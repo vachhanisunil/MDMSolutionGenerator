@@ -1,0 +1,37 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <AssemblyName>MDM Solution Generator</AssemblyName>
+    <NoWarn>$(NoWarn);1591</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="generated-out\**\*.cs" />
+    <Compile Remove="enterpriseMDM\**\*.cs" />
+    <Compile Remove="aggregate-test-out\**\*.cs" />
+    <Compile Remove="pg-test-out\**\*.cs" />
+    <Compile Remove="incremental-test-out\**\*.cs" />
+    <Compile Remove="profiling-dq-test-out\**\*.cs" />
+    <Compile Remove="profiling-dq-out\**\*.cs" />
+    <Content Remove="generated-out\**\*" />
+    <Content Remove="enterpriseMDM\**\*" />
+    <Content Remove="aggregate-test-out\**\*" />
+    <Content Remove="pg-test-out\**\*" />
+    <Content Remove="incremental-test-out\**\*" />
+    <Content Remove="profiling-dq-test-out\**\*" />
+    <Content Remove="profiling-dq-out\**\*" />
+    <None Remove="generated-out\**\*" />
+    <None Remove="enterpriseMDM\**\*" />
+    <None Remove="aggregate-test-out\**\*" />
+    <None Remove="pg-test-out\**\*" />
+    <None Remove="incremental-test-out\**\*" />
+    <None Remove="profiling-dq-test-out\**\*" />
+    <None Remove="profiling-dq-out\**\*" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,6 @@
+using MediatR;
+using EnterpriseMdmSolution.Application.Modules.CustomerPartnerFunction.DTOs;
+
+namespace EnterpriseMdmSolution.Application.Modules.CustomerPartnerFunction.Commands;
+
+public sealed record CreateCustomerPartnerFunctionCommand(CreateCustomerPartnerFunctionDto Input) : IRequest<CustomerPartnerFunctionDto>;

@@ -1,0 +1,649 @@
+{
+  "application": {
+    "name": "EnterpriseMdmSolution",
+    "namespace": "EnterpriseMdmSolution",
+    "description": "Enterprise MDM solution for Customer, Material and Vendor master data"
+  },
+  "audit": true,
+  "entities": [
+    {
+      "name": "Customer",
+      "primaryKey": "Id",
+      "properties": [
+        { "name": "Id", "type": "int", "isKey": true, "identity": true },
+        { "name": "CustomerNumber", "type": "string", "required": true, "maxLength": 20, "unique": true },
+        { "name": "CustomerName", "type": "string", "required": true, "maxLength": 200 },
+        { "name": "CustomerType", "type": "string", "required": true, "maxLength": 30, "allowedValues": ["Individual", "Corporate", "Government", "Distributor"] },
+        { "name": "Email", "type": "string", "email": true, "maxLength": 250 },
+        { "name": "Phone", "type": "string", "maxLength": 30 },
+        { "name": "CountryId", "type": "int", "required": true, "index": true },
+        { "name": "CurrencyId", "type": "int", "required": true, "index": true },
+        { "name": "IndustryCode", "type": "string", "maxLength": 30, "index": true },
+        { "name": "RiskCategory", "type": "string", "maxLength": 30, "allowedValues": ["Low", "Medium", "High"] },
+        { "name": "RegistrationNumber", "type": "string", "maxLength": 50 },
+        { "name": "OnboardingDate", "type": "datetime" },
+        { "name": "IsActive", "type": "bool", "required": true }
+      ]
+    },
+    {
+      "name": "CustomerAddress",
+      "primaryKey": "Id",
+      "properties": [
+        { "name": "Id", "type": "int", "isKey": true, "identity": true },
+        { "name": "CustomerId", "type": "int", "required": true, "index": true },
+        { "name": "AddressType", "type": "string", "required": true, "maxLength": 30, "allowedValues": ["Billing", "Shipping", "Registered"] },
+        { "name": "AddressLine1", "type": "string", "required": true, "maxLength": 200 },
+        { "name": "AddressLine2", "type": "string", "maxLength": 200 },
+        { "name": "City", "type": "string", "required": true, "maxLength": 100 },
+        { "name": "State", "type": "string", "maxLength": 100 },
+        { "name": "PostalCode", "type": "string", "required": true, "maxLength": 20 },
+        { "name": "CountryId", "type": "int", "required": true, "index": true },
+        { "name": "Region", "type": "string", "maxLength": 100 },
+        { "name": "Latitude", "type": "decimal" },
+        { "name": "Longitude", "type": "decimal" },
+        { "name": "IsDefault", "type": "bool", "required": true }
+      ]
+    },
+    {
+      "name": "CustomerContact",
+      "primaryKey": "Id",
+      "properties": [
+        { "name": "Id", "type": "int", "isKey": true, "identity": true },
+        { "name": "CustomerId", "type": "int", "required": true, "index": true },
+        { "name": "FirstName", "type": "string", "required": true, "maxLength": 100 },
+        { "name": "LastName", "type": "string", "required": true, "maxLength": 100 },
+        { "name": "Email", "type": "string", "email": true, "maxLength": 250 },
+        { "name": "Phone", "type": "string", "maxLength": 30 },
+        { "name": "MobilePhone", "type": "string", "maxLength": 30 },
+        { "name": "Designation", "type": "string", "maxLength": 100 },
+        { "name": "Department", "type": "string", "maxLength": 100 },
+        { "name": "PreferredLanguage", "type": "string", "maxLength": 20 },
+        { "name": "IsPrimary", "type": "bool", "required": true }
+      ]
+    },
+    {
+      "name": "CustomerBankAccount",
+      "primaryKey": "Id",
+      "properties": [
+        { "name": "Id", "type": "int", "isKey": true, "identity": true },
+        { "name": "CustomerId", "type": "int", "required": true, "index": true },
+        { "name": "BankName", "type": "string", "required": true, "maxLength": 150 },
+        { "name": "AccountNumber", "type": "string", "required": true, "maxLength": 50 },
+        { "name": "IfscCode", "type": "string", "maxLength": 20 },
+        { "name": "SwiftCode", "type": "string", "maxLength": 20 },
+        { "name": "CurrencyId", "type": "int", "required": true, "index": true },
+        { "name": "AccountHolderName", "type": "string", "maxLength": 150 },
+        { "name": "BankCountryId", "type": "int", "index": true },
+        { "name": "IsDefault", "type": "bool", "required": true }
+      ]
+    },
+    {
+      "name": "CustomerSalesArea",
+      "primaryKey": "Id",
+      "properties": [
+        { "name": "Id", "type": "int", "isKey": true, "identity": true },
+        { "name": "CustomerId", "type": "int", "required": true, "index": true },
+        { "name": "SalesOrganizationId", "type": "int", "required": true, "index": true },
+        { "name": "DistributionChannel", "type": "string", "required": true, "maxLength": 30 },
+        { "name": "Division", "type": "string", "required": true, "maxLength": 30 },
+        { "name": "PaymentTermId", "type": "int", "index": true },
+        { "name": "CreditLimit", "type": "decimal", "minValue": 0 },
+        { "name": "CustomerGroup", "type": "string", "maxLength": 50 },
+        { "name": "SalesOffice", "type": "string", "maxLength": 50 },
+        { "name": "SalesDistrict", "type": "string", "maxLength": 50 }
+      ]
+    },
+    {
+      "name": "CustomerTax",
+      "primaryKey": "Id",
+      "properties": [
+        { "name": "Id", "type": "int", "isKey": true, "identity": true },
+        { "name": "CustomerId", "type": "int", "required": true, "index": true },
+        { "name": "TaxType", "type": "string", "required": true, "maxLength": 50 },
+        { "name": "TaxNumber", "type": "string", "required": true, "maxLength": 50 },
+        { "name": "CountryId", "type": "int", "required": true, "index": true },
+        { "name": "ValidFrom", "type": "datetime" },
+        { "name": "ValidTo", "type": "datetime" },
+        { "name": "IsExempt", "type": "bool", "required": true }
+      ]
+    },
+    {
+      "name": "CustomerClassification",
+      "primaryKey": "Id",
+      "properties": [
+        { "name": "Id", "type": "int", "isKey": true, "identity": true },
+        { "name": "CustomerId", "type": "int", "required": true, "index": true },
+        { "name": "ClassificationType", "type": "string", "required": true, "maxLength": 50 },
+        { "name": "ClassificationValue", "type": "string", "required": true, "maxLength": 100 },
+        { "name": "ClassificationGroup", "type": "string", "maxLength": 50 }
+      ]
+    },
+    {
+      "name": "CustomerCreditProfile",
+      "primaryKey": "Id",
+      "properties": [
+        { "name": "Id", "type": "int", "isKey": true, "identity": true },
+        { "name": "CustomerId", "type": "int", "required": true, "index": true },
+        { "name": "CreditControlArea", "type": "string", "required": true, "maxLength": 20 },
+        { "name": "CreditLimit", "type": "decimal", "required": true, "minValue": 0 },
+        { "name": "CreditExposure", "type": "decimal", "minValue": 0 },
+        { "name": "CreditRiskClass", "type": "string", "maxLength": 30, "allowedValues": ["A", "B", "C", "D"] },
+        { "name": "ReviewDate", "type": "datetime" },
+        { "name": "IsBlocked", "type": "bool", "required": true }
+      ]
+    },
+    {
+      "name": "CustomerPartnerFunction",
+      "primaryKey": "Id",
+      "properties": [
+        { "name": "Id", "type": "int", "isKey": true, "identity": true },
+        { "name": "CustomerId", "type": "int", "required": true, "index": true },
+        { "name": "PartnerFunctionCode", "type": "string", "required": true, "maxLength": 20 },
+        { "name": "PartnerCustomerId", "type": "int", "index": true },
+        { "name": "Description", "type": "string", "maxLength": 200 },
+        { "name": "IsDefault", "type": "bool", "required": true }
+      ]
+    },
+    {
+      "name": "CustomerAttachment",
+      "primaryKey": "Id",
+      "properties": [
+        { "name": "Id", "type": "int", "isKey": true, "identity": true },
+        { "name": "CustomerId", "type": "int", "required": true, "index": true },
+        { "name": "DocumentType", "type": "string", "required": true, "maxLength": 50 },
+        { "name": "FileName", "type": "string", "required": true, "maxLength": 200 },
+        { "name": "ContentType", "type": "string", "maxLength": 100 },
+        { "name": "StoragePath", "type": "string", "required": true, "maxLength": 500 },
+        { "name": "UploadedOn", "type": "datetime", "required": true }
+      ]
+    },
+
+    {
+      "name": "Material",
+      "primaryKey": "Id",
+      "properties": [
+        { "name": "Id", "type": "int", "isKey": true, "identity": true },
+        { "name": "MaterialNumber", "type": "string", "required": true, "maxLength": 40, "unique": true },
+        { "name": "MaterialName", "type": "string", "required": true, "maxLength": 200 },
+        { "name": "MaterialType", "type": "string", "required": true, "maxLength": 30, "allowedValues": ["RawMaterial", "FinishedGood", "SemiFinished", "Service"] },
+        { "name": "MaterialGroupId", "type": "int", "required": true, "index": true },
+        { "name": "BaseUnitOfMeasureId", "type": "int", "required": true, "index": true },
+        { "name": "GlobalTradeItemNumber", "type": "string", "maxLength": 50, "index": true },
+        { "name": "ProductHierarchy", "type": "string", "maxLength": 50 },
+        { "name": "GrossWeight", "type": "decimal", "minValue": 0 },
+        { "name": "NetWeight", "type": "decimal", "minValue": 0 },
+        { "name": "WeightUnitOfMeasureId", "type": "int", "index": true },
+        { "name": "IsBatchManaged", "type": "bool", "required": true },
+        { "name": "IsSerialManaged", "type": "bool", "required": true },
+        { "name": "IsActive", "type": "bool", "required": true }
+      ]
+    },
+    {
+      "name": "MaterialPlant",
+      "primaryKey": "Id",
+      "properties": [
+        { "name": "Id", "type": "int", "isKey": true, "identity": true },
+        { "name": "MaterialId", "type": "int", "required": true, "index": true },
+        { "name": "PlantId", "type": "int", "required": true, "index": true },
+        { "name": "ProcurementType", "type": "string", "required": true, "maxLength": 30, "allowedValues": ["InHouse", "External", "Both"] },
+        { "name": "ReorderPoint", "type": "decimal", "minValue": 0 },
+        { "name": "MinimumLotSize", "type": "decimal", "minValue": 0 },
+        { "name": "MaximumLotSize", "type": "decimal", "minValue": 0 },
+        { "name": "MrpType", "type": "string", "maxLength": 20 },
+        { "name": "PlanningTimeFenceDays", "type": "int", "minValue": 0, "maxValue": 365 },
+        { "name": "ProfitCenter", "type": "string", "maxLength": 50 }
+      ]
+    },
+    {
+      "name": "MaterialPrice",
+      "primaryKey": "Id",
+      "properties": [
+        { "name": "Id", "type": "int", "isKey": true, "identity": true },
+        { "name": "MaterialId", "type": "int", "required": true, "index": true },
+        { "name": "CurrencyId", "type": "int", "required": true, "index": true },
+        { "name": "PriceType", "type": "string", "required": true, "maxLength": 30, "allowedValues": ["Standard", "MovingAverage", "Sales", "Purchase"] },
+        { "name": "Price", "type": "decimal", "required": true, "minValue": 0 },
+        { "name": "PriceUnit", "type": "decimal", "required": true, "minValue": 1 },
+        { "name": "ValidFrom", "type": "datetime", "required": true },
+        { "name": "ValidTo", "type": "datetime" },
+        { "name": "SourceSystem", "type": "string", "maxLength": 50 }
+      ]
+    },
+    {
+      "name": "MaterialStorage",
+      "primaryKey": "Id",
+      "properties": [
+        { "name": "Id", "type": "int", "isKey": true, "identity": true },
+        { "name": "MaterialId", "type": "int", "required": true, "index": true },
+        { "name": "StorageLocationId", "type": "int", "required": true, "index": true },
+        { "name": "BinLocation", "type": "string", "maxLength": 50 },
+        { "name": "SafetyStock", "type": "decimal", "minValue": 0 },
+        { "name": "MaximumStock", "type": "decimal", "minValue": 0 },
+        { "name": "TemperatureZone", "type": "string", "maxLength": 30 },
+        { "name": "HazardousStorageRequired", "type": "bool" }
+      ]
+    },
+    {
+      "name": "MaterialClassification",
+      "primaryKey": "Id",
+      "properties": [
+        { "name": "Id", "type": "int", "isKey": true, "identity": true },
+        { "name": "MaterialId", "type": "int", "required": true, "index": true },
+        { "name": "ClassType", "type": "string", "required": true, "maxLength": 50 },
+        { "name": "ClassValue", "type": "string", "required": true, "maxLength": 100 },
+        { "name": "CharacteristicName", "type": "string", "maxLength": 100 }
+      ]
+    },
+    {
+      "name": "MaterialVendor",
+      "primaryKey": "Id",
+      "properties": [
+        { "name": "Id", "type": "int", "isKey": true, "identity": true },
+        { "name": "MaterialId", "type": "int", "required": true, "index": true },
+        { "name": "VendorId", "type": "int", "required": true, "index": true },
+        { "name": "VendorMaterialNumber", "type": "string", "maxLength": 50 },
+        { "name": "LeadTimeDays", "type": "int", "minValue": 0, "maxValue": 365 },
+        { "name": "MinimumOrderQuantity", "type": "decimal", "minValue": 0 },
+        { "name": "PurchaseUnitOfMeasureId", "type": "int", "index": true },
+        { "name": "IsPreferred", "type": "bool", "required": true }
+      ]
+    },
+    {
+      "name": "MaterialUOM",
+      "primaryKey": "Id",
+      "properties": [
+        { "name": "Id", "type": "int", "isKey": true, "identity": true },
+        { "name": "MaterialId", "type": "int", "required": true, "index": true },
+        { "name": "UnitOfMeasureId", "type": "int", "required": true, "index": true },
+        { "name": "ConversionNumerator", "type": "decimal", "required": true, "minValue": 0 },
+        { "name": "ConversionDenominator", "type": "decimal", "required": true, "minValue": 1 },
+        { "name": "Barcode", "type": "string", "maxLength": 50 },
+        { "name": "IsBaseUnit", "type": "bool", "required": true }
+      ]
+    },
+    {
+      "name": "MaterialQualityInspection",
+      "primaryKey": "Id",
+      "properties": [
+        { "name": "Id", "type": "int", "isKey": true, "identity": true },
+        { "name": "MaterialId", "type": "int", "required": true, "index": true },
+        { "name": "InspectionType", "type": "string", "required": true, "maxLength": 50 },
+        { "name": "InspectionIntervalDays", "type": "int", "minValue": 0, "maxValue": 3650 },
+        { "name": "QualityCertificateRequired", "type": "bool", "required": true },
+        { "name": "SampleSize", "type": "decimal", "minValue": 0 },
+        { "name": "AcceptanceCriteria", "type": "string", "maxLength": 500 }
+      ]
+    },
+    {
+      "name": "MaterialForecast",
+      "primaryKey": "Id",
+      "properties": [
+        { "name": "Id", "type": "int", "isKey": true, "identity": true },
+        { "name": "MaterialId", "type": "int", "required": true, "index": true },
+        { "name": "PlantId", "type": "int", "required": true, "index": true },
+        { "name": "ForecastPeriod", "type": "string", "required": true, "maxLength": 20 },
+        { "name": "ForecastQuantity", "type": "decimal", "required": true, "minValue": 0 },
+        { "name": "ForecastUnitOfMeasureId", "type": "int", "required": true, "index": true },
+        { "name": "ConfidencePercent", "type": "decimal", "minValue": 0, "maxValue": 100 }
+      ]
+    },
+    {
+      "name": "MaterialBarcode",
+      "primaryKey": "Id",
+      "properties": [
+        { "name": "Id", "type": "int", "isKey": true, "identity": true },
+        { "name": "MaterialId", "type": "int", "required": true, "index": true },
+        { "name": "BarcodeType", "type": "string", "required": true, "maxLength": 30, "allowedValues": ["EAN", "UPC", "QR", "Code128"] },
+        { "name": "BarcodeValue", "type": "string", "required": true, "maxLength": 100, "unique": true },
+        { "name": "UnitOfMeasureId", "type": "int", "index": true },
+        { "name": "IsPrimary", "type": "bool", "required": true }
+      ]
+    },
+
+    {
+      "name": "Vendor",
+      "primaryKey": "Id",
+      "properties": [
+        { "name": "Id", "type": "int", "isKey": true, "identity": true },
+        { "name": "VendorNumber", "type": "string", "required": true, "maxLength": 20, "unique": true },
+        { "name": "VendorName", "type": "string", "required": true, "maxLength": 200 },
+        { "name": "VendorType", "type": "string", "required": true, "maxLength": 30, "allowedValues": ["Manufacturer", "Distributor", "ServiceProvider", "Contractor"] },
+        { "name": "Email", "type": "string", "email": true, "maxLength": 250 },
+        { "name": "Phone", "type": "string", "maxLength": 30 },
+        { "name": "CountryId", "type": "int", "required": true, "index": true },
+        { "name": "CurrencyId", "type": "int", "required": true, "index": true },
+        { "name": "PaymentTermId", "type": "int", "index": true },
+        { "name": "SupplierCategory", "type": "string", "maxLength": 50 },
+        { "name": "DunsNumber", "type": "string", "maxLength": 30, "index": true },
+        { "name": "OnboardingStatus", "type": "string", "maxLength": 30, "allowedValues": ["Draft", "UnderReview", "Approved", "Rejected", "Blocked"] },
+        { "name": "OnboardingDate", "type": "datetime" },
+        { "name": "IsActive", "type": "bool", "required": true }
+      ]
+    },
+    {
+      "name": "VendorAddress",
+      "primaryKey": "Id",
+      "properties": [
+        { "name": "Id", "type": "int", "isKey": true, "identity": true },
+        { "name": "VendorId", "type": "int", "required": true, "index": true },
+        { "name": "AddressType", "type": "string", "required": true, "maxLength": 30, "allowedValues": ["Registered", "Remittance", "Warehouse"] },
+        { "name": "AddressLine1", "type": "string", "required": true, "maxLength": 200 },
+        { "name": "AddressLine2", "type": "string", "maxLength": 200 },
+        { "name": "City", "type": "string", "required": true, "maxLength": 100 },
+        { "name": "State", "type": "string", "maxLength": 100 },
+        { "name": "PostalCode", "type": "string", "required": true, "maxLength": 20 },
+        { "name": "CountryId", "type": "int", "required": true, "index": true },
+        { "name": "Region", "type": "string", "maxLength": 100 },
+        { "name": "IsDefault", "type": "bool", "required": true }
+      ]
+    },
+    {
+      "name": "VendorContact",
+      "primaryKey": "Id",
+      "properties": [
+        { "name": "Id", "type": "int", "isKey": true, "identity": true },
+        { "name": "VendorId", "type": "int", "required": true, "index": true },
+        { "name": "FirstName", "type": "string", "required": true, "maxLength": 100 },
+        { "name": "LastName", "type": "string", "required": true, "maxLength": 100 },
+        { "name": "Email", "type": "string", "email": true, "maxLength": 250 },
+        { "name": "Phone", "type": "string", "maxLength": 30 },
+        { "name": "MobilePhone", "type": "string", "maxLength": 30 },
+        { "name": "Designation", "type": "string", "maxLength": 100 },
+        { "name": "Department", "type": "string", "maxLength": 100 },
+        { "name": "IsPrimary", "type": "bool", "required": true }
+      ]
+    },
+    {
+      "name": "VendorBankAccount",
+      "primaryKey": "Id",
+      "properties": [
+        { "name": "Id", "type": "int", "isKey": true, "identity": true },
+        { "name": "VendorId", "type": "int", "required": true, "index": true },
+        { "name": "BankName", "type": "string", "required": true, "maxLength": 150 },
+        { "name": "AccountNumber", "type": "string", "required": true, "maxLength": 50 },
+        { "name": "IfscCode", "type": "string", "maxLength": 20 },
+        { "name": "SwiftCode", "type": "string", "maxLength": 20 },
+        { "name": "CurrencyId", "type": "int", "required": true, "index": true },
+        { "name": "AccountHolderName", "type": "string", "maxLength": 150 },
+        { "name": "BankCountryId", "type": "int", "index": true },
+        { "name": "IsDefault", "type": "bool", "required": true }
+      ]
+    },
+    {
+      "name": "VendorTax",
+      "primaryKey": "Id",
+      "properties": [
+        { "name": "Id", "type": "int", "isKey": true, "identity": true },
+        { "name": "VendorId", "type": "int", "required": true, "index": true },
+        { "name": "TaxType", "type": "string", "required": true, "maxLength": 50 },
+        { "name": "TaxNumber", "type": "string", "required": true, "maxLength": 50 },
+        { "name": "CountryId", "type": "int", "required": true, "index": true },
+        { "name": "ValidFrom", "type": "datetime" },
+        { "name": "ValidTo", "type": "datetime" },
+        { "name": "IsTaxWithholdingApplicable", "type": "bool" }
+      ]
+    },
+    {
+      "name": "VendorPurchasingOrganization",
+      "primaryKey": "Id",
+      "properties": [
+        { "name": "Id", "type": "int", "isKey": true, "identity": true },
+        { "name": "VendorId", "type": "int", "required": true, "index": true },
+        { "name": "PurchasingOrganizationId", "type": "int", "required": true, "index": true },
+        { "name": "PaymentTermId", "type": "int", "index": true },
+        { "name": "Incoterms", "type": "string", "maxLength": 30 },
+        { "name": "OrderCurrencyId", "type": "int", "index": true },
+        { "name": "PurchaseGroup", "type": "string", "maxLength": 50 },
+        { "name": "MinimumOrderValue", "type": "decimal", "minValue": 0 },
+        { "name": "IsBlockedForPurchasing", "type": "bool", "required": true }
+      ]
+    },
+    {
+      "name": "VendorCompliance",
+      "primaryKey": "Id",
+      "properties": [
+        { "name": "Id", "type": "int", "isKey": true, "identity": true },
+        { "name": "VendorId", "type": "int", "required": true, "index": true },
+        { "name": "ComplianceType", "type": "string", "required": true, "maxLength": 50 },
+        { "name": "ComplianceStatus", "type": "string", "required": true, "maxLength": 30, "allowedValues": ["Pending", "Approved", "Rejected", "Expired"] },
+        { "name": "CertificateNumber", "type": "string", "maxLength": 100 },
+        { "name": "ValidFrom", "type": "datetime" },
+        { "name": "ValidTo", "type": "datetime" },
+        { "name": "ReviewOwner", "type": "string", "maxLength": 100 }
+      ]
+    },
+    {
+      "name": "VendorEvaluation",
+      "primaryKey": "Id",
+      "properties": [
+        { "name": "Id", "type": "int", "isKey": true, "identity": true },
+        { "name": "VendorId", "type": "int", "required": true, "index": true },
+        { "name": "EvaluationPeriod", "type": "string", "required": true, "maxLength": 20 },
+        { "name": "QualityScore", "type": "decimal", "minValue": 0, "maxValue": 100 },
+        { "name": "DeliveryScore", "type": "decimal", "minValue": 0, "maxValue": 100 },
+        { "name": "CostScore", "type": "decimal", "minValue": 0, "maxValue": 100 },
+        { "name": "OverallScore", "type": "decimal", "minValue": 0, "maxValue": 100 },
+        { "name": "EvaluationDate", "type": "datetime", "required": true }
+      ]
+    },
+    {
+      "name": "VendorCertificate",
+      "primaryKey": "Id",
+      "properties": [
+        { "name": "Id", "type": "int", "isKey": true, "identity": true },
+        { "name": "VendorId", "type": "int", "required": true, "index": true },
+        { "name": "CertificateType", "type": "string", "required": true, "maxLength": 50 },
+        { "name": "CertificateName", "type": "string", "required": true, "maxLength": 150 },
+        { "name": "CertificateNumber", "type": "string", "maxLength": 100 },
+        { "name": "IssuingAuthority", "type": "string", "maxLength": 150 },
+        { "name": "ExpiryDate", "type": "datetime" },
+        { "name": "StoragePath", "type": "string", "maxLength": 500 }
+      ]
+    },
+
+    {
+      "name": "Country",
+      "primaryKey": "Id",
+      "properties": [
+        { "name": "Id", "type": "int", "isKey": true, "identity": true },
+        { "name": "Code", "type": "string", "required": true, "maxLength": 3, "unique": true },
+        { "name": "Name", "type": "string", "required": true, "maxLength": 100 }
+      ]
+    },
+    {
+      "name": "Currency",
+      "primaryKey": "Id",
+      "properties": [
+        { "name": "Id", "type": "int", "isKey": true, "identity": true },
+        { "name": "Code", "type": "string", "required": true, "maxLength": 3, "unique": true },
+        { "name": "Name", "type": "string", "required": true, "maxLength": 100 },
+        { "name": "DecimalPlaces", "type": "int", "required": true, "minValue": 0, "maxValue": 4 }
+      ]
+    },
+    {
+      "name": "UnitOfMeasure",
+      "primaryKey": "Id",
+      "properties": [
+        { "name": "Id", "type": "int", "isKey": true, "identity": true },
+        { "name": "Code", "type": "string", "required": true, "maxLength": 10, "unique": true },
+        { "name": "Name", "type": "string", "required": true, "maxLength": 100 },
+        { "name": "Dimension", "type": "string", "maxLength": 50 }
+      ]
+    },
+    {
+      "name": "Plant",
+      "primaryKey": "Id",
+      "properties": [
+        { "name": "Id", "type": "int", "isKey": true, "identity": true },
+        { "name": "PlantCode", "type": "string", "required": true, "maxLength": 10, "unique": true },
+        { "name": "PlantName", "type": "string", "required": true, "maxLength": 150 },
+        { "name": "CountryId", "type": "int", "required": true, "index": true }
+      ]
+    },
+    {
+      "name": "StorageLocation",
+      "primaryKey": "Id",
+      "properties": [
+        { "name": "Id", "type": "int", "isKey": true, "identity": true },
+        { "name": "StorageLocationCode", "type": "string", "required": true, "maxLength": 10 },
+        { "name": "StorageLocationName", "type": "string", "required": true, "maxLength": 150 },
+        { "name": "PlantId", "type": "int", "required": true, "index": true }
+      ]
+    },
+    {
+      "name": "MaterialGroup",
+      "primaryKey": "Id",
+      "properties": [
+        { "name": "Id", "type": "int", "isKey": true, "identity": true },
+        { "name": "Code", "type": "string", "required": true, "maxLength": 20, "unique": true },
+        { "name": "Name", "type": "string", "required": true, "maxLength": 150 }
+      ]
+    },
+    {
+      "name": "SalesOrganization",
+      "primaryKey": "Id",
+      "properties": [
+        { "name": "Id", "type": "int", "isKey": true, "identity": true },
+        { "name": "SalesOrganizationCode", "type": "string", "required": true, "maxLength": 10, "unique": true },
+        { "name": "SalesOrganizationName", "type": "string", "required": true, "maxLength": 150 },
+        { "name": "CurrencyId", "type": "int", "required": true, "index": true }
+      ]
+    },
+    {
+      "name": "PurchasingOrganization",
+      "primaryKey": "Id",
+      "properties": [
+        { "name": "Id", "type": "int", "isKey": true, "identity": true },
+        { "name": "PurchasingOrganizationCode", "type": "string", "required": true, "maxLength": 10, "unique": true },
+        { "name": "PurchasingOrganizationName", "type": "string", "required": true, "maxLength": 150 },
+        { "name": "CurrencyId", "type": "int", "required": true, "index": true }
+      ]
+    },
+    {
+      "name": "PaymentTerm",
+      "primaryKey": "Id",
+      "properties": [
+        { "name": "Id", "type": "int", "isKey": true, "identity": true },
+        { "name": "Code", "type": "string", "required": true, "maxLength": 20, "unique": true },
+        { "name": "Description", "type": "string", "required": true, "maxLength": 200 },
+        { "name": "NetDays", "type": "int", "required": true, "minValue": 0, "maxValue": 365 }
+      ]
+    }
+  ],
+  "relationships": [
+    { "type": "ManyToOne", "from": "Customer", "to": "Country", "foreignKey": "CountryId" },
+    { "type": "ManyToOne", "from": "Customer", "to": "Currency", "foreignKey": "CurrencyId" },
+    { "type": "ManyToOne", "from": "CustomerAddress", "to": "Customer", "foreignKey": "CustomerId" },
+    { "type": "ManyToOne", "from": "CustomerAddress", "to": "Country", "foreignKey": "CountryId" },
+    { "type": "ManyToOne", "from": "CustomerContact", "to": "Customer", "foreignKey": "CustomerId" },
+    { "type": "ManyToOne", "from": "CustomerBankAccount", "to": "Customer", "foreignKey": "CustomerId" },
+    { "type": "ManyToOne", "from": "CustomerBankAccount", "to": "Currency", "foreignKey": "CurrencyId" },
+    { "type": "ManyToOne", "from": "CustomerBankAccount", "to": "Country", "foreignKey": "BankCountryId" },
+    { "type": "ManyToOne", "from": "CustomerSalesArea", "to": "Customer", "foreignKey": "CustomerId" },
+    { "type": "ManyToOne", "from": "CustomerSalesArea", "to": "SalesOrganization", "foreignKey": "SalesOrganizationId" },
+    { "type": "ManyToOne", "from": "CustomerSalesArea", "to": "PaymentTerm", "foreignKey": "PaymentTermId" },
+    { "type": "ManyToOne", "from": "CustomerTax", "to": "Customer", "foreignKey": "CustomerId" },
+    { "type": "ManyToOne", "from": "CustomerTax", "to": "Country", "foreignKey": "CountryId" },
+    { "type": "ManyToOne", "from": "CustomerClassification", "to": "Customer", "foreignKey": "CustomerId" },
+    { "type": "ManyToOne", "from": "CustomerCreditProfile", "to": "Customer", "foreignKey": "CustomerId" },
+    { "type": "ManyToOne", "from": "CustomerPartnerFunction", "to": "Customer", "foreignKey": "CustomerId" },
+    { "type": "ManyToOne", "from": "CustomerAttachment", "to": "Customer", "foreignKey": "CustomerId" },
+
+    { "type": "ManyToOne", "from": "Material", "to": "MaterialGroup", "foreignKey": "MaterialGroupId" },
+    { "type": "ManyToOne", "from": "Material", "to": "UnitOfMeasure", "foreignKey": "BaseUnitOfMeasureId" },
+    { "type": "ManyToOne", "from": "MaterialPlant", "to": "Material", "foreignKey": "MaterialId" },
+    { "type": "ManyToOne", "from": "MaterialPlant", "to": "Plant", "foreignKey": "PlantId" },
+    { "type": "ManyToOne", "from": "MaterialPrice", "to": "Material", "foreignKey": "MaterialId" },
+    { "type": "ManyToOne", "from": "MaterialPrice", "to": "Currency", "foreignKey": "CurrencyId" },
+    { "type": "ManyToOne", "from": "MaterialStorage", "to": "Material", "foreignKey": "MaterialId" },
+    { "type": "ManyToOne", "from": "MaterialStorage", "to": "StorageLocation", "foreignKey": "StorageLocationId" },
+    { "type": "ManyToOne", "from": "MaterialClassification", "to": "Material", "foreignKey": "MaterialId" },
+    { "type": "ManyToOne", "from": "MaterialVendor", "to": "Material", "foreignKey": "MaterialId" },
+    { "type": "ManyToOne", "from": "MaterialVendor", "to": "Vendor", "foreignKey": "VendorId" },
+    { "type": "ManyToOne", "from": "MaterialVendor", "to": "UnitOfMeasure", "foreignKey": "PurchaseUnitOfMeasureId" },
+    { "type": "ManyToOne", "from": "MaterialUOM", "to": "Material", "foreignKey": "MaterialId" },
+    { "type": "ManyToOne", "from": "MaterialUOM", "to": "UnitOfMeasure", "foreignKey": "UnitOfMeasureId" },
+    { "type": "ManyToOne", "from": "MaterialQualityInspection", "to": "Material", "foreignKey": "MaterialId" },
+    { "type": "ManyToOne", "from": "MaterialForecast", "to": "Material", "foreignKey": "MaterialId" },
+    { "type": "ManyToOne", "from": "MaterialForecast", "to": "Plant", "foreignKey": "PlantId" },
+    { "type": "ManyToOne", "from": "MaterialForecast", "to": "UnitOfMeasure", "foreignKey": "ForecastUnitOfMeasureId" },
+    { "type": "ManyToOne", "from": "MaterialBarcode", "to": "Material", "foreignKey": "MaterialId" },
+    { "type": "ManyToOne", "from": "MaterialBarcode", "to": "UnitOfMeasure", "foreignKey": "UnitOfMeasureId" },
+
+    { "type": "ManyToOne", "from": "Vendor", "to": "Country", "foreignKey": "CountryId" },
+    { "type": "ManyToOne", "from": "Vendor", "to": "Currency", "foreignKey": "CurrencyId" },
+    { "type": "ManyToOne", "from": "Vendor", "to": "PaymentTerm", "foreignKey": "PaymentTermId" },
+    { "type": "ManyToOne", "from": "VendorAddress", "to": "Vendor", "foreignKey": "VendorId" },
+    { "type": "ManyToOne", "from": "VendorAddress", "to": "Country", "foreignKey": "CountryId" },
+    { "type": "ManyToOne", "from": "VendorContact", "to": "Vendor", "foreignKey": "VendorId" },
+    { "type": "ManyToOne", "from": "VendorBankAccount", "to": "Vendor", "foreignKey": "VendorId" },
+    { "type": "ManyToOne", "from": "VendorBankAccount", "to": "Currency", "foreignKey": "CurrencyId" },
+    { "type": "ManyToOne", "from": "VendorBankAccount", "to": "Country", "foreignKey": "BankCountryId" },
+    { "type": "ManyToOne", "from": "VendorTax", "to": "Vendor", "foreignKey": "VendorId" },
+    { "type": "ManyToOne", "from": "VendorTax", "to": "Country", "foreignKey": "CountryId" },
+    { "type": "ManyToOne", "from": "VendorPurchasingOrganization", "to": "Vendor", "foreignKey": "VendorId" },
+    { "type": "ManyToOne", "from": "VendorPurchasingOrganization", "to": "PurchasingOrganization", "foreignKey": "PurchasingOrganizationId" },
+    { "type": "ManyToOne", "from": "VendorPurchasingOrganization", "to": "PaymentTerm", "foreignKey": "PaymentTermId" },
+    { "type": "ManyToOne", "from": "VendorPurchasingOrganization", "to": "Currency", "foreignKey": "OrderCurrencyId" },
+    { "type": "ManyToOne", "from": "VendorCompliance", "to": "Vendor", "foreignKey": "VendorId" },
+    { "type": "ManyToOne", "from": "VendorEvaluation", "to": "Vendor", "foreignKey": "VendorId" },
+    { "type": "ManyToOne", "from": "VendorCertificate", "to": "Vendor", "foreignKey": "VendorId" },
+
+    { "type": "ManyToOne", "from": "Plant", "to": "Country", "foreignKey": "CountryId" },
+    { "type": "ManyToOne", "from": "StorageLocation", "to": "Plant", "foreignKey": "PlantId" },
+    { "type": "ManyToOne", "from": "SalesOrganization", "to": "Currency", "foreignKey": "CurrencyId" },
+    { "type": "ManyToOne", "from": "PurchasingOrganization", "to": "Currency", "foreignKey": "CurrencyId" }
+  ],
+  "businessObjects": [
+    {
+      "name": "Customer",
+      "entity": "Customer",
+      "rootEntity": "Customer",
+      "entities": [
+        "Customer",
+        "CustomerAddress",
+        "CustomerContact",
+        "CustomerBankAccount",
+        "CustomerSalesArea",
+        "CustomerTax",
+        "CustomerClassification",
+        "CustomerCreditProfile",
+        "CustomerPartnerFunction",
+        "CustomerAttachment"
+      ]
+    },
+    {
+      "name": "Material",
+      "entity": "Material",
+      "rootEntity": "Material",
+      "entities": [
+        "Material",
+        "MaterialPlant",
+        "MaterialPrice",
+        "MaterialStorage",
+        "MaterialClassification",
+        "MaterialVendor",
+        "MaterialUOM",
+        "MaterialQualityInspection",
+        "MaterialForecast",
+        "MaterialBarcode"
+      ]
+    },
+    {
+      "name": "Vendor",
+      "entity": "Vendor",
+      "rootEntity": "Vendor",
+      "entities": [
+        "Vendor",
+        "VendorAddress",
+        "VendorContact",
+        "VendorBankAccount",
+        "VendorTax",
+        "VendorPurchasingOrganization",
+        "VendorCompliance",
+        "VendorEvaluation",
+        "VendorCertificate"
+      ]
+    }
+  ]
+}

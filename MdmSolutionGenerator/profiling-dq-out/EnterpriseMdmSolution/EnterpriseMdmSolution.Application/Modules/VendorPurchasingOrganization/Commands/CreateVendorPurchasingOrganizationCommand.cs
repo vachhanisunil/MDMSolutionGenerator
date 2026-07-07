@@ -1,0 +1,6 @@
+using MediatR;
+using EnterpriseMdmSolution.Application.Modules.VendorPurchasingOrganization.DTOs;
+
+namespace EnterpriseMdmSolution.Application.Modules.VendorPurchasingOrganization.Commands;
+
+public sealed record CreateVendorPurchasingOrganizationCommand(CreateVendorPurchasingOrganizationDto Input) : IRequest<VendorPurchasingOrganizationDto>;

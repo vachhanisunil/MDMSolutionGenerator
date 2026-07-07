@@ -1,0 +1,6 @@
+using MediatR;
+using EnterpriseMdmSolution.Application.Modules.MaterialClassification.DTOs;
+
+namespace EnterpriseMdmSolution.Application.Modules.MaterialClassification.Commands;
+
+public sealed record CreateMaterialClassificationCommand(CreateMaterialClassificationDto Input) : IRequest<MaterialClassificationDto>;

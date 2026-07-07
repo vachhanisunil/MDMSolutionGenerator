@@ -1,0 +1,6 @@
+using MediatR;
+using EnterpriseMdmSolution.Application.Modules.CustomerClassification.DTOs;
+
+namespace EnterpriseMdmSolution.Application.Modules.CustomerClassification.Commands;
+
+public sealed record CreateCustomerClassificationCommand(CreateCustomerClassificationDto Input) : IRequest<CustomerClassificationDto>;

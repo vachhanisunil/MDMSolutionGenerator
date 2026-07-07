@@ -1,0 +1,19 @@
+using FluentValidation;
+using EnterpriseMdmSolution.Application.Modules.MaterialGroup.Commands;
+
+namespace EnterpriseMdmSolution.Application.Modules.MaterialGroup.Validators;
+
+public sealed class CreateMaterialGroupCommandValidator : AbstractValidator<CreateMaterialGroupCommand>
+{
+    public CreateMaterialGroupCommandValidator()
+    {
+        RuleFor(x => x.Input.Code)
+            .NotEmpty()
+            .MaximumLength(20);
+
+        RuleFor(x => x.Input.Name)
+            .NotEmpty()
+            .MaximumLength(150);
+
+    }
+}

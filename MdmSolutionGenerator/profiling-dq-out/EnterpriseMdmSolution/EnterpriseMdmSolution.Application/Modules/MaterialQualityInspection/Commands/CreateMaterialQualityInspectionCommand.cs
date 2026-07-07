@@ -1,0 +1,6 @@
+using MediatR;
+using EnterpriseMdmSolution.Application.Modules.MaterialQualityInspection.DTOs;
+
+namespace EnterpriseMdmSolution.Application.Modules.MaterialQualityInspection.Commands;
+
+public sealed record CreateMaterialQualityInspectionCommand(CreateMaterialQualityInspectionDto Input) : IRequest<MaterialQualityInspectionDto>;

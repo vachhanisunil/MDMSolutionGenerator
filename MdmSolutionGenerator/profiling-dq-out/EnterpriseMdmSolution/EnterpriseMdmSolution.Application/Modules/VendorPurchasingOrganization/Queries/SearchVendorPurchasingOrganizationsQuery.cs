@@ -1,0 +1,7 @@
+using MediatR;
+using EnterpriseMdmSolution.Core.Common;
+using EnterpriseMdmSolution.Application.Modules.VendorPurchasingOrganization.DTOs;
+
+namespace EnterpriseMdmSolution.Application.Modules.VendorPurchasingOrganization.Queries;
+
+public sealed record SearchVendorPurchasingOrganizationsQuery(SearchVendorPurchasingOrganizationDto Search) : IRequest<PagedResult<VendorPurchasingOrganizationDto>>;

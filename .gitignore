@@ -1,0 +1,9 @@
+.vs/
+**/bin/
+**/obj/
+generated-out/
+MdmSolutionGenerator/generated-out/
+MdmSolutionGenerator/enterpriseMDM/
+MdmSolutionGenerator/aggregate-test-out/
+MdmSolutionGenerator/aggregate-test-metadata.json
+MdmSolutionGenerator/pg-test-out/
