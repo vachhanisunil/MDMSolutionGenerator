@@ -51,6 +51,18 @@ public sealed class VendorProfiler(IAnalysisDbContext dbContext)
         await ProfileVendorEvaluationVendorIdNullOrEmptyCountAsync(runId, cancellationToken);
         await ProfileVendorCertificateRecordsTotalRecordsAsync(runId, cancellationToken);
         await ProfileVendorCertificateVendorIdNullOrEmptyCountAsync(runId, cancellationToken);
+        await ProfileVendorVendorTypeDistinctCountAsync(runId, cancellationToken);
+        await ProfileVendorSupplierCategoryDistinctCountAsync(runId, cancellationToken);
+        await ProfileVendorOnboardingStatusDistinctCountAsync(runId, cancellationToken);
+        await ProfileVendorEmailDuplicateCountAsync(runId, cancellationToken);
+        await ProfileVendorDunsNumberDuplicateCountAsync(runId, cancellationToken);
+        await ProfileVendorAddressCityDistinctCountAsync(runId, cancellationToken);
+        await ProfileVendorContactEmailDuplicateCountAsync(runId, cancellationToken);
+        await ProfileVendorBankAccountAccountNumberDuplicateCountAsync(runId, cancellationToken);
+        await ProfileVendorPurchasingOrganizationMinimumOrderValueAverageValueAsync(runId, cancellationToken);
+        await ProfileVendorEvaluationOverallScoreAverageValueAsync(runId, cancellationToken);
+        await ProfileVendorEvaluationQualityScoreMinValueAsync(runId, cancellationToken);
+        await ProfileVendorCertificateCertificateTypeDistinctCountAsync(runId, cancellationToken);
     }
 
     private async Task ProfileVendorRecordsTotalRootObjectsAsync(Guid runId, CancellationToken cancellationToken)
@@ -1859,6 +1871,470 @@ public sealed class VendorProfiler(IAnalysisDbContext dbContext)
         }).ToList();
 
         _dbContext.DataProfilingDrilldowns.AddRange(affectedRecords);
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    private async Task ProfileVendorVendorTypeDistinctCountAsync(Guid runId, CancellationToken cancellationToken)
+    {
+        var metricValue = await _dbContext.Vendors
+            .Select(x => x.VendorType)
+            .Distinct()
+            .CountAsync(cancellationToken);
+
+        var summary = new DataProfilingSummary
+        {
+            SummaryId = Guid.NewGuid(),
+            RunId = runId,
+            BusinessObjectName = "Vendor",
+            EntityName = "Vendor",
+            ColumnName = "VendorType",
+            SummaryCode = "VENDOR_VENDORTYPE_DISTINCT_COUNT",
+            SummaryType = "DistinctCount",
+            Label = "Distinct vendor types",
+            Severity = "Info",
+            MetricValue = metricValue,
+            AffectedCount = metricValue,
+            HasDrilldown = false,
+            DrilldownKey = "VENDOR_VENDORTYPE_DISTINCT_COUNT",
+            CreatedOn = DateTimeOffset.UtcNow
+        };
+
+        _dbContext.DataProfilingSummaries.Add(summary);
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    private async Task ProfileVendorSupplierCategoryDistinctCountAsync(Guid runId, CancellationToken cancellationToken)
+    {
+        var metricValue = await _dbContext.Vendors
+            .Select(x => x.SupplierCategory)
+            .Distinct()
+            .CountAsync(cancellationToken);
+
+        var summary = new DataProfilingSummary
+        {
+            SummaryId = Guid.NewGuid(),
+            RunId = runId,
+            BusinessObjectName = "Vendor",
+            EntityName = "Vendor",
+            ColumnName = "SupplierCategory",
+            SummaryCode = "VENDOR_SUPPLIERCATEGORY_DISTINCT_COUNT",
+            SummaryType = "DistinctCount",
+            Label = "Distinct supplier categories",
+            Severity = "Info",
+            MetricValue = metricValue,
+            AffectedCount = metricValue,
+            HasDrilldown = false,
+            DrilldownKey = "VENDOR_SUPPLIERCATEGORY_DISTINCT_COUNT",
+            CreatedOn = DateTimeOffset.UtcNow
+        };
+
+        _dbContext.DataProfilingSummaries.Add(summary);
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    private async Task ProfileVendorOnboardingStatusDistinctCountAsync(Guid runId, CancellationToken cancellationToken)
+    {
+        var metricValue = await _dbContext.Vendors
+            .Select(x => x.OnboardingStatus)
+            .Distinct()
+            .CountAsync(cancellationToken);
+
+        var summary = new DataProfilingSummary
+        {
+            SummaryId = Guid.NewGuid(),
+            RunId = runId,
+            BusinessObjectName = "Vendor",
+            EntityName = "Vendor",
+            ColumnName = "OnboardingStatus",
+            SummaryCode = "VENDOR_ONBOARDINGSTATUS_DISTINCT_COUNT",
+            SummaryType = "DistinctCount",
+            Label = "Distinct vendor onboarding statuses",
+            Severity = "Info",
+            MetricValue = metricValue,
+            AffectedCount = metricValue,
+            HasDrilldown = false,
+            DrilldownKey = "VENDOR_ONBOARDINGSTATUS_DISTINCT_COUNT",
+            CreatedOn = DateTimeOffset.UtcNow
+        };
+
+        _dbContext.DataProfilingSummaries.Add(summary);
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    private async Task ProfileVendorEmailDuplicateCountAsync(Guid runId, CancellationToken cancellationToken)
+    {
+        var duplicateValues = await _dbContext.Vendors
+            .Where(x => x.Email != null && x.Email != "")
+            .GroupBy(x => x.Email)
+            .Where(group => group.Count() > 1)
+            .Select(group => group.Key)
+            .ToListAsync(cancellationToken);
+
+        var affectedSourceRecords = await _dbContext.Vendors
+            .Where(x => duplicateValues.Contains(x.Email))
+            .ToListAsync(cancellationToken);
+
+        var summary = new DataProfilingSummary
+        {
+            SummaryId = Guid.NewGuid(),
+            RunId = runId,
+            BusinessObjectName = "Vendor",
+            EntityName = "Vendor",
+            ColumnName = "Email",
+            SummaryCode = "VENDOR_EMAIL_DUPLICATE_COUNT",
+            SummaryType = "DuplicateCount",
+            Label = "Duplicate vendor email records",
+            Severity = "Medium",
+            MetricValue = affectedSourceRecords.Count,
+            AffectedCount = affectedSourceRecords.Count,
+            HasDrilldown = true,
+            DrilldownKey = "VENDOR_EMAIL_DUPLICATE_COUNT",
+            CreatedOn = DateTimeOffset.UtcNow
+        };
+
+        _dbContext.DataProfilingSummaries.Add(summary);
+
+        var affectedRecords = affectedSourceRecords.Select(x => new DataProfilingDrilldown
+        {
+            DrilldownId = Guid.NewGuid(),
+            RunId = runId,
+            SummaryId = summary.SummaryId,
+            BusinessObjectName = "Vendor",
+            EntityName = "Vendor",
+            RootRecordId = x.Id.ToString(),
+            RecordId = x.Id.ToString(),
+            ColumnName = "Email",
+            SummaryCode = "VENDOR_EMAIL_DUPLICATE_COUNT",
+            SummaryType = "DuplicateCount",
+            FieldValue = x.Email,
+            Message = "Duplicate vendor email records",
+            RecordSnapshotJson = JsonSerializer.Serialize(new { x.Id, x.Email }),
+            CreatedOn = DateTimeOffset.UtcNow
+        }).ToList();
+
+        _dbContext.DataProfilingDrilldowns.AddRange(affectedRecords);
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    private async Task ProfileVendorDunsNumberDuplicateCountAsync(Guid runId, CancellationToken cancellationToken)
+    {
+        var duplicateValues = await _dbContext.Vendors
+            .Where(x => x.DunsNumber != null && x.DunsNumber != "")
+            .GroupBy(x => x.DunsNumber)
+            .Where(group => group.Count() > 1)
+            .Select(group => group.Key)
+            .ToListAsync(cancellationToken);
+
+        var affectedSourceRecords = await _dbContext.Vendors
+            .Where(x => duplicateValues.Contains(x.DunsNumber))
+            .ToListAsync(cancellationToken);
+
+        var summary = new DataProfilingSummary
+        {
+            SummaryId = Guid.NewGuid(),
+            RunId = runId,
+            BusinessObjectName = "Vendor",
+            EntityName = "Vendor",
+            ColumnName = "DunsNumber",
+            SummaryCode = "VENDOR_DUNSNUMBER_DUPLICATE_COUNT",
+            SummaryType = "DuplicateCount",
+            Label = "Duplicate vendor DUNS numbers",
+            Severity = "High",
+            MetricValue = affectedSourceRecords.Count,
+            AffectedCount = affectedSourceRecords.Count,
+            HasDrilldown = true,
+            DrilldownKey = "VENDOR_DUNSNUMBER_DUPLICATE_COUNT",
+            CreatedOn = DateTimeOffset.UtcNow
+        };
+
+        _dbContext.DataProfilingSummaries.Add(summary);
+
+        var affectedRecords = affectedSourceRecords.Select(x => new DataProfilingDrilldown
+        {
+            DrilldownId = Guid.NewGuid(),
+            RunId = runId,
+            SummaryId = summary.SummaryId,
+            BusinessObjectName = "Vendor",
+            EntityName = "Vendor",
+            RootRecordId = x.Id.ToString(),
+            RecordId = x.Id.ToString(),
+            ColumnName = "DunsNumber",
+            SummaryCode = "VENDOR_DUNSNUMBER_DUPLICATE_COUNT",
+            SummaryType = "DuplicateCount",
+            FieldValue = x.DunsNumber,
+            Message = "Duplicate vendor DUNS numbers",
+            RecordSnapshotJson = JsonSerializer.Serialize(new { x.Id, x.DunsNumber }),
+            CreatedOn = DateTimeOffset.UtcNow
+        }).ToList();
+
+        _dbContext.DataProfilingDrilldowns.AddRange(affectedRecords);
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    private async Task ProfileVendorAddressCityDistinctCountAsync(Guid runId, CancellationToken cancellationToken)
+    {
+        var metricValue = await _dbContext.VendorAddresses
+            .Select(x => x.City)
+            .Distinct()
+            .CountAsync(cancellationToken);
+
+        var summary = new DataProfilingSummary
+        {
+            SummaryId = Guid.NewGuid(),
+            RunId = runId,
+            BusinessObjectName = "Vendor",
+            EntityName = "VendorAddress",
+            ColumnName = "City",
+            SummaryCode = "VENDORADDRESS_CITY_DISTINCT_COUNT",
+            SummaryType = "DistinctCount",
+            Label = "Distinct vendor address cities",
+            Severity = "Info",
+            MetricValue = metricValue,
+            AffectedCount = metricValue,
+            HasDrilldown = false,
+            DrilldownKey = "VENDORADDRESS_CITY_DISTINCT_COUNT",
+            CreatedOn = DateTimeOffset.UtcNow
+        };
+
+        _dbContext.DataProfilingSummaries.Add(summary);
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    private async Task ProfileVendorContactEmailDuplicateCountAsync(Guid runId, CancellationToken cancellationToken)
+    {
+        var duplicateValues = await _dbContext.VendorContacts
+            .Where(x => x.Email != null && x.Email != "")
+            .GroupBy(x => x.Email)
+            .Where(group => group.Count() > 1)
+            .Select(group => group.Key)
+            .ToListAsync(cancellationToken);
+
+        var affectedSourceRecords = await _dbContext.VendorContacts
+            .Where(x => duplicateValues.Contains(x.Email))
+            .ToListAsync(cancellationToken);
+
+        var summary = new DataProfilingSummary
+        {
+            SummaryId = Guid.NewGuid(),
+            RunId = runId,
+            BusinessObjectName = "Vendor",
+            EntityName = "VendorContact",
+            ColumnName = "Email",
+            SummaryCode = "VENDORCONTACT_EMAIL_DUPLICATE_COUNT",
+            SummaryType = "DuplicateCount",
+            Label = "Duplicate vendor contact email records",
+            Severity = "Medium",
+            MetricValue = affectedSourceRecords.Count,
+            AffectedCount = affectedSourceRecords.Count,
+            HasDrilldown = true,
+            DrilldownKey = "VENDORCONTACT_EMAIL_DUPLICATE_COUNT",
+            CreatedOn = DateTimeOffset.UtcNow
+        };
+
+        _dbContext.DataProfilingSummaries.Add(summary);
+
+        var affectedRecords = affectedSourceRecords.Select(x => new DataProfilingDrilldown
+        {
+            DrilldownId = Guid.NewGuid(),
+            RunId = runId,
+            SummaryId = summary.SummaryId,
+            BusinessObjectName = "Vendor",
+            EntityName = "VendorContact",
+            RootRecordId = x.VendorId.ToString(),
+            RecordId = x.Id.ToString(),
+            ColumnName = "Email",
+            SummaryCode = "VENDORCONTACT_EMAIL_DUPLICATE_COUNT",
+            SummaryType = "DuplicateCount",
+            FieldValue = x.Email,
+            Message = "Duplicate vendor contact email records",
+            RecordSnapshotJson = JsonSerializer.Serialize(new { x.Id, x.VendorId, x.Email }),
+            CreatedOn = DateTimeOffset.UtcNow
+        }).ToList();
+
+        _dbContext.DataProfilingDrilldowns.AddRange(affectedRecords);
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    private async Task ProfileVendorBankAccountAccountNumberDuplicateCountAsync(Guid runId, CancellationToken cancellationToken)
+    {
+        var duplicateValues = await _dbContext.VendorBankAccounts
+            .Where(x => x.AccountNumber != null && x.AccountNumber != "")
+            .GroupBy(x => x.AccountNumber)
+            .Where(group => group.Count() > 1)
+            .Select(group => group.Key)
+            .ToListAsync(cancellationToken);
+
+        var affectedSourceRecords = await _dbContext.VendorBankAccounts
+            .Where(x => duplicateValues.Contains(x.AccountNumber))
+            .ToListAsync(cancellationToken);
+
+        var summary = new DataProfilingSummary
+        {
+            SummaryId = Guid.NewGuid(),
+            RunId = runId,
+            BusinessObjectName = "Vendor",
+            EntityName = "VendorBankAccount",
+            ColumnName = "AccountNumber",
+            SummaryCode = "VENDORBANKACCOUNT_ACCOUNTNUMBER_DUPLICATE_COUNT",
+            SummaryType = "DuplicateCount",
+            Label = "Duplicate vendor bank account numbers",
+            Severity = "High",
+            MetricValue = affectedSourceRecords.Count,
+            AffectedCount = affectedSourceRecords.Count,
+            HasDrilldown = true,
+            DrilldownKey = "VENDORBANKACCOUNT_ACCOUNTNUMBER_DUPLICATE_COUNT",
+            CreatedOn = DateTimeOffset.UtcNow
+        };
+
+        _dbContext.DataProfilingSummaries.Add(summary);
+
+        var affectedRecords = affectedSourceRecords.Select(x => new DataProfilingDrilldown
+        {
+            DrilldownId = Guid.NewGuid(),
+            RunId = runId,
+            SummaryId = summary.SummaryId,
+            BusinessObjectName = "Vendor",
+            EntityName = "VendorBankAccount",
+            RootRecordId = x.VendorId.ToString(),
+            RecordId = x.Id.ToString(),
+            ColumnName = "AccountNumber",
+            SummaryCode = "VENDORBANKACCOUNT_ACCOUNTNUMBER_DUPLICATE_COUNT",
+            SummaryType = "DuplicateCount",
+            FieldValue = x.AccountNumber,
+            Message = "Duplicate vendor bank account numbers",
+            RecordSnapshotJson = JsonSerializer.Serialize(new { x.Id, x.VendorId, x.AccountNumber }),
+            CreatedOn = DateTimeOffset.UtcNow
+        }).ToList();
+
+        _dbContext.DataProfilingDrilldowns.AddRange(affectedRecords);
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    private async Task ProfileVendorPurchasingOrganizationMinimumOrderValueAverageValueAsync(Guid runId, CancellationToken cancellationToken)
+    {
+        var metricValue = await _dbContext.VendorPurchasingOrganizations
+            .Where(x => x.MinimumOrderValue != null)
+            .Select(x => (decimal?)x.MinimumOrderValue)
+            .AverageAsync(cancellationToken);
+
+        var summary = new DataProfilingSummary
+        {
+            SummaryId = Guid.NewGuid(),
+            RunId = runId,
+            BusinessObjectName = "Vendor",
+            EntityName = "VendorPurchasingOrganization",
+            ColumnName = "MinimumOrderValue",
+            SummaryCode = "VENDORPURCHASINGORG_AVERAGE_MIN_ORDER_VALUE",
+            SummaryType = "AverageValue",
+            Label = "Average vendor minimum order value",
+            Severity = "Info",
+            MetricValue = metricValue ?? 0,
+            AffectedCount = 0,
+            HasDrilldown = false,
+            DrilldownKey = "VENDORPURCHASINGORG_AVERAGE_MIN_ORDER_VALUE",
+            CreatedOn = DateTimeOffset.UtcNow
+        };
+
+        _dbContext.DataProfilingSummaries.Add(summary);
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    private async Task ProfileVendorEvaluationOverallScoreAverageValueAsync(Guid runId, CancellationToken cancellationToken)
+    {
+        var metricValue = await _dbContext.VendorEvaluations
+            .Where(x => x.OverallScore != null)
+            .Select(x => (decimal?)x.OverallScore)
+            .AverageAsync(cancellationToken);
+
+        var summary = new DataProfilingSummary
+        {
+            SummaryId = Guid.NewGuid(),
+            RunId = runId,
+            BusinessObjectName = "Vendor",
+            EntityName = "VendorEvaluation",
+            ColumnName = "OverallScore",
+            SummaryCode = "VENDOREVALUATION_AVERAGE_OVERALL_SCORE",
+            SummaryType = "AverageValue",
+            Label = "Average vendor evaluation overall score",
+            Severity = "Info",
+            MetricValue = metricValue ?? 0,
+            AffectedCount = 0,
+            HasDrilldown = false,
+            DrilldownKey = "VENDOREVALUATION_AVERAGE_OVERALL_SCORE",
+            CreatedOn = DateTimeOffset.UtcNow
+        };
+
+        _dbContext.DataProfilingSummaries.Add(summary);
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    private async Task ProfileVendorEvaluationQualityScoreMinValueAsync(Guid runId, CancellationToken cancellationToken)
+    {
+        var metricValue = await _dbContext.VendorEvaluations
+            .Where(x => x.QualityScore != null)
+            .Select(x => (decimal?)x.QualityScore)
+            .MinAsync(cancellationToken);
+
+        var summary = new DataProfilingSummary
+        {
+            SummaryId = Guid.NewGuid(),
+            RunId = runId,
+            BusinessObjectName = "Vendor",
+            EntityName = "VendorEvaluation",
+            ColumnName = "QualityScore",
+            SummaryCode = "VENDOREVALUATION_MIN_QUALITY_SCORE",
+            SummaryType = "MinValue",
+            Label = "Minimum vendor quality score",
+            Severity = "Info",
+            MetricValue = metricValue ?? 0,
+            AffectedCount = 0,
+            HasDrilldown = false,
+            DrilldownKey = "VENDOREVALUATION_MIN_QUALITY_SCORE",
+            CreatedOn = DateTimeOffset.UtcNow
+        };
+
+        _dbContext.DataProfilingSummaries.Add(summary);
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    private async Task ProfileVendorCertificateCertificateTypeDistinctCountAsync(Guid runId, CancellationToken cancellationToken)
+    {
+        var metricValue = await _dbContext.VendorCertificates
+            .Select(x => x.CertificateType)
+            .Distinct()
+            .CountAsync(cancellationToken);
+
+        var summary = new DataProfilingSummary
+        {
+            SummaryId = Guid.NewGuid(),
+            RunId = runId,
+            BusinessObjectName = "Vendor",
+            EntityName = "VendorCertificate",
+            ColumnName = "CertificateType",
+            SummaryCode = "VENDORCERTIFICATE_TYPE_DISTINCT_COUNT",
+            SummaryType = "DistinctCount",
+            Label = "Distinct vendor certificate types",
+            Severity = "Info",
+            MetricValue = metricValue,
+            AffectedCount = metricValue,
+            HasDrilldown = false,
+            DrilldownKey = "VENDORCERTIFICATE_TYPE_DISTINCT_COUNT",
+            CreatedOn = DateTimeOffset.UtcNow
+        };
+
+        _dbContext.DataProfilingSummaries.Add(summary);
 
         await _dbContext.SaveChangesAsync(cancellationToken);
     }

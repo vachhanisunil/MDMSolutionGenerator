@@ -14,6 +14,7 @@ internal sealed class ProfilingIntent
     public string? ColumnName { get; set; }
     public string ConditionType { get; set; } = "IsNullOrEmpty";
     public string? FieldName { get; set; }
+    public string? FieldType { get; set; }
     public bool IsFieldString { get; set; }
     public bool IsFieldNullable { get; set; }
     public bool StoreDrilldown { get; set; }

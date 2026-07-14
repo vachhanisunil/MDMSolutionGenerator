@@ -38,6 +38,21 @@ internal sealed class ProfilingCodeTemplateBuilder(string rootNamespace)
 
     private string BuildProfilingMethod(ProfilingIntent intent)
     {
+        if (IsDuplicate(intent))
+        {
+            return BuildDuplicateProfilingMethod(intent);
+        }
+
+        if (IsDistinctCount(intent))
+        {
+            return BuildDistinctCountProfilingMethod(intent);
+        }
+
+        if (IsNumericAggregate(intent))
+        {
+            return BuildNumericAggregateProfilingMethod(intent);
+        }
+
         var method = ProfileMethodName(intent);
         var fieldValue = FieldValueExpression(intent.FieldName, intent.IsFieldString);
         var whereClause = _linq.BuildWhereClause(intent);
@@ -78,6 +93,137 @@ internal sealed class ProfilingCodeTemplateBuilder(string rootNamespace)
 """;
     }
 
+    private string BuildDuplicateProfilingMethod(ProfilingIntent intent)
+    {
+        var method = ProfileMethodName(intent);
+        var fieldValue = FieldValueExpression(intent.FieldName, intent.IsFieldString);
+        var field = intent.FieldName ?? intent.PrimaryKey;
+        var notEmptyFilter = intent.IsFieldString
+            ? $".Where(x => x.{field} != null && x.{field} != \"\")"
+            : ".Where(x => true)";
+        var drilldownBlock = intent.StoreDrilldown ? BuildDrilldownBlock(intent, fieldValue) : "";
+
+        return $$"""
+    private async Task {{method}}Async(Guid runId, CancellationToken cancellationToken)
+    {
+        var duplicateValues = await _dbContext.{{intent.DbSetName}}
+            {{notEmptyFilter}}
+            .GroupBy(x => x.{{field}})
+            .Where(group => group.Count() > 1)
+            .Select(group => group.Key)
+            .ToListAsync(cancellationToken);
+
+        var affectedSourceRecords = await _dbContext.{{intent.DbSetName}}
+            .Where(x => duplicateValues.Contains(x.{{field}}))
+            .ToListAsync(cancellationToken);
+
+        var summary = new DataProfilingSummary
+        {
+            SummaryId = Guid.NewGuid(),
+            RunId = runId,
+            BusinessObjectName = "{{Escape(intent.BusinessObjectName)}}",
+            EntityName = "{{Escape(intent.EntityName)}}",
+            ColumnName = "{{Escape(intent.ColumnName)}}",
+            SummaryCode = "{{Escape(intent.SummaryCode)}}",
+            SummaryType = "{{Escape(intent.SummaryType)}}",
+            Label = "{{Escape(intent.Label)}}",
+            Severity = "{{Escape(intent.Severity)}}",
+            MetricValue = affectedSourceRecords.Count,
+            AffectedCount = affectedSourceRecords.Count,
+            HasDrilldown = {{Bool(intent.StoreDrilldown)}},
+            DrilldownKey = "{{Escape(intent.SummaryCode)}}",
+            CreatedOn = DateTimeOffset.UtcNow
+        };
+
+        _dbContext.DataProfilingSummaries.Add(summary);
+{{drilldownBlock}}
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+""";
+    }
+
+    private string BuildDistinctCountProfilingMethod(ProfilingIntent intent)
+    {
+        var method = ProfileMethodName(intent);
+        var field = intent.FieldName ?? intent.PrimaryKey;
+
+        return $$"""
+    private async Task {{method}}Async(Guid runId, CancellationToken cancellationToken)
+    {
+        var metricValue = await _dbContext.{{intent.DbSetName}}
+            .Select(x => x.{{field}})
+            .Distinct()
+            .CountAsync(cancellationToken);
+
+        var summary = new DataProfilingSummary
+        {
+            SummaryId = Guid.NewGuid(),
+            RunId = runId,
+            BusinessObjectName = "{{Escape(intent.BusinessObjectName)}}",
+            EntityName = "{{Escape(intent.EntityName)}}",
+            ColumnName = "{{Escape(intent.ColumnName)}}",
+            SummaryCode = "{{Escape(intent.SummaryCode)}}",
+            SummaryType = "{{Escape(intent.SummaryType)}}",
+            Label = "{{Escape(intent.Label)}}",
+            Severity = "{{Escape(intent.Severity)}}",
+            MetricValue = metricValue,
+            AffectedCount = metricValue,
+            HasDrilldown = false,
+            DrilldownKey = "{{Escape(intent.SummaryCode)}}",
+            CreatedOn = DateTimeOffset.UtcNow
+        };
+
+        _dbContext.DataProfilingSummaries.Add(summary);
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+""";
+    }
+
+    private string BuildNumericAggregateProfilingMethod(ProfilingIntent intent)
+    {
+        var method = ProfileMethodName(intent);
+        var field = intent.FieldName ?? intent.PrimaryKey;
+        var metricExpression = NumericAggregateExpression(intent, field);
+        var notNullFilter = intent.IsFieldNullable ? $".Where(x => x.{field} != null)" : ".Where(x => true)";
+
+        return $$"""
+    private async Task {{method}}Async(Guid runId, CancellationToken cancellationToken)
+    {
+        var metricValue = await _dbContext.{{intent.DbSetName}}
+            {{notNullFilter}}
+            .Select(x => (decimal?)x.{{field}})
+            {{metricExpression}};
+
+        var summary = new DataProfilingSummary
+        {
+            SummaryId = Guid.NewGuid(),
+            RunId = runId,
+            BusinessObjectName = "{{Escape(intent.BusinessObjectName)}}",
+            EntityName = "{{Escape(intent.EntityName)}}",
+            ColumnName = "{{Escape(intent.ColumnName)}}",
+            SummaryCode = "{{Escape(intent.SummaryCode)}}",
+            SummaryType = "{{Escape(intent.SummaryType)}}",
+            Label = "{{Escape(intent.Label)}}",
+            Severity = "{{Escape(intent.Severity)}}",
+            MetricValue = metricValue ?? 0,
+            AffectedCount = 0,
+            HasDrilldown = false,
+            DrilldownKey = "{{Escape(intent.SummaryCode)}}",
+            CreatedOn = DateTimeOffset.UtcNow
+        };
+
+        _dbContext.DataProfilingSummaries.Add(summary);
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+""";
+    }
+
     private static string BuildDrilldownBlock(ProfilingIntent intent, string fieldValue) => $$"""
 
         var affectedRecords = affectedSourceRecords.Select(x => new DataProfilingDrilldown
@@ -103,6 +249,43 @@ internal sealed class ProfilingCodeTemplateBuilder(string rootNamespace)
 
     private static string ProfileMethodName(ProfilingIntent intent)
         => $"Profile{Sanitize(intent.EntityName)}{Sanitize(intent.FieldName)}{Sanitize(intent.SummaryType)}";
+
+    private static bool IsDuplicate(ProfilingIntent intent)
+        => intent.ConditionType.Equals("Duplicate", StringComparison.OrdinalIgnoreCase)
+            || intent.SummaryType.Contains("Duplicate", StringComparison.OrdinalIgnoreCase);
+
+    private static bool IsDistinctCount(ProfilingIntent intent)
+        => intent.ConditionType.Equals("DistinctCount", StringComparison.OrdinalIgnoreCase)
+            || intent.SummaryType.Equals("DistinctCount", StringComparison.OrdinalIgnoreCase);
+
+    private static bool IsNumericAggregate(ProfilingIntent intent)
+        => IsNumericField(intent)
+            && (intent.ConditionType.Equals("AverageValue", StringComparison.OrdinalIgnoreCase)
+                || intent.ConditionType.Equals("MinValue", StringComparison.OrdinalIgnoreCase)
+                || intent.ConditionType.Equals("MaxValue", StringComparison.OrdinalIgnoreCase)
+                || intent.SummaryType.Equals("AverageValue", StringComparison.OrdinalIgnoreCase)
+                || intent.SummaryType.Equals("MinValue", StringComparison.OrdinalIgnoreCase)
+                || intent.SummaryType.Equals("MaxValue", StringComparison.OrdinalIgnoreCase));
+
+    private static bool IsNumericField(ProfilingIntent intent)
+        => (intent.FieldType ?? "").Equals("decimal", StringComparison.OrdinalIgnoreCase);
+
+    private static string NumericAggregateExpression(ProfilingIntent intent, string field)
+    {
+        if (intent.ConditionType.Equals("MinValue", StringComparison.OrdinalIgnoreCase)
+            || intent.SummaryType.Equals("MinValue", StringComparison.OrdinalIgnoreCase))
+        {
+            return ".MinAsync(cancellationToken)";
+        }
+
+        if (intent.ConditionType.Equals("MaxValue", StringComparison.OrdinalIgnoreCase)
+            || intent.SummaryType.Equals("MaxValue", StringComparison.OrdinalIgnoreCase))
+        {
+            return ".MaxAsync(cancellationToken)";
+        }
+
+        return ".AverageAsync(cancellationToken)";
+    }
 
     private static string RootRecordIdExpression(ProfilingIntent intent)
         => string.Equals(intent.EntityName, intent.RootEntityName, StringComparison.OrdinalIgnoreCase)

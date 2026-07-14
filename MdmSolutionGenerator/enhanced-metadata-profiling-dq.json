@@ -2869,6 +2869,174 @@
               "field": "StoragePath"
             },
             "storeDrilldown": true
+          },
+          {
+            "summaryCode": "CUSTOMER_CUSTOMERTYPE_DISTINCT_COUNT",
+            "summaryType": "DistinctCount",
+            "level": "BusinessObjectRoot",
+            "entity": "Customer",
+            "column": "CustomerType",
+            "label": "Distinct customer types",
+            "severity": "Info",
+            "condition": {
+              "type": "DistinctCount",
+              "field": "CustomerType"
+            },
+            "storeDrilldown": false
+          },
+          {
+            "summaryCode": "CUSTOMER_RISKCATEGORY_DISTINCT_COUNT",
+            "summaryType": "DistinctCount",
+            "level": "BusinessObjectRoot",
+            "entity": "Customer",
+            "column": "RiskCategory",
+            "label": "Distinct customer risk categories",
+            "severity": "Info",
+            "condition": {
+              "type": "DistinctCount",
+              "field": "RiskCategory"
+            },
+            "storeDrilldown": false
+          },
+          {
+            "summaryCode": "CUSTOMER_EMAIL_DUPLICATE_COUNT",
+            "summaryType": "DuplicateCount",
+            "level": "BusinessObjectRoot",
+            "entity": "Customer",
+            "column": "Email",
+            "label": "Duplicate customer email records",
+            "severity": "Medium",
+            "condition": {
+              "type": "Duplicate",
+              "field": "Email"
+            },
+            "storeDrilldown": true
+          },
+          {
+            "summaryCode": "CUSTOMER_REGISTRATIONNUMBER_DUPLICATE_COUNT",
+            "summaryType": "DuplicateCount",
+            "level": "BusinessObjectRoot",
+            "entity": "Customer",
+            "column": "RegistrationNumber",
+            "label": "Duplicate customer registration numbers",
+            "severity": "High",
+            "condition": {
+              "type": "Duplicate",
+              "field": "RegistrationNumber"
+            },
+            "storeDrilldown": true
+          },
+          {
+            "summaryCode": "CUSTOMERADDRESS_CITY_DISTINCT_COUNT",
+            "summaryType": "DistinctCount",
+            "level": "ChildEntity",
+            "entity": "CustomerAddress",
+            "column": "City",
+            "label": "Distinct customer address cities",
+            "severity": "Info",
+            "condition": {
+              "type": "DistinctCount",
+              "field": "City"
+            },
+            "storeDrilldown": false
+          },
+          {
+            "summaryCode": "CUSTOMERADDRESS_POSTALCODE_DISTINCT_COUNT",
+            "summaryType": "DistinctCount",
+            "level": "ChildEntity",
+            "entity": "CustomerAddress",
+            "column": "PostalCode",
+            "label": "Distinct customer postal codes",
+            "severity": "Info",
+            "condition": {
+              "type": "DistinctCount",
+              "field": "PostalCode"
+            },
+            "storeDrilldown": false
+          },
+          {
+            "summaryCode": "CUSTOMERCONTACT_EMAIL_DUPLICATE_COUNT",
+            "summaryType": "DuplicateCount",
+            "level": "ChildEntity",
+            "entity": "CustomerContact",
+            "column": "Email",
+            "label": "Duplicate customer contact email records",
+            "severity": "Medium",
+            "condition": {
+              "type": "Duplicate",
+              "field": "Email"
+            },
+            "storeDrilldown": true
+          },
+          {
+            "summaryCode": "CUSTOMERSALESAREA_AVERAGE_CREDIT_LIMIT",
+            "summaryType": "AverageValue",
+            "level": "ChildEntity",
+            "entity": "CustomerSalesArea",
+            "column": "CreditLimit",
+            "label": "Average customer sales area credit limit",
+            "severity": "Info",
+            "condition": {
+              "type": "AverageValue",
+              "field": "CreditLimit"
+            },
+            "storeDrilldown": false
+          },
+          {
+            "summaryCode": "CUSTOMERSALESAREA_MAX_CREDIT_LIMIT",
+            "summaryType": "MaxValue",
+            "level": "ChildEntity",
+            "entity": "CustomerSalesArea",
+            "column": "CreditLimit",
+            "label": "Maximum customer sales area credit limit",
+            "severity": "Info",
+            "condition": {
+              "type": "MaxValue",
+              "field": "CreditLimit"
+            },
+            "storeDrilldown": false
+          },
+          {
+            "summaryCode": "CUSTOMERCREDITPROFILE_AVERAGE_CREDIT_EXPOSURE",
+            "summaryType": "AverageValue",
+            "level": "ChildEntity",
+            "entity": "CustomerCreditProfile",
+            "column": "CreditExposure",
+            "label": "Average customer credit exposure",
+            "severity": "Info",
+            "condition": {
+              "type": "AverageValue",
+              "field": "CreditExposure"
+            },
+            "storeDrilldown": false
+          },
+          {
+            "summaryCode": "CUSTOMERCREDITPROFILE_MAX_CREDIT_EXPOSURE",
+            "summaryType": "MaxValue",
+            "level": "ChildEntity",
+            "entity": "CustomerCreditProfile",
+            "column": "CreditExposure",
+            "label": "Maximum customer credit exposure",
+            "severity": "Info",
+            "condition": {
+              "type": "MaxValue",
+              "field": "CreditExposure"
+            },
+            "storeDrilldown": false
+          },
+          {
+            "summaryCode": "CUSTOMERCLASSIFICATION_TYPE_DISTINCT_COUNT",
+            "summaryType": "DistinctCount",
+            "level": "ChildEntity",
+            "entity": "CustomerClassification",
+            "column": "ClassificationType",
+            "label": "Distinct customer classification types",
+            "severity": "Info",
+            "condition": {
+              "type": "DistinctCount",
+              "field": "ClassificationType"
+            },
+            "storeDrilldown": false
           }
         ],
         "generationMode": "ExplicitOnly",
@@ -4350,6 +4518,174 @@
               "field": "BarcodeValue"
             },
             "storeDrilldown": true
+          },
+          {
+            "summaryCode": "MATERIAL_MATERIALTYPE_DISTINCT_COUNT",
+            "summaryType": "DistinctCount",
+            "level": "BusinessObjectRoot",
+            "entity": "Material",
+            "column": "MaterialType",
+            "label": "Distinct material types",
+            "severity": "Info",
+            "condition": {
+              "type": "DistinctCount",
+              "field": "MaterialType"
+            },
+            "storeDrilldown": false
+          },
+          {
+            "summaryCode": "MATERIAL_PRODUCTHIERARCHY_DISTINCT_COUNT",
+            "summaryType": "DistinctCount",
+            "level": "BusinessObjectRoot",
+            "entity": "Material",
+            "column": "ProductHierarchy",
+            "label": "Distinct material product hierarchies",
+            "severity": "Info",
+            "condition": {
+              "type": "DistinctCount",
+              "field": "ProductHierarchy"
+            },
+            "storeDrilldown": false
+          },
+          {
+            "summaryCode": "MATERIAL_GTIN_DUPLICATE_COUNT",
+            "summaryType": "DuplicateCount",
+            "level": "BusinessObjectRoot",
+            "entity": "Material",
+            "column": "GlobalTradeItemNumber",
+            "label": "Duplicate material GTIN records",
+            "severity": "High",
+            "condition": {
+              "type": "Duplicate",
+              "field": "GlobalTradeItemNumber"
+            },
+            "storeDrilldown": true
+          },
+          {
+            "summaryCode": "MATERIAL_AVERAGE_GROSS_WEIGHT",
+            "summaryType": "AverageValue",
+            "level": "BusinessObjectRoot",
+            "entity": "Material",
+            "column": "GrossWeight",
+            "label": "Average material gross weight",
+            "severity": "Info",
+            "condition": {
+              "type": "AverageValue",
+              "field": "GrossWeight"
+            },
+            "storeDrilldown": false
+          },
+          {
+            "summaryCode": "MATERIAL_AVERAGE_NET_WEIGHT",
+            "summaryType": "AverageValue",
+            "level": "BusinessObjectRoot",
+            "entity": "Material",
+            "column": "NetWeight",
+            "label": "Average material net weight",
+            "severity": "Info",
+            "condition": {
+              "type": "AverageValue",
+              "field": "NetWeight"
+            },
+            "storeDrilldown": false
+          },
+          {
+            "summaryCode": "MATERIALPRICE_AVERAGE_PRICE",
+            "summaryType": "AverageValue",
+            "level": "ChildEntity",
+            "entity": "MaterialPrice",
+            "column": "Price",
+            "label": "Average material price",
+            "severity": "Info",
+            "condition": {
+              "type": "AverageValue",
+              "field": "Price"
+            },
+            "storeDrilldown": false
+          },
+          {
+            "summaryCode": "MATERIALPRICE_MIN_PRICE",
+            "summaryType": "MinValue",
+            "level": "ChildEntity",
+            "entity": "MaterialPrice",
+            "column": "Price",
+            "label": "Minimum material price",
+            "severity": "Info",
+            "condition": {
+              "type": "MinValue",
+              "field": "Price"
+            },
+            "storeDrilldown": false
+          },
+          {
+            "summaryCode": "MATERIALPRICE_MAX_PRICE",
+            "summaryType": "MaxValue",
+            "level": "ChildEntity",
+            "entity": "MaterialPrice",
+            "column": "Price",
+            "label": "Maximum material price",
+            "severity": "Info",
+            "condition": {
+              "type": "MaxValue",
+              "field": "Price"
+            },
+            "storeDrilldown": false
+          },
+          {
+            "summaryCode": "MATERIALPLANT_AVERAGE_REORDER_POINT",
+            "summaryType": "AverageValue",
+            "level": "ChildEntity",
+            "entity": "MaterialPlant",
+            "column": "ReorderPoint",
+            "label": "Average material reorder point",
+            "severity": "Info",
+            "condition": {
+              "type": "AverageValue",
+              "field": "ReorderPoint"
+            },
+            "storeDrilldown": false
+          },
+          {
+            "summaryCode": "MATERIALVENDOR_AVERAGE_MINIMUM_ORDER_QUANTITY",
+            "summaryType": "AverageValue",
+            "level": "ChildEntity",
+            "entity": "MaterialVendor",
+            "column": "MinimumOrderQuantity",
+            "label": "Average material vendor minimum order quantity",
+            "severity": "Info",
+            "condition": {
+              "type": "AverageValue",
+              "field": "MinimumOrderQuantity"
+            },
+            "storeDrilldown": false
+          },
+          {
+            "summaryCode": "MATERIALFORECAST_AVERAGE_CONFIDENCE_PERCENT",
+            "summaryType": "AverageValue",
+            "level": "ChildEntity",
+            "entity": "MaterialForecast",
+            "column": "ConfidencePercent",
+            "label": "Average material forecast confidence percent",
+            "severity": "Info",
+            "condition": {
+              "type": "AverageValue",
+              "field": "ConfidencePercent"
+            },
+            "storeDrilldown": false
+          },
+          {
+            "summaryCode": "MATERIALBARCODE_DUPLICATE_COUNT",
+            "summaryType": "DuplicateCount",
+            "level": "ChildEntity",
+            "entity": "MaterialBarcode",
+            "column": "BarcodeValue",
+            "label": "Duplicate material barcode records",
+            "severity": "High",
+            "condition": {
+              "type": "Duplicate",
+              "field": "BarcodeValue"
+            },
+            "storeDrilldown": true
           }
         ],
         "generationMode": "ExplicitOnly",
@@ -5784,6 +6120,174 @@
               "field": "VendorId"
             },
             "storeDrilldown": true
+          },
+          {
+            "summaryCode": "VENDOR_VENDORTYPE_DISTINCT_COUNT",
+            "summaryType": "DistinctCount",
+            "level": "BusinessObjectRoot",
+            "entity": "Vendor",
+            "column": "VendorType",
+            "label": "Distinct vendor types",
+            "severity": "Info",
+            "condition": {
+              "type": "DistinctCount",
+              "field": "VendorType"
+            },
+            "storeDrilldown": false
+          },
+          {
+            "summaryCode": "VENDOR_SUPPLIERCATEGORY_DISTINCT_COUNT",
+            "summaryType": "DistinctCount",
+            "level": "BusinessObjectRoot",
+            "entity": "Vendor",
+            "column": "SupplierCategory",
+            "label": "Distinct supplier categories",
+            "severity": "Info",
+            "condition": {
+              "type": "DistinctCount",
+              "field": "SupplierCategory"
+            },
+            "storeDrilldown": false
+          },
+          {
+            "summaryCode": "VENDOR_ONBOARDINGSTATUS_DISTINCT_COUNT",
+            "summaryType": "DistinctCount",
+            "level": "BusinessObjectRoot",
+            "entity": "Vendor",
+            "column": "OnboardingStatus",
+            "label": "Distinct vendor onboarding statuses",
+            "severity": "Info",
+            "condition": {
+              "type": "DistinctCount",
+              "field": "OnboardingStatus"
+            },
+            "storeDrilldown": false
+          },
+          {
+            "summaryCode": "VENDOR_EMAIL_DUPLICATE_COUNT",
+            "summaryType": "DuplicateCount",
+            "level": "BusinessObjectRoot",
+            "entity": "Vendor",
+            "column": "Email",
+            "label": "Duplicate vendor email records",
+            "severity": "Medium",
+            "condition": {
+              "type": "Duplicate",
+              "field": "Email"
+            },
+            "storeDrilldown": true
+          },
+          {
+            "summaryCode": "VENDOR_DUNSNUMBER_DUPLICATE_COUNT",
+            "summaryType": "DuplicateCount",
+            "level": "BusinessObjectRoot",
+            "entity": "Vendor",
+            "column": "DunsNumber",
+            "label": "Duplicate vendor DUNS numbers",
+            "severity": "High",
+            "condition": {
+              "type": "Duplicate",
+              "field": "DunsNumber"
+            },
+            "storeDrilldown": true
+          },
+          {
+            "summaryCode": "VENDORADDRESS_CITY_DISTINCT_COUNT",
+            "summaryType": "DistinctCount",
+            "level": "ChildEntity",
+            "entity": "VendorAddress",
+            "column": "City",
+            "label": "Distinct vendor address cities",
+            "severity": "Info",
+            "condition": {
+              "type": "DistinctCount",
+              "field": "City"
+            },
+            "storeDrilldown": false
+          },
+          {
+            "summaryCode": "VENDORCONTACT_EMAIL_DUPLICATE_COUNT",
+            "summaryType": "DuplicateCount",
+            "level": "ChildEntity",
+            "entity": "VendorContact",
+            "column": "Email",
+            "label": "Duplicate vendor contact email records",
+            "severity": "Medium",
+            "condition": {
+              "type": "Duplicate",
+              "field": "Email"
+            },
+            "storeDrilldown": true
+          },
+          {
+            "summaryCode": "VENDORBANKACCOUNT_ACCOUNTNUMBER_DUPLICATE_COUNT",
+            "summaryType": "DuplicateCount",
+            "level": "ChildEntity",
+            "entity": "VendorBankAccount",
+            "column": "AccountNumber",
+            "label": "Duplicate vendor bank account numbers",
+            "severity": "High",
+            "condition": {
+              "type": "Duplicate",
+              "field": "AccountNumber"
+            },
+            "storeDrilldown": true
+          },
+          {
+            "summaryCode": "VENDORPURCHASINGORG_AVERAGE_MIN_ORDER_VALUE",
+            "summaryType": "AverageValue",
+            "level": "ChildEntity",
+            "entity": "VendorPurchasingOrganization",
+            "column": "MinimumOrderValue",
+            "label": "Average vendor minimum order value",
+            "severity": "Info",
+            "condition": {
+              "type": "AverageValue",
+              "field": "MinimumOrderValue"
+            },
+            "storeDrilldown": false
+          },
+          {
+            "summaryCode": "VENDOREVALUATION_AVERAGE_OVERALL_SCORE",
+            "summaryType": "AverageValue",
+            "level": "ChildEntity",
+            "entity": "VendorEvaluation",
+            "column": "OverallScore",
+            "label": "Average vendor evaluation overall score",
+            "severity": "Info",
+            "condition": {
+              "type": "AverageValue",
+              "field": "OverallScore"
+            },
+            "storeDrilldown": false
+          },
+          {
+            "summaryCode": "VENDOREVALUATION_MIN_QUALITY_SCORE",
+            "summaryType": "MinValue",
+            "level": "ChildEntity",
+            "entity": "VendorEvaluation",
+            "column": "QualityScore",
+            "label": "Minimum vendor quality score",
+            "severity": "Info",
+            "condition": {
+              "type": "MinValue",
+              "field": "QualityScore"
+            },
+            "storeDrilldown": false
+          },
+          {
+            "summaryCode": "VENDORCERTIFICATE_TYPE_DISTINCT_COUNT",
+            "summaryType": "DistinctCount",
+            "level": "ChildEntity",
+            "entity": "VendorCertificate",
+            "column": "CertificateType",
+            "label": "Distinct vendor certificate types",
+            "severity": "Info",
+            "condition": {
+              "type": "DistinctCount",
+              "field": "CertificateType"
+            },
+            "storeDrilldown": false
           }
         ],
         "generationMode": "ExplicitOnly",
@@ -6869,3 +7373,4 @@
     "description": "Profiling and data quality generation is explicit-only. Entity definitions remain schema-focused; only configured profiling summaries and data quality rules are generated."
   }
 }
+

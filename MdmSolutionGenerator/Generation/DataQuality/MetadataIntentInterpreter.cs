@@ -166,6 +166,7 @@ internal sealed class MetadataIntentInterpreter(MetadataDocument metadata)
             ColumnName = fieldName,
             ConditionType = conditionType,
             FieldName = fieldName,
+            FieldType = field?.Type,
             IsFieldString = field is not null && IsString(field),
             IsFieldNullable = field is null || IsNullable(entity, field),
             StoreDrilldown = storeDrilldown,

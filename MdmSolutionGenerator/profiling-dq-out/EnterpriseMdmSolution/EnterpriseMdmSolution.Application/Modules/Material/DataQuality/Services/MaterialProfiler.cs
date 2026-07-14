@@ -43,6 +43,18 @@ public sealed class MaterialProfiler(IAnalysisDbContext dbContext)
         await ProfileMaterialForecastForecastQuantityBelowMinimumCountAsync(runId, cancellationToken);
         await ProfileMaterialBarcodeRecordsTotalRecordsAsync(runId, cancellationToken);
         await ProfileMaterialBarcodeBarcodeValueNullOrEmptyCountAsync(runId, cancellationToken);
+        await ProfileMaterialMaterialTypeDistinctCountAsync(runId, cancellationToken);
+        await ProfileMaterialProductHierarchyDistinctCountAsync(runId, cancellationToken);
+        await ProfileMaterialGlobalTradeItemNumberDuplicateCountAsync(runId, cancellationToken);
+        await ProfileMaterialGrossWeightAverageValueAsync(runId, cancellationToken);
+        await ProfileMaterialNetWeightAverageValueAsync(runId, cancellationToken);
+        await ProfileMaterialPricePriceAverageValueAsync(runId, cancellationToken);
+        await ProfileMaterialPricePriceMinValueAsync(runId, cancellationToken);
+        await ProfileMaterialPricePriceMaxValueAsync(runId, cancellationToken);
+        await ProfileMaterialPlantReorderPointAverageValueAsync(runId, cancellationToken);
+        await ProfileMaterialVendorMinimumOrderQuantityAverageValueAsync(runId, cancellationToken);
+        await ProfileMaterialForecastConfidencePercentAverageValueAsync(runId, cancellationToken);
+        await ProfileMaterialBarcodeBarcodeValueDuplicateCountAsync(runId, cancellationToken);
     }
 
     private async Task ProfileMaterialRecordsTotalRootObjectsAsync(Guid runId, CancellationToken cancellationToken)
@@ -1427,6 +1439,418 @@ public sealed class MaterialProfiler(IAnalysisDbContext dbContext)
             SummaryType = "NullOrEmptyCount",
             FieldValue = x.BarcodeValue,
             Message = "MaterialBarcode.BarcodeValue missing values",
+            RecordSnapshotJson = JsonSerializer.Serialize(new { x.Id, x.MaterialId, x.BarcodeValue }),
+            CreatedOn = DateTimeOffset.UtcNow
+        }).ToList();
+
+        _dbContext.DataProfilingDrilldowns.AddRange(affectedRecords);
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    private async Task ProfileMaterialMaterialTypeDistinctCountAsync(Guid runId, CancellationToken cancellationToken)
+    {
+        var metricValue = await _dbContext.Materials
+            .Select(x => x.MaterialType)
+            .Distinct()
+            .CountAsync(cancellationToken);
+
+        var summary = new DataProfilingSummary
+        {
+            SummaryId = Guid.NewGuid(),
+            RunId = runId,
+            BusinessObjectName = "Material",
+            EntityName = "Material",
+            ColumnName = "MaterialType",
+            SummaryCode = "MATERIAL_MATERIALTYPE_DISTINCT_COUNT",
+            SummaryType = "DistinctCount",
+            Label = "Distinct material types",
+            Severity = "Info",
+            MetricValue = metricValue,
+            AffectedCount = metricValue,
+            HasDrilldown = false,
+            DrilldownKey = "MATERIAL_MATERIALTYPE_DISTINCT_COUNT",
+            CreatedOn = DateTimeOffset.UtcNow
+        };
+
+        _dbContext.DataProfilingSummaries.Add(summary);
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    private async Task ProfileMaterialProductHierarchyDistinctCountAsync(Guid runId, CancellationToken cancellationToken)
+    {
+        var metricValue = await _dbContext.Materials
+            .Select(x => x.ProductHierarchy)
+            .Distinct()
+            .CountAsync(cancellationToken);
+
+        var summary = new DataProfilingSummary
+        {
+            SummaryId = Guid.NewGuid(),
+            RunId = runId,
+            BusinessObjectName = "Material",
+            EntityName = "Material",
+            ColumnName = "ProductHierarchy",
+            SummaryCode = "MATERIAL_PRODUCTHIERARCHY_DISTINCT_COUNT",
+            SummaryType = "DistinctCount",
+            Label = "Distinct material product hierarchies",
+            Severity = "Info",
+            MetricValue = metricValue,
+            AffectedCount = metricValue,
+            HasDrilldown = false,
+            DrilldownKey = "MATERIAL_PRODUCTHIERARCHY_DISTINCT_COUNT",
+            CreatedOn = DateTimeOffset.UtcNow
+        };
+
+        _dbContext.DataProfilingSummaries.Add(summary);
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    private async Task ProfileMaterialGlobalTradeItemNumberDuplicateCountAsync(Guid runId, CancellationToken cancellationToken)
+    {
+        var duplicateValues = await _dbContext.Materials
+            .Where(x => x.GlobalTradeItemNumber != null && x.GlobalTradeItemNumber != "")
+            .GroupBy(x => x.GlobalTradeItemNumber)
+            .Where(group => group.Count() > 1)
+            .Select(group => group.Key)
+            .ToListAsync(cancellationToken);
+
+        var affectedSourceRecords = await _dbContext.Materials
+            .Where(x => duplicateValues.Contains(x.GlobalTradeItemNumber))
+            .ToListAsync(cancellationToken);
+
+        var summary = new DataProfilingSummary
+        {
+            SummaryId = Guid.NewGuid(),
+            RunId = runId,
+            BusinessObjectName = "Material",
+            EntityName = "Material",
+            ColumnName = "GlobalTradeItemNumber",
+            SummaryCode = "MATERIAL_GTIN_DUPLICATE_COUNT",
+            SummaryType = "DuplicateCount",
+            Label = "Duplicate material GTIN records",
+            Severity = "High",
+            MetricValue = affectedSourceRecords.Count,
+            AffectedCount = affectedSourceRecords.Count,
+            HasDrilldown = true,
+            DrilldownKey = "MATERIAL_GTIN_DUPLICATE_COUNT",
+            CreatedOn = DateTimeOffset.UtcNow
+        };
+
+        _dbContext.DataProfilingSummaries.Add(summary);
+
+        var affectedRecords = affectedSourceRecords.Select(x => new DataProfilingDrilldown
+        {
+            DrilldownId = Guid.NewGuid(),
+            RunId = runId,
+            SummaryId = summary.SummaryId,
+            BusinessObjectName = "Material",
+            EntityName = "Material",
+            RootRecordId = x.Id.ToString(),
+            RecordId = x.Id.ToString(),
+            ColumnName = "GlobalTradeItemNumber",
+            SummaryCode = "MATERIAL_GTIN_DUPLICATE_COUNT",
+            SummaryType = "DuplicateCount",
+            FieldValue = x.GlobalTradeItemNumber,
+            Message = "Duplicate material GTIN records",
+            RecordSnapshotJson = JsonSerializer.Serialize(new { x.Id, x.GlobalTradeItemNumber }),
+            CreatedOn = DateTimeOffset.UtcNow
+        }).ToList();
+
+        _dbContext.DataProfilingDrilldowns.AddRange(affectedRecords);
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    private async Task ProfileMaterialGrossWeightAverageValueAsync(Guid runId, CancellationToken cancellationToken)
+    {
+        var metricValue = await _dbContext.Materials
+            .Where(x => x.GrossWeight != null)
+            .Select(x => (decimal?)x.GrossWeight)
+            .AverageAsync(cancellationToken);
+
+        var summary = new DataProfilingSummary
+        {
+            SummaryId = Guid.NewGuid(),
+            RunId = runId,
+            BusinessObjectName = "Material",
+            EntityName = "Material",
+            ColumnName = "GrossWeight",
+            SummaryCode = "MATERIAL_AVERAGE_GROSS_WEIGHT",
+            SummaryType = "AverageValue",
+            Label = "Average material gross weight",
+            Severity = "Info",
+            MetricValue = metricValue ?? 0,
+            AffectedCount = 0,
+            HasDrilldown = false,
+            DrilldownKey = "MATERIAL_AVERAGE_GROSS_WEIGHT",
+            CreatedOn = DateTimeOffset.UtcNow
+        };
+
+        _dbContext.DataProfilingSummaries.Add(summary);
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    private async Task ProfileMaterialNetWeightAverageValueAsync(Guid runId, CancellationToken cancellationToken)
+    {
+        var metricValue = await _dbContext.Materials
+            .Where(x => x.NetWeight != null)
+            .Select(x => (decimal?)x.NetWeight)
+            .AverageAsync(cancellationToken);
+
+        var summary = new DataProfilingSummary
+        {
+            SummaryId = Guid.NewGuid(),
+            RunId = runId,
+            BusinessObjectName = "Material",
+            EntityName = "Material",
+            ColumnName = "NetWeight",
+            SummaryCode = "MATERIAL_AVERAGE_NET_WEIGHT",
+            SummaryType = "AverageValue",
+            Label = "Average material net weight",
+            Severity = "Info",
+            MetricValue = metricValue ?? 0,
+            AffectedCount = 0,
+            HasDrilldown = false,
+            DrilldownKey = "MATERIAL_AVERAGE_NET_WEIGHT",
+            CreatedOn = DateTimeOffset.UtcNow
+        };
+
+        _dbContext.DataProfilingSummaries.Add(summary);
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    private async Task ProfileMaterialPricePriceAverageValueAsync(Guid runId, CancellationToken cancellationToken)
+    {
+        var metricValue = await _dbContext.MaterialPrices
+            .Where(x => true)
+            .Select(x => (decimal?)x.Price)
+            .AverageAsync(cancellationToken);
+
+        var summary = new DataProfilingSummary
+        {
+            SummaryId = Guid.NewGuid(),
+            RunId = runId,
+            BusinessObjectName = "Material",
+            EntityName = "MaterialPrice",
+            ColumnName = "Price",
+            SummaryCode = "MATERIALPRICE_AVERAGE_PRICE",
+            SummaryType = "AverageValue",
+            Label = "Average material price",
+            Severity = "Info",
+            MetricValue = metricValue ?? 0,
+            AffectedCount = 0,
+            HasDrilldown = false,
+            DrilldownKey = "MATERIALPRICE_AVERAGE_PRICE",
+            CreatedOn = DateTimeOffset.UtcNow
+        };
+
+        _dbContext.DataProfilingSummaries.Add(summary);
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    private async Task ProfileMaterialPricePriceMinValueAsync(Guid runId, CancellationToken cancellationToken)
+    {
+        var metricValue = await _dbContext.MaterialPrices
+            .Where(x => true)
+            .Select(x => (decimal?)x.Price)
+            .MinAsync(cancellationToken);
+
+        var summary = new DataProfilingSummary
+        {
+            SummaryId = Guid.NewGuid(),
+            RunId = runId,
+            BusinessObjectName = "Material",
+            EntityName = "MaterialPrice",
+            ColumnName = "Price",
+            SummaryCode = "MATERIALPRICE_MIN_PRICE",
+            SummaryType = "MinValue",
+            Label = "Minimum material price",
+            Severity = "Info",
+            MetricValue = metricValue ?? 0,
+            AffectedCount = 0,
+            HasDrilldown = false,
+            DrilldownKey = "MATERIALPRICE_MIN_PRICE",
+            CreatedOn = DateTimeOffset.UtcNow
+        };
+
+        _dbContext.DataProfilingSummaries.Add(summary);
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    private async Task ProfileMaterialPricePriceMaxValueAsync(Guid runId, CancellationToken cancellationToken)
+    {
+        var metricValue = await _dbContext.MaterialPrices
+            .Where(x => true)
+            .Select(x => (decimal?)x.Price)
+            .MaxAsync(cancellationToken);
+
+        var summary = new DataProfilingSummary
+        {
+            SummaryId = Guid.NewGuid(),
+            RunId = runId,
+            BusinessObjectName = "Material",
+            EntityName = "MaterialPrice",
+            ColumnName = "Price",
+            SummaryCode = "MATERIALPRICE_MAX_PRICE",
+            SummaryType = "MaxValue",
+            Label = "Maximum material price",
+            Severity = "Info",
+            MetricValue = metricValue ?? 0,
+            AffectedCount = 0,
+            HasDrilldown = false,
+            DrilldownKey = "MATERIALPRICE_MAX_PRICE",
+            CreatedOn = DateTimeOffset.UtcNow
+        };
+
+        _dbContext.DataProfilingSummaries.Add(summary);
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    private async Task ProfileMaterialPlantReorderPointAverageValueAsync(Guid runId, CancellationToken cancellationToken)
+    {
+        var metricValue = await _dbContext.MaterialPlants
+            .Where(x => x.ReorderPoint != null)
+            .Select(x => (decimal?)x.ReorderPoint)
+            .AverageAsync(cancellationToken);
+
+        var summary = new DataProfilingSummary
+        {
+            SummaryId = Guid.NewGuid(),
+            RunId = runId,
+            BusinessObjectName = "Material",
+            EntityName = "MaterialPlant",
+            ColumnName = "ReorderPoint",
+            SummaryCode = "MATERIALPLANT_AVERAGE_REORDER_POINT",
+            SummaryType = "AverageValue",
+            Label = "Average material reorder point",
+            Severity = "Info",
+            MetricValue = metricValue ?? 0,
+            AffectedCount = 0,
+            HasDrilldown = false,
+            DrilldownKey = "MATERIALPLANT_AVERAGE_REORDER_POINT",
+            CreatedOn = DateTimeOffset.UtcNow
+        };
+
+        _dbContext.DataProfilingSummaries.Add(summary);
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    private async Task ProfileMaterialVendorMinimumOrderQuantityAverageValueAsync(Guid runId, CancellationToken cancellationToken)
+    {
+        var metricValue = await _dbContext.MaterialVendors
+            .Where(x => x.MinimumOrderQuantity != null)
+            .Select(x => (decimal?)x.MinimumOrderQuantity)
+            .AverageAsync(cancellationToken);
+
+        var summary = new DataProfilingSummary
+        {
+            SummaryId = Guid.NewGuid(),
+            RunId = runId,
+            BusinessObjectName = "Material",
+            EntityName = "MaterialVendor",
+            ColumnName = "MinimumOrderQuantity",
+            SummaryCode = "MATERIALVENDOR_AVERAGE_MINIMUM_ORDER_QUANTITY",
+            SummaryType = "AverageValue",
+            Label = "Average material vendor minimum order quantity",
+            Severity = "Info",
+            MetricValue = metricValue ?? 0,
+            AffectedCount = 0,
+            HasDrilldown = false,
+            DrilldownKey = "MATERIALVENDOR_AVERAGE_MINIMUM_ORDER_QUANTITY",
+            CreatedOn = DateTimeOffset.UtcNow
+        };
+
+        _dbContext.DataProfilingSummaries.Add(summary);
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    private async Task ProfileMaterialForecastConfidencePercentAverageValueAsync(Guid runId, CancellationToken cancellationToken)
+    {
+        var metricValue = await _dbContext.MaterialForecasts
+            .Where(x => x.ConfidencePercent != null)
+            .Select(x => (decimal?)x.ConfidencePercent)
+            .AverageAsync(cancellationToken);
+
+        var summary = new DataProfilingSummary
+        {
+            SummaryId = Guid.NewGuid(),
+            RunId = runId,
+            BusinessObjectName = "Material",
+            EntityName = "MaterialForecast",
+            ColumnName = "ConfidencePercent",
+            SummaryCode = "MATERIALFORECAST_AVERAGE_CONFIDENCE_PERCENT",
+            SummaryType = "AverageValue",
+            Label = "Average material forecast confidence percent",
+            Severity = "Info",
+            MetricValue = metricValue ?? 0,
+            AffectedCount = 0,
+            HasDrilldown = false,
+            DrilldownKey = "MATERIALFORECAST_AVERAGE_CONFIDENCE_PERCENT",
+            CreatedOn = DateTimeOffset.UtcNow
+        };
+
+        _dbContext.DataProfilingSummaries.Add(summary);
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    private async Task ProfileMaterialBarcodeBarcodeValueDuplicateCountAsync(Guid runId, CancellationToken cancellationToken)
+    {
+        var duplicateValues = await _dbContext.MaterialBarcodes
+            .Where(x => x.BarcodeValue != null && x.BarcodeValue != "")
+            .GroupBy(x => x.BarcodeValue)
+            .Where(group => group.Count() > 1)
+            .Select(group => group.Key)
+            .ToListAsync(cancellationToken);
+
+        var affectedSourceRecords = await _dbContext.MaterialBarcodes
+            .Where(x => duplicateValues.Contains(x.BarcodeValue))
+            .ToListAsync(cancellationToken);
+
+        var summary = new DataProfilingSummary
+        {
+            SummaryId = Guid.NewGuid(),
+            RunId = runId,
+            BusinessObjectName = "Material",
+            EntityName = "MaterialBarcode",
+            ColumnName = "BarcodeValue",
+            SummaryCode = "MATERIALBARCODE_DUPLICATE_COUNT",
+            SummaryType = "DuplicateCount",
+            Label = "Duplicate material barcode records",
+            Severity = "High",
+            MetricValue = affectedSourceRecords.Count,
+            AffectedCount = affectedSourceRecords.Count,
+            HasDrilldown = true,
+            DrilldownKey = "MATERIALBARCODE_DUPLICATE_COUNT",
+            CreatedOn = DateTimeOffset.UtcNow
+        };
+
+        _dbContext.DataProfilingSummaries.Add(summary);
+
+        var affectedRecords = affectedSourceRecords.Select(x => new DataProfilingDrilldown
+        {
+            DrilldownId = Guid.NewGuid(),
+            RunId = runId,
+            SummaryId = summary.SummaryId,
+            BusinessObjectName = "Material",
+            EntityName = "MaterialBarcode",
+            RootRecordId = x.MaterialId.ToString(),
+            RecordId = x.Id.ToString(),
+            ColumnName = "BarcodeValue",
+            SummaryCode = "MATERIALBARCODE_DUPLICATE_COUNT",
+            SummaryType = "DuplicateCount",
+            FieldValue = x.BarcodeValue,
+            Message = "Duplicate material barcode records",
             RecordSnapshotJson = JsonSerializer.Serialize(new { x.Id, x.MaterialId, x.BarcodeValue }),
             CreatedOn = DateTimeOffset.UtcNow
         }).ToList();

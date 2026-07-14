@@ -52,6 +52,18 @@ public sealed class CustomerProfiler(IAnalysisDbContext dbContext)
         await ProfileCustomerAttachmentDocumentTypeNullOrEmptyCountAsync(runId, cancellationToken);
         await ProfileCustomerAttachmentFileNameNullOrEmptyCountAsync(runId, cancellationToken);
         await ProfileCustomerAttachmentStoragePathNullOrEmptyCountAsync(runId, cancellationToken);
+        await ProfileCustomerCustomerTypeDistinctCountAsync(runId, cancellationToken);
+        await ProfileCustomerRiskCategoryDistinctCountAsync(runId, cancellationToken);
+        await ProfileCustomerEmailDuplicateCountAsync(runId, cancellationToken);
+        await ProfileCustomerRegistrationNumberDuplicateCountAsync(runId, cancellationToken);
+        await ProfileCustomerAddressCityDistinctCountAsync(runId, cancellationToken);
+        await ProfileCustomerAddressPostalCodeDistinctCountAsync(runId, cancellationToken);
+        await ProfileCustomerContactEmailDuplicateCountAsync(runId, cancellationToken);
+        await ProfileCustomerSalesAreaCreditLimitAverageValueAsync(runId, cancellationToken);
+        await ProfileCustomerSalesAreaCreditLimitMaxValueAsync(runId, cancellationToken);
+        await ProfileCustomerCreditProfileCreditExposureAverageValueAsync(runId, cancellationToken);
+        await ProfileCustomerCreditProfileCreditExposureMaxValueAsync(runId, cancellationToken);
+        await ProfileCustomerClassificationClassificationTypeDistinctCountAsync(runId, cancellationToken);
     }
 
     private async Task ProfileCustomerRecordsTotalRootObjectsAsync(Guid runId, CancellationToken cancellationToken)
@@ -1891,6 +1903,444 @@ public sealed class CustomerProfiler(IAnalysisDbContext dbContext)
         }).ToList();
 
         _dbContext.DataProfilingDrilldowns.AddRange(affectedRecords);
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    private async Task ProfileCustomerCustomerTypeDistinctCountAsync(Guid runId, CancellationToken cancellationToken)
+    {
+        var metricValue = await _dbContext.Customers
+            .Select(x => x.CustomerType)
+            .Distinct()
+            .CountAsync(cancellationToken);
+
+        var summary = new DataProfilingSummary
+        {
+            SummaryId = Guid.NewGuid(),
+            RunId = runId,
+            BusinessObjectName = "Customer",
+            EntityName = "Customer",
+            ColumnName = "CustomerType",
+            SummaryCode = "CUSTOMER_CUSTOMERTYPE_DISTINCT_COUNT",
+            SummaryType = "DistinctCount",
+            Label = "Distinct customer types",
+            Severity = "Info",
+            MetricValue = metricValue,
+            AffectedCount = metricValue,
+            HasDrilldown = false,
+            DrilldownKey = "CUSTOMER_CUSTOMERTYPE_DISTINCT_COUNT",
+            CreatedOn = DateTimeOffset.UtcNow
+        };
+
+        _dbContext.DataProfilingSummaries.Add(summary);
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    private async Task ProfileCustomerRiskCategoryDistinctCountAsync(Guid runId, CancellationToken cancellationToken)
+    {
+        var metricValue = await _dbContext.Customers
+            .Select(x => x.RiskCategory)
+            .Distinct()
+            .CountAsync(cancellationToken);
+
+        var summary = new DataProfilingSummary
+        {
+            SummaryId = Guid.NewGuid(),
+            RunId = runId,
+            BusinessObjectName = "Customer",
+            EntityName = "Customer",
+            ColumnName = "RiskCategory",
+            SummaryCode = "CUSTOMER_RISKCATEGORY_DISTINCT_COUNT",
+            SummaryType = "DistinctCount",
+            Label = "Distinct customer risk categories",
+            Severity = "Info",
+            MetricValue = metricValue,
+            AffectedCount = metricValue,
+            HasDrilldown = false,
+            DrilldownKey = "CUSTOMER_RISKCATEGORY_DISTINCT_COUNT",
+            CreatedOn = DateTimeOffset.UtcNow
+        };
+
+        _dbContext.DataProfilingSummaries.Add(summary);
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    private async Task ProfileCustomerEmailDuplicateCountAsync(Guid runId, CancellationToken cancellationToken)
+    {
+        var duplicateValues = await _dbContext.Customers
+            .Where(x => x.Email != null && x.Email != "")
+            .GroupBy(x => x.Email)
+            .Where(group => group.Count() > 1)
+            .Select(group => group.Key)
+            .ToListAsync(cancellationToken);
+
+        var affectedSourceRecords = await _dbContext.Customers
+            .Where(x => duplicateValues.Contains(x.Email))
+            .ToListAsync(cancellationToken);
+
+        var summary = new DataProfilingSummary
+        {
+            SummaryId = Guid.NewGuid(),
+            RunId = runId,
+            BusinessObjectName = "Customer",
+            EntityName = "Customer",
+            ColumnName = "Email",
+            SummaryCode = "CUSTOMER_EMAIL_DUPLICATE_COUNT",
+            SummaryType = "DuplicateCount",
+            Label = "Duplicate customer email records",
+            Severity = "Medium",
+            MetricValue = affectedSourceRecords.Count,
+            AffectedCount = affectedSourceRecords.Count,
+            HasDrilldown = true,
+            DrilldownKey = "CUSTOMER_EMAIL_DUPLICATE_COUNT",
+            CreatedOn = DateTimeOffset.UtcNow
+        };
+
+        _dbContext.DataProfilingSummaries.Add(summary);
+
+        var affectedRecords = affectedSourceRecords.Select(x => new DataProfilingDrilldown
+        {
+            DrilldownId = Guid.NewGuid(),
+            RunId = runId,
+            SummaryId = summary.SummaryId,
+            BusinessObjectName = "Customer",
+            EntityName = "Customer",
+            RootRecordId = x.Id.ToString(),
+            RecordId = x.Id.ToString(),
+            ColumnName = "Email",
+            SummaryCode = "CUSTOMER_EMAIL_DUPLICATE_COUNT",
+            SummaryType = "DuplicateCount",
+            FieldValue = x.Email,
+            Message = "Duplicate customer email records",
+            RecordSnapshotJson = JsonSerializer.Serialize(new { x.Id, x.Email }),
+            CreatedOn = DateTimeOffset.UtcNow
+        }).ToList();
+
+        _dbContext.DataProfilingDrilldowns.AddRange(affectedRecords);
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    private async Task ProfileCustomerRegistrationNumberDuplicateCountAsync(Guid runId, CancellationToken cancellationToken)
+    {
+        var duplicateValues = await _dbContext.Customers
+            .Where(x => x.RegistrationNumber != null && x.RegistrationNumber != "")
+            .GroupBy(x => x.RegistrationNumber)
+            .Where(group => group.Count() > 1)
+            .Select(group => group.Key)
+            .ToListAsync(cancellationToken);
+
+        var affectedSourceRecords = await _dbContext.Customers
+            .Where(x => duplicateValues.Contains(x.RegistrationNumber))
+            .ToListAsync(cancellationToken);
+
+        var summary = new DataProfilingSummary
+        {
+            SummaryId = Guid.NewGuid(),
+            RunId = runId,
+            BusinessObjectName = "Customer",
+            EntityName = "Customer",
+            ColumnName = "RegistrationNumber",
+            SummaryCode = "CUSTOMER_REGISTRATIONNUMBER_DUPLICATE_COUNT",
+            SummaryType = "DuplicateCount",
+            Label = "Duplicate customer registration numbers",
+            Severity = "High",
+            MetricValue = affectedSourceRecords.Count,
+            AffectedCount = affectedSourceRecords.Count,
+            HasDrilldown = true,
+            DrilldownKey = "CUSTOMER_REGISTRATIONNUMBER_DUPLICATE_COUNT",
+            CreatedOn = DateTimeOffset.UtcNow
+        };
+
+        _dbContext.DataProfilingSummaries.Add(summary);
+
+        var affectedRecords = affectedSourceRecords.Select(x => new DataProfilingDrilldown
+        {
+            DrilldownId = Guid.NewGuid(),
+            RunId = runId,
+            SummaryId = summary.SummaryId,
+            BusinessObjectName = "Customer",
+            EntityName = "Customer",
+            RootRecordId = x.Id.ToString(),
+            RecordId = x.Id.ToString(),
+            ColumnName = "RegistrationNumber",
+            SummaryCode = "CUSTOMER_REGISTRATIONNUMBER_DUPLICATE_COUNT",
+            SummaryType = "DuplicateCount",
+            FieldValue = x.RegistrationNumber,
+            Message = "Duplicate customer registration numbers",
+            RecordSnapshotJson = JsonSerializer.Serialize(new { x.Id, x.RegistrationNumber }),
+            CreatedOn = DateTimeOffset.UtcNow
+        }).ToList();
+
+        _dbContext.DataProfilingDrilldowns.AddRange(affectedRecords);
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    private async Task ProfileCustomerAddressCityDistinctCountAsync(Guid runId, CancellationToken cancellationToken)
+    {
+        var metricValue = await _dbContext.CustomerAddresses
+            .Select(x => x.City)
+            .Distinct()
+            .CountAsync(cancellationToken);
+
+        var summary = new DataProfilingSummary
+        {
+            SummaryId = Guid.NewGuid(),
+            RunId = runId,
+            BusinessObjectName = "Customer",
+            EntityName = "CustomerAddress",
+            ColumnName = "City",
+            SummaryCode = "CUSTOMERADDRESS_CITY_DISTINCT_COUNT",
+            SummaryType = "DistinctCount",
+            Label = "Distinct customer address cities",
+            Severity = "Info",
+            MetricValue = metricValue,
+            AffectedCount = metricValue,
+            HasDrilldown = false,
+            DrilldownKey = "CUSTOMERADDRESS_CITY_DISTINCT_COUNT",
+            CreatedOn = DateTimeOffset.UtcNow
+        };
+
+        _dbContext.DataProfilingSummaries.Add(summary);
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    private async Task ProfileCustomerAddressPostalCodeDistinctCountAsync(Guid runId, CancellationToken cancellationToken)
+    {
+        var metricValue = await _dbContext.CustomerAddresses
+            .Select(x => x.PostalCode)
+            .Distinct()
+            .CountAsync(cancellationToken);
+
+        var summary = new DataProfilingSummary
+        {
+            SummaryId = Guid.NewGuid(),
+            RunId = runId,
+            BusinessObjectName = "Customer",
+            EntityName = "CustomerAddress",
+            ColumnName = "PostalCode",
+            SummaryCode = "CUSTOMERADDRESS_POSTALCODE_DISTINCT_COUNT",
+            SummaryType = "DistinctCount",
+            Label = "Distinct customer postal codes",
+            Severity = "Info",
+            MetricValue = metricValue,
+            AffectedCount = metricValue,
+            HasDrilldown = false,
+            DrilldownKey = "CUSTOMERADDRESS_POSTALCODE_DISTINCT_COUNT",
+            CreatedOn = DateTimeOffset.UtcNow
+        };
+
+        _dbContext.DataProfilingSummaries.Add(summary);
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    private async Task ProfileCustomerContactEmailDuplicateCountAsync(Guid runId, CancellationToken cancellationToken)
+    {
+        var duplicateValues = await _dbContext.CustomerContacts
+            .Where(x => x.Email != null && x.Email != "")
+            .GroupBy(x => x.Email)
+            .Where(group => group.Count() > 1)
+            .Select(group => group.Key)
+            .ToListAsync(cancellationToken);
+
+        var affectedSourceRecords = await _dbContext.CustomerContacts
+            .Where(x => duplicateValues.Contains(x.Email))
+            .ToListAsync(cancellationToken);
+
+        var summary = new DataProfilingSummary
+        {
+            SummaryId = Guid.NewGuid(),
+            RunId = runId,
+            BusinessObjectName = "Customer",
+            EntityName = "CustomerContact",
+            ColumnName = "Email",
+            SummaryCode = "CUSTOMERCONTACT_EMAIL_DUPLICATE_COUNT",
+            SummaryType = "DuplicateCount",
+            Label = "Duplicate customer contact email records",
+            Severity = "Medium",
+            MetricValue = affectedSourceRecords.Count,
+            AffectedCount = affectedSourceRecords.Count,
+            HasDrilldown = true,
+            DrilldownKey = "CUSTOMERCONTACT_EMAIL_DUPLICATE_COUNT",
+            CreatedOn = DateTimeOffset.UtcNow
+        };
+
+        _dbContext.DataProfilingSummaries.Add(summary);
+
+        var affectedRecords = affectedSourceRecords.Select(x => new DataProfilingDrilldown
+        {
+            DrilldownId = Guid.NewGuid(),
+            RunId = runId,
+            SummaryId = summary.SummaryId,
+            BusinessObjectName = "Customer",
+            EntityName = "CustomerContact",
+            RootRecordId = x.CustomerId.ToString(),
+            RecordId = x.Id.ToString(),
+            ColumnName = "Email",
+            SummaryCode = "CUSTOMERCONTACT_EMAIL_DUPLICATE_COUNT",
+            SummaryType = "DuplicateCount",
+            FieldValue = x.Email,
+            Message = "Duplicate customer contact email records",
+            RecordSnapshotJson = JsonSerializer.Serialize(new { x.Id, x.CustomerId, x.Email }),
+            CreatedOn = DateTimeOffset.UtcNow
+        }).ToList();
+
+        _dbContext.DataProfilingDrilldowns.AddRange(affectedRecords);
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    private async Task ProfileCustomerSalesAreaCreditLimitAverageValueAsync(Guid runId, CancellationToken cancellationToken)
+    {
+        var metricValue = await _dbContext.CustomerSalesAreas
+            .Where(x => x.CreditLimit != null)
+            .Select(x => (decimal?)x.CreditLimit)
+            .AverageAsync(cancellationToken);
+
+        var summary = new DataProfilingSummary
+        {
+            SummaryId = Guid.NewGuid(),
+            RunId = runId,
+            BusinessObjectName = "Customer",
+            EntityName = "CustomerSalesArea",
+            ColumnName = "CreditLimit",
+            SummaryCode = "CUSTOMERSALESAREA_AVERAGE_CREDIT_LIMIT",
+            SummaryType = "AverageValue",
+            Label = "Average customer sales area credit limit",
+            Severity = "Info",
+            MetricValue = metricValue ?? 0,
+            AffectedCount = 0,
+            HasDrilldown = false,
+            DrilldownKey = "CUSTOMERSALESAREA_AVERAGE_CREDIT_LIMIT",
+            CreatedOn = DateTimeOffset.UtcNow
+        };
+
+        _dbContext.DataProfilingSummaries.Add(summary);
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    private async Task ProfileCustomerSalesAreaCreditLimitMaxValueAsync(Guid runId, CancellationToken cancellationToken)
+    {
+        var metricValue = await _dbContext.CustomerSalesAreas
+            .Where(x => x.CreditLimit != null)
+            .Select(x => (decimal?)x.CreditLimit)
+            .MaxAsync(cancellationToken);
+
+        var summary = new DataProfilingSummary
+        {
+            SummaryId = Guid.NewGuid(),
+            RunId = runId,
+            BusinessObjectName = "Customer",
+            EntityName = "CustomerSalesArea",
+            ColumnName = "CreditLimit",
+            SummaryCode = "CUSTOMERSALESAREA_MAX_CREDIT_LIMIT",
+            SummaryType = "MaxValue",
+            Label = "Maximum customer sales area credit limit",
+            Severity = "Info",
+            MetricValue = metricValue ?? 0,
+            AffectedCount = 0,
+            HasDrilldown = false,
+            DrilldownKey = "CUSTOMERSALESAREA_MAX_CREDIT_LIMIT",
+            CreatedOn = DateTimeOffset.UtcNow
+        };
+
+        _dbContext.DataProfilingSummaries.Add(summary);
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    private async Task ProfileCustomerCreditProfileCreditExposureAverageValueAsync(Guid runId, CancellationToken cancellationToken)
+    {
+        var metricValue = await _dbContext.CustomerCreditProfiles
+            .Where(x => x.CreditExposure != null)
+            .Select(x => (decimal?)x.CreditExposure)
+            .AverageAsync(cancellationToken);
+
+        var summary = new DataProfilingSummary
+        {
+            SummaryId = Guid.NewGuid(),
+            RunId = runId,
+            BusinessObjectName = "Customer",
+            EntityName = "CustomerCreditProfile",
+            ColumnName = "CreditExposure",
+            SummaryCode = "CUSTOMERCREDITPROFILE_AVERAGE_CREDIT_EXPOSURE",
+            SummaryType = "AverageValue",
+            Label = "Average customer credit exposure",
+            Severity = "Info",
+            MetricValue = metricValue ?? 0,
+            AffectedCount = 0,
+            HasDrilldown = false,
+            DrilldownKey = "CUSTOMERCREDITPROFILE_AVERAGE_CREDIT_EXPOSURE",
+            CreatedOn = DateTimeOffset.UtcNow
+        };
+
+        _dbContext.DataProfilingSummaries.Add(summary);
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    private async Task ProfileCustomerCreditProfileCreditExposureMaxValueAsync(Guid runId, CancellationToken cancellationToken)
+    {
+        var metricValue = await _dbContext.CustomerCreditProfiles
+            .Where(x => x.CreditExposure != null)
+            .Select(x => (decimal?)x.CreditExposure)
+            .MaxAsync(cancellationToken);
+
+        var summary = new DataProfilingSummary
+        {
+            SummaryId = Guid.NewGuid(),
+            RunId = runId,
+            BusinessObjectName = "Customer",
+            EntityName = "CustomerCreditProfile",
+            ColumnName = "CreditExposure",
+            SummaryCode = "CUSTOMERCREDITPROFILE_MAX_CREDIT_EXPOSURE",
+            SummaryType = "MaxValue",
+            Label = "Maximum customer credit exposure",
+            Severity = "Info",
+            MetricValue = metricValue ?? 0,
+            AffectedCount = 0,
+            HasDrilldown = false,
+            DrilldownKey = "CUSTOMERCREDITPROFILE_MAX_CREDIT_EXPOSURE",
+            CreatedOn = DateTimeOffset.UtcNow
+        };
+
+        _dbContext.DataProfilingSummaries.Add(summary);
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    private async Task ProfileCustomerClassificationClassificationTypeDistinctCountAsync(Guid runId, CancellationToken cancellationToken)
+    {
+        var metricValue = await _dbContext.CustomerClassifications
+            .Select(x => x.ClassificationType)
+            .Distinct()
+            .CountAsync(cancellationToken);
+
+        var summary = new DataProfilingSummary
+        {
+            SummaryId = Guid.NewGuid(),
+            RunId = runId,
+            BusinessObjectName = "Customer",
+            EntityName = "CustomerClassification",
+            ColumnName = "ClassificationType",
+            SummaryCode = "CUSTOMERCLASSIFICATION_TYPE_DISTINCT_COUNT",
+            SummaryType = "DistinctCount",
+            Label = "Distinct customer classification types",
+            Severity = "Info",
+            MetricValue = metricValue,
+            AffectedCount = metricValue,
+            HasDrilldown = false,
+            DrilldownKey = "CUSTOMERCLASSIFICATION_TYPE_DISTINCT_COUNT",
+            CreatedOn = DateTimeOffset.UtcNow
+        };
+
+        _dbContext.DataProfilingSummaries.Add(summary);
 
         await _dbContext.SaveChangesAsync(cancellationToken);
     }
