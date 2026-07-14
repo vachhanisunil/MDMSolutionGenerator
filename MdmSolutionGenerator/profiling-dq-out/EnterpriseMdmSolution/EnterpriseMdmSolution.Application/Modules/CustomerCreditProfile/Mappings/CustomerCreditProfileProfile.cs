@@ -10,6 +10,7 @@ public sealed class CustomerCreditProfileProfile : Profile
     {
         CreateMap<Entity, CustomerCreditProfileDto>();
         CreateMap<CreateCustomerCreditProfileDto, Entity>();
-        CreateMap<UpdateCustomerCreditProfileDto, Entity>();
+        CreateMap<UpdateCustomerCreditProfileDto, Entity>()
+            .ForMember(x => x.Id, options => options.Ignore());
     }
 }

@@ -10,6 +10,7 @@ public sealed class CustomerTaxProfile : Profile
     {
         CreateMap<Entity, CustomerTaxDto>();
         CreateMap<CreateCustomerTaxDto, Entity>();
-        CreateMap<UpdateCustomerTaxDto, Entity>();
+        CreateMap<UpdateCustomerTaxDto, Entity>()
+            .ForMember(x => x.Id, options => options.Ignore());
     }
 }

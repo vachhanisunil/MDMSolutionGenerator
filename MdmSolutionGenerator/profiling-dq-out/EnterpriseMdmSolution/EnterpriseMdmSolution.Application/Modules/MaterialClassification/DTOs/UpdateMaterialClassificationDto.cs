@@ -6,4 +6,6 @@ public sealed class UpdateMaterialClassificationDto
     public string ClassType { get; init; } = string.Empty;
     public string ClassValue { get; init; } = string.Empty;
     public string? CharacteristicName { get; init; }
+
+    public int Id { get; init; }
 }

@@ -8,4 +8,6 @@ public sealed class UpdateMaterialQualityInspectionDto
     public bool QualityCertificateRequired { get; init; }
     public decimal? SampleSize { get; init; }
     public string? AcceptanceCriteria { get; init; }
+
+    public int Id { get; init; }
 }

@@ -9,4 +9,6 @@ public sealed class UpdateVendorTaxDto
     public DateTime? ValidFrom { get; init; }
     public DateTime? ValidTo { get; init; }
     public bool? IsTaxWithholdingApplicable { get; init; }
+
+    public int Id { get; init; }
 }

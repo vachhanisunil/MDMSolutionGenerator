@@ -12,4 +12,6 @@ public sealed class UpdateVendorAddressDto
     public int CountryId { get; init; }
     public string? Region { get; init; }
     public bool IsDefault { get; init; }
+
+    public int Id { get; init; }
 }

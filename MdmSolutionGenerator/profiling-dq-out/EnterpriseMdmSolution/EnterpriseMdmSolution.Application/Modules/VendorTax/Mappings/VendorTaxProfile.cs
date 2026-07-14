@@ -10,6 +10,7 @@ public sealed class VendorTaxProfile : Profile
     {
         CreateMap<Entity, VendorTaxDto>();
         CreateMap<CreateVendorTaxDto, Entity>();
-        CreateMap<UpdateVendorTaxDto, Entity>();
+        CreateMap<UpdateVendorTaxDto, Entity>()
+            .ForMember(x => x.Id, options => options.Ignore());
     }
 }

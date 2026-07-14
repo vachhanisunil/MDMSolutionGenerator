@@ -8,4 +8,6 @@ public sealed class UpdateMaterialUOMDto
     public decimal ConversionDenominator { get; init; }
     public string? Barcode { get; init; }
     public bool IsBaseUnit { get; init; }
+
+    public int Id { get; init; }
 }

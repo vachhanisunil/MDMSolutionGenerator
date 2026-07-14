@@ -10,6 +10,7 @@ public sealed class MaterialForecastProfile : Profile
     {
         CreateMap<Entity, MaterialForecastDto>();
         CreateMap<CreateMaterialForecastDto, Entity>();
-        CreateMap<UpdateMaterialForecastDto, Entity>();
+        CreateMap<UpdateMaterialForecastDto, Entity>()
+            .ForMember(x => x.Id, options => options.Ignore());
     }
 }

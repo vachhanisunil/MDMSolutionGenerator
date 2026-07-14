@@ -10,6 +10,7 @@ public sealed class StorageLocationProfile : Profile
     {
         CreateMap<Entity, StorageLocationDto>();
         CreateMap<CreateStorageLocationDto, Entity>();
-        CreateMap<UpdateStorageLocationDto, Entity>();
+        CreateMap<UpdateStorageLocationDto, Entity>()
+            .ForMember(x => x.Id, options => options.Ignore());
     }
 }

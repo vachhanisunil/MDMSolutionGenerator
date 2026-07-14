@@ -10,6 +10,7 @@ public sealed class CustomerAddressProfile : Profile
     {
         CreateMap<Entity, CustomerAddressDto>();
         CreateMap<CreateCustomerAddressDto, Entity>();
-        CreateMap<UpdateCustomerAddressDto, Entity>();
+        CreateMap<UpdateCustomerAddressDto, Entity>()
+            .ForMember(x => x.Id, options => options.Ignore());
     }
 }

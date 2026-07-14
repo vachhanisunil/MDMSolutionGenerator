@@ -10,6 +10,7 @@ public sealed class MaterialStorageProfile : Profile
     {
         CreateMap<Entity, MaterialStorageDto>();
         CreateMap<CreateMaterialStorageDto, Entity>();
-        CreateMap<UpdateMaterialStorageDto, Entity>();
+        CreateMap<UpdateMaterialStorageDto, Entity>()
+            .ForMember(x => x.Id, options => options.Ignore());
     }
 }

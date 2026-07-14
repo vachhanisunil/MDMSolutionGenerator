@@ -10,6 +10,7 @@ public sealed class CountryProfile : Profile
     {
         CreateMap<Entity, CountryDto>();
         CreateMap<CreateCountryDto, Entity>();
-        CreateMap<UpdateCountryDto, Entity>();
+        CreateMap<UpdateCountryDto, Entity>()
+            .ForMember(x => x.Id, options => options.Ignore());
     }
 }

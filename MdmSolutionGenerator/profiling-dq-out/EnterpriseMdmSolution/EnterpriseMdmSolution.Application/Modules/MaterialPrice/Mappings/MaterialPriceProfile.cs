@@ -10,6 +10,7 @@ public sealed class MaterialPriceProfile : Profile
     {
         CreateMap<Entity, MaterialPriceDto>();
         CreateMap<CreateMaterialPriceDto, Entity>();
-        CreateMap<UpdateMaterialPriceDto, Entity>();
+        CreateMap<UpdateMaterialPriceDto, Entity>()
+            .ForMember(x => x.Id, options => options.Ignore());
     }
 }

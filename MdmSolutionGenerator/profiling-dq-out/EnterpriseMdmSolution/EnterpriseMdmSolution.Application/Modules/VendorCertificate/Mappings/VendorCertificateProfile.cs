@@ -10,6 +10,7 @@ public sealed class VendorCertificateProfile : Profile
     {
         CreateMap<Entity, VendorCertificateDto>();
         CreateMap<CreateVendorCertificateDto, Entity>();
-        CreateMap<UpdateVendorCertificateDto, Entity>();
+        CreateMap<UpdateVendorCertificateDto, Entity>()
+            .ForMember(x => x.Id, options => options.Ignore());
     }
 }

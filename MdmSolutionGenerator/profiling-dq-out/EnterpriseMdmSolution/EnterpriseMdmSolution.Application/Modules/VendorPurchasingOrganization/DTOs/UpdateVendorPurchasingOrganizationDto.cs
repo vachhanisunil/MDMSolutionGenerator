@@ -10,4 +10,6 @@ public sealed class UpdateVendorPurchasingOrganizationDto
     public string? PurchaseGroup { get; init; }
     public decimal? MinimumOrderValue { get; init; }
     public bool IsBlockedForPurchasing { get; init; }
+
+    public int Id { get; init; }
 }

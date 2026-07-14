@@ -14,4 +14,6 @@ public sealed class UpdateCustomerAddressDto
     public decimal? Latitude { get; init; }
     public decimal? Longitude { get; init; }
     public bool IsDefault { get; init; }
+
+    public int Id { get; init; }
 }

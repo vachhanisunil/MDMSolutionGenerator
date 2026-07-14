@@ -5,4 +5,6 @@ public sealed class UpdatePurchasingOrganizationDto
     public string PurchasingOrganizationCode { get; init; } = string.Empty;
     public string PurchasingOrganizationName { get; init; } = string.Empty;
     public int CurrencyId { get; init; }
+
+    public int Id { get; init; }
 }

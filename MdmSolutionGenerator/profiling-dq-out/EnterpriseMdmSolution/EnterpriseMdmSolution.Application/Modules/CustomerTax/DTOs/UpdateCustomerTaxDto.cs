@@ -9,4 +9,6 @@ public sealed class UpdateCustomerTaxDto
     public DateTime? ValidFrom { get; init; }
     public DateTime? ValidTo { get; init; }
     public bool IsExempt { get; init; }
+
+    public int Id { get; init; }
 }

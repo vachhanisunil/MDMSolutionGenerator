@@ -41,6 +41,7 @@ internal sealed class ProfilingCodeTemplateBuilder(string rootNamespace)
         var method = ProfileMethodName(intent);
         var fieldValue = FieldValueExpression(intent.FieldName, intent.IsFieldString);
         var whereClause = _linq.BuildWhereClause(intent);
+        var drilldownBlock = intent.StoreDrilldown ? BuildDrilldownBlock(intent, fieldValue) : "";
 
         return $$"""
     private async Task {{method}}Async(Guid runId, CancellationToken cancellationToken)
@@ -69,35 +70,36 @@ internal sealed class ProfilingCodeTemplateBuilder(string rootNamespace)
         };
 
         _dbContext.DataProfilingSummaries.Add(summary);
-
-        if ({{Bool(intent.StoreDrilldown)}})
-        {
-            var affectedRecords = affectedSourceRecords.Select(x => new DataProfilingDrilldown
-            {
-                DrilldownId = Guid.NewGuid(),
-                RunId = runId,
-                SummaryId = summary.SummaryId,
-                BusinessObjectName = "{{Escape(intent.BusinessObjectName)}}",
-                EntityName = "{{Escape(intent.EntityName)}}",
-                RootRecordId = {{RootRecordIdExpression(intent)}},
-                RecordId = x.{{intent.PrimaryKey}}.ToString(),
-                ColumnName = "{{Escape(intent.ColumnName)}}",
-                SummaryCode = "{{Escape(intent.SummaryCode)}}",
-                SummaryType = "{{Escape(intent.SummaryType)}}",
-                FieldValue = {{fieldValue}},
-                Message = "{{Escape(intent.Label)}}",
-                RecordSnapshotJson = JsonSerializer.Serialize(new { {{SnapshotFields(intent)}} }),
-                CreatedOn = DateTimeOffset.UtcNow
-            }).ToList();
-
-            _dbContext.DataProfilingDrilldowns.AddRange(affectedRecords);
-        }
+{{drilldownBlock}}
 
         await _dbContext.SaveChangesAsync(cancellationToken);
     }
 
 """;
     }
+
+    private static string BuildDrilldownBlock(ProfilingIntent intent, string fieldValue) => $$"""
+
+        var affectedRecords = affectedSourceRecords.Select(x => new DataProfilingDrilldown
+        {
+            DrilldownId = Guid.NewGuid(),
+            RunId = runId,
+            SummaryId = summary.SummaryId,
+            BusinessObjectName = "{{Escape(intent.BusinessObjectName)}}",
+            EntityName = "{{Escape(intent.EntityName)}}",
+            RootRecordId = {{RootRecordIdExpression(intent)}},
+            RecordId = x.{{intent.PrimaryKey}}.ToString(),
+            ColumnName = "{{Escape(intent.ColumnName)}}",
+            SummaryCode = "{{Escape(intent.SummaryCode)}}",
+            SummaryType = "{{Escape(intent.SummaryType)}}",
+            FieldValue = {{fieldValue}},
+            Message = "{{Escape(intent.Label)}}",
+            RecordSnapshotJson = JsonSerializer.Serialize(new { {{SnapshotFields(intent)}} }),
+            CreatedOn = DateTimeOffset.UtcNow
+        }).ToList();
+
+        _dbContext.DataProfilingDrilldowns.AddRange(affectedRecords);
+""";
 
     private static string ProfileMethodName(ProfilingIntent intent)
         => $"Profile{Sanitize(intent.EntityName)}{Sanitize(intent.FieldName)}{Sanitize(intent.SummaryType)}";

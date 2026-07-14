@@ -7,4 +7,6 @@ public sealed class UpdateCustomerPartnerFunctionDto
     public int? PartnerCustomerId { get; init; }
     public string? Description { get; init; }
     public bool IsDefault { get; init; }
+
+    public int Id { get; init; }
 }

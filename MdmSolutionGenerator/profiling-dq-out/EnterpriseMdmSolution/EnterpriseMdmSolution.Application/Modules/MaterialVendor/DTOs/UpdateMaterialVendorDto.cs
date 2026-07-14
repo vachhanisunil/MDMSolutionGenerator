@@ -9,4 +9,6 @@ public sealed class UpdateMaterialVendorDto
     public decimal? MinimumOrderQuantity { get; init; }
     public int? PurchaseUnitOfMeasureId { get; init; }
     public bool IsPreferred { get; init; }
+
+    public int Id { get; init; }
 }

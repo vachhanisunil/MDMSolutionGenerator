@@ -9,4 +9,6 @@ public sealed class UpdateVendorEvaluationDto
     public decimal? CostScore { get; init; }
     public decimal? OverallScore { get; init; }
     public DateTime EvaluationDate { get; init; }
+
+    public int Id { get; init; }
 }

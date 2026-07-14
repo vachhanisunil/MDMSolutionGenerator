@@ -11,6 +11,7 @@ public sealed class VendorProfile : Profile
         CreateMap<Entity, VendorDto>();
         CreateMap<CreateVendorDto, Entity>();
         CreateMap<UpdateVendorDto, Entity>()
+            .ForMember(x => x.Id, options => options.Ignore())
             .ForMember(x => x.VendorAddresses, options => options.Ignore())
             .ForMember(x => x.VendorContacts, options => options.Ignore())
             .ForMember(x => x.VendorBankAccounts, options => options.Ignore())

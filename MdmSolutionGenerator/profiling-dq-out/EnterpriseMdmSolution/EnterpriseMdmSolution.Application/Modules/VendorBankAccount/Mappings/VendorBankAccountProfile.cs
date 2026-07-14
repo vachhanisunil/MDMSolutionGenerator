@@ -10,6 +10,7 @@ public sealed class VendorBankAccountProfile : Profile
     {
         CreateMap<Entity, VendorBankAccountDto>();
         CreateMap<CreateVendorBankAccountDto, Entity>();
-        CreateMap<UpdateVendorBankAccountDto, Entity>();
+        CreateMap<UpdateVendorBankAccountDto, Entity>()
+            .ForMember(x => x.Id, options => options.Ignore());
     }
 }

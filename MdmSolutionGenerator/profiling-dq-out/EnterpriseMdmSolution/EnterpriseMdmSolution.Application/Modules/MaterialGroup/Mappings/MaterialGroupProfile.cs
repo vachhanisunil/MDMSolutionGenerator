@@ -10,6 +10,7 @@ public sealed class MaterialGroupProfile : Profile
     {
         CreateMap<Entity, MaterialGroupDto>();
         CreateMap<CreateMaterialGroupDto, Entity>();
-        CreateMap<UpdateMaterialGroupDto, Entity>();
+        CreateMap<UpdateMaterialGroupDto, Entity>()
+            .ForMember(x => x.Id, options => options.Ignore());
     }
 }

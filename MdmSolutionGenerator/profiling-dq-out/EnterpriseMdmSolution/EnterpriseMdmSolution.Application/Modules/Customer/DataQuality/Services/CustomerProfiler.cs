@@ -11,31 +11,112 @@ public sealed class CustomerProfiler(IAnalysisDbContext dbContext)
 
     public async Task ExecuteAsync(Guid runId, CancellationToken cancellationToken)
     {
-        await ProfileCustomerCustomerNumberNullCountAsync(runId, cancellationToken);
-        await ProfileCustomerCustomerNameNullCountAsync(runId, cancellationToken);
-        await ProfileCustomerCustomerTypeNullCountAsync(runId, cancellationToken);
-        await ProfileCustomerAddressAddressTypeNullCountAsync(runId, cancellationToken);
-        await ProfileCustomerAddressAddressLine1NullCountAsync(runId, cancellationToken);
-        await ProfileCustomerAddressCityNullCountAsync(runId, cancellationToken);
-        await ProfileCustomerAddressPostalCodeNullCountAsync(runId, cancellationToken);
-        await ProfileCustomerContactFirstNameNullCountAsync(runId, cancellationToken);
-        await ProfileCustomerContactLastNameNullCountAsync(runId, cancellationToken);
-        await ProfileCustomerBankAccountBankNameNullCountAsync(runId, cancellationToken);
-        await ProfileCustomerBankAccountAccountNumberNullCountAsync(runId, cancellationToken);
-        await ProfileCustomerSalesAreaDistributionChannelNullCountAsync(runId, cancellationToken);
-        await ProfileCustomerSalesAreaDivisionNullCountAsync(runId, cancellationToken);
-        await ProfileCustomerTaxTaxTypeNullCountAsync(runId, cancellationToken);
-        await ProfileCustomerTaxTaxNumberNullCountAsync(runId, cancellationToken);
-        await ProfileCustomerClassificationClassificationTypeNullCountAsync(runId, cancellationToken);
-        await ProfileCustomerClassificationClassificationValueNullCountAsync(runId, cancellationToken);
-        await ProfileCustomerCreditProfileCreditControlAreaNullCountAsync(runId, cancellationToken);
-        await ProfileCustomerPartnerFunctionPartnerFunctionCodeNullCountAsync(runId, cancellationToken);
-        await ProfileCustomerAttachmentDocumentTypeNullCountAsync(runId, cancellationToken);
-        await ProfileCustomerAttachmentFileNameNullCountAsync(runId, cancellationToken);
-        await ProfileCustomerAttachmentStoragePathNullCountAsync(runId, cancellationToken);
+        await ProfileCustomerRecordsTotalRootObjectsAsync(runId, cancellationToken);
+        await ProfileCustomerRecordsTotalRecordsAsync(runId, cancellationToken);
+        await ProfileCustomerCustomerNumberNullOrEmptyCountAsync(runId, cancellationToken);
+        await ProfileCustomerCustomerNameNullOrEmptyCountAsync(runId, cancellationToken);
+        await ProfileCustomerCustomerTypeNullOrEmptyCountAsync(runId, cancellationToken);
+        await ProfileCustomerEmailInvalidFormatCountAsync(runId, cancellationToken);
+        await ProfileCustomerCountryIdNullOrEmptyCountAsync(runId, cancellationToken);
+        await ProfileCustomerCurrencyIdNullOrEmptyCountAsync(runId, cancellationToken);
+        await ProfileCustomerAddressRecordsTotalRecordsAsync(runId, cancellationToken);
+        await ProfileCustomerAddressAddressTypeNullOrEmptyCountAsync(runId, cancellationToken);
+        await ProfileCustomerAddressAddressLine1NullOrEmptyCountAsync(runId, cancellationToken);
+        await ProfileCustomerAddressCityNullOrEmptyCountAsync(runId, cancellationToken);
+        await ProfileCustomerAddressPostalCodeNullOrEmptyCountAsync(runId, cancellationToken);
+        await ProfileCustomerAddressCountryIdNullOrEmptyCountAsync(runId, cancellationToken);
+        await ProfileCustomerContactRecordsTotalRecordsAsync(runId, cancellationToken);
+        await ProfileCustomerContactFirstNameNullOrEmptyCountAsync(runId, cancellationToken);
+        await ProfileCustomerContactLastNameNullOrEmptyCountAsync(runId, cancellationToken);
+        await ProfileCustomerContactEmailInvalidFormatCountAsync(runId, cancellationToken);
+        await ProfileCustomerBankAccountRecordsTotalRecordsAsync(runId, cancellationToken);
+        await ProfileCustomerBankAccountBankNameNullOrEmptyCountAsync(runId, cancellationToken);
+        await ProfileCustomerBankAccountAccountNumberNullOrEmptyCountAsync(runId, cancellationToken);
+        await ProfileCustomerBankAccountCurrencyIdNullOrEmptyCountAsync(runId, cancellationToken);
+        await ProfileCustomerSalesAreaRecordsTotalRecordsAsync(runId, cancellationToken);
+        await ProfileCustomerSalesAreaCreditLimitBelowMinimumCountAsync(runId, cancellationToken);
+        await ProfileCustomerTaxRecordsTotalRecordsAsync(runId, cancellationToken);
+        await ProfileCustomerTaxTaxTypeNullOrEmptyCountAsync(runId, cancellationToken);
+        await ProfileCustomerTaxTaxNumberNullOrEmptyCountAsync(runId, cancellationToken);
+        await ProfileCustomerTaxCountryIdNullOrEmptyCountAsync(runId, cancellationToken);
+        await ProfileCustomerClassificationRecordsTotalRecordsAsync(runId, cancellationToken);
+        await ProfileCustomerClassificationClassificationTypeNullOrEmptyCountAsync(runId, cancellationToken);
+        await ProfileCustomerClassificationClassificationValueNullOrEmptyCountAsync(runId, cancellationToken);
+        await ProfileCustomerCreditProfileRecordsTotalRecordsAsync(runId, cancellationToken);
+        await ProfileCustomerCreditProfileCreditControlAreaNullOrEmptyCountAsync(runId, cancellationToken);
+        await ProfileCustomerCreditProfileCreditLimitNullOrEmptyCountAsync(runId, cancellationToken);
+        await ProfileCustomerCreditProfileCreditLimitBelowMinimumCountAsync(runId, cancellationToken);
+        await ProfileCustomerPartnerFunctionRecordsTotalRecordsAsync(runId, cancellationToken);
+        await ProfileCustomerPartnerFunctionPartnerFunctionCodeNullOrEmptyCountAsync(runId, cancellationToken);
+        await ProfileCustomerAttachmentRecordsTotalRecordsAsync(runId, cancellationToken);
+        await ProfileCustomerAttachmentDocumentTypeNullOrEmptyCountAsync(runId, cancellationToken);
+        await ProfileCustomerAttachmentFileNameNullOrEmptyCountAsync(runId, cancellationToken);
+        await ProfileCustomerAttachmentStoragePathNullOrEmptyCountAsync(runId, cancellationToken);
     }
 
-    private async Task ProfileCustomerCustomerNumberNullCountAsync(Guid runId, CancellationToken cancellationToken)
+    private async Task ProfileCustomerRecordsTotalRootObjectsAsync(Guid runId, CancellationToken cancellationToken)
+    {
+        var totalRecords = await _dbContext.Customers.CountAsync(cancellationToken);
+        var affectedSourceRecords = await _dbContext.Customers
+            .Where(x => true)
+            .ToListAsync(cancellationToken);
+
+        var summary = new DataProfilingSummary
+        {
+            SummaryId = Guid.NewGuid(),
+            RunId = runId,
+            BusinessObjectName = "Customer",
+            EntityName = "Customer",
+            ColumnName = "",
+            SummaryCode = "CUSTOMER_ROOT_OBJECT_COUNT",
+            SummaryType = "TotalRootObjects",
+            Label = "Total Customer root objects",
+            Severity = "",
+            MetricValue = affectedSourceRecords.Count,
+            AffectedCount = affectedSourceRecords.Count,
+            HasDrilldown = false,
+            DrilldownKey = "CUSTOMER_ROOT_OBJECT_COUNT",
+            CreatedOn = DateTimeOffset.UtcNow
+        };
+
+        _dbContext.DataProfilingSummaries.Add(summary);
+
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    private async Task ProfileCustomerRecordsTotalRecordsAsync(Guid runId, CancellationToken cancellationToken)
+    {
+        var totalRecords = await _dbContext.Customers.CountAsync(cancellationToken);
+        var affectedSourceRecords = await _dbContext.Customers
+            .Where(x => true)
+            .ToListAsync(cancellationToken);
+
+        var summary = new DataProfilingSummary
+        {
+            SummaryId = Guid.NewGuid(),
+            RunId = runId,
+            BusinessObjectName = "Customer",
+            EntityName = "Customer",
+            ColumnName = "",
+            SummaryCode = "CUSTOMER_TOTAL_RECORD_COUNT",
+            SummaryType = "TotalRecords",
+            Label = "Total records in Customer",
+            Severity = "",
+            MetricValue = affectedSourceRecords.Count,
+            AffectedCount = affectedSourceRecords.Count,
+            HasDrilldown = false,
+            DrilldownKey = "CUSTOMER_TOTAL_RECORD_COUNT",
+            CreatedOn = DateTimeOffset.UtcNow
+        };
+
+        _dbContext.DataProfilingSummaries.Add(summary);
+
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    private async Task ProfileCustomerCustomerNumberNullOrEmptyCountAsync(Guid runId, CancellationToken cancellationToken)
     {
         var totalRecords = await _dbContext.Customers.CountAsync(cancellationToken);
         var affectedSourceRecords = await _dbContext.Customers
@@ -49,46 +130,43 @@ public sealed class CustomerProfiler(IAnalysisDbContext dbContext)
             BusinessObjectName = "Customer",
             EntityName = "Customer",
             ColumnName = "CustomerNumber",
-            SummaryCode = "CUSTOMER_CUSTOMER_CUSTOMERNUMBER_NULL_COUNT",
-            SummaryType = "NullCount",
-            Label = "Customer CustomerNumber missing count",
-            Severity = "Medium",
+            SummaryCode = "CUSTOMER_CUSTOMERNUMBER_MISSING_COUNT",
+            SummaryType = "NullOrEmptyCount",
+            Label = "Customer.CustomerNumber missing values",
+            Severity = "High",
             MetricValue = affectedSourceRecords.Count,
             AffectedCount = affectedSourceRecords.Count,
             HasDrilldown = true,
-            DrilldownKey = "CUSTOMER_CUSTOMER_CUSTOMERNUMBER_NULL_COUNT",
+            DrilldownKey = "CUSTOMER_CUSTOMERNUMBER_MISSING_COUNT",
             CreatedOn = DateTimeOffset.UtcNow
         };
 
         _dbContext.DataProfilingSummaries.Add(summary);
 
-        if (true)
+        var affectedRecords = affectedSourceRecords.Select(x => new DataProfilingDrilldown
         {
-            var affectedRecords = affectedSourceRecords.Select(x => new DataProfilingDrilldown
-            {
-                DrilldownId = Guid.NewGuid(),
-                RunId = runId,
-                SummaryId = summary.SummaryId,
-                BusinessObjectName = "Customer",
-                EntityName = "Customer",
-                RootRecordId = x.Id.ToString(),
-                RecordId = x.Id.ToString(),
-                ColumnName = "CustomerNumber",
-                SummaryCode = "CUSTOMER_CUSTOMER_CUSTOMERNUMBER_NULL_COUNT",
-                SummaryType = "NullCount",
-                FieldValue = x.CustomerNumber,
-                Message = "Customer CustomerNumber missing count",
-                RecordSnapshotJson = JsonSerializer.Serialize(new { x.Id, x.CustomerNumber }),
-                CreatedOn = DateTimeOffset.UtcNow
-            }).ToList();
+            DrilldownId = Guid.NewGuid(),
+            RunId = runId,
+            SummaryId = summary.SummaryId,
+            BusinessObjectName = "Customer",
+            EntityName = "Customer",
+            RootRecordId = x.Id.ToString(),
+            RecordId = x.Id.ToString(),
+            ColumnName = "CustomerNumber",
+            SummaryCode = "CUSTOMER_CUSTOMERNUMBER_MISSING_COUNT",
+            SummaryType = "NullOrEmptyCount",
+            FieldValue = x.CustomerNumber,
+            Message = "Customer.CustomerNumber missing values",
+            RecordSnapshotJson = JsonSerializer.Serialize(new { x.Id, x.CustomerNumber }),
+            CreatedOn = DateTimeOffset.UtcNow
+        }).ToList();
 
-            _dbContext.DataProfilingDrilldowns.AddRange(affectedRecords);
-        }
+        _dbContext.DataProfilingDrilldowns.AddRange(affectedRecords);
 
         await _dbContext.SaveChangesAsync(cancellationToken);
     }
 
-    private async Task ProfileCustomerCustomerNameNullCountAsync(Guid runId, CancellationToken cancellationToken)
+    private async Task ProfileCustomerCustomerNameNullOrEmptyCountAsync(Guid runId, CancellationToken cancellationToken)
     {
         var totalRecords = await _dbContext.Customers.CountAsync(cancellationToken);
         var affectedSourceRecords = await _dbContext.Customers
@@ -102,46 +180,43 @@ public sealed class CustomerProfiler(IAnalysisDbContext dbContext)
             BusinessObjectName = "Customer",
             EntityName = "Customer",
             ColumnName = "CustomerName",
-            SummaryCode = "CUSTOMER_CUSTOMER_CUSTOMERNAME_NULL_COUNT",
-            SummaryType = "NullCount",
-            Label = "Customer CustomerName missing count",
-            Severity = "Medium",
+            SummaryCode = "CUSTOMER_CUSTOMERNAME_MISSING_COUNT",
+            SummaryType = "NullOrEmptyCount",
+            Label = "Customer.CustomerName missing values",
+            Severity = "High",
             MetricValue = affectedSourceRecords.Count,
             AffectedCount = affectedSourceRecords.Count,
             HasDrilldown = true,
-            DrilldownKey = "CUSTOMER_CUSTOMER_CUSTOMERNAME_NULL_COUNT",
+            DrilldownKey = "CUSTOMER_CUSTOMERNAME_MISSING_COUNT",
             CreatedOn = DateTimeOffset.UtcNow
         };
 
         _dbContext.DataProfilingSummaries.Add(summary);
 
-        if (true)
+        var affectedRecords = affectedSourceRecords.Select(x => new DataProfilingDrilldown
         {
-            var affectedRecords = affectedSourceRecords.Select(x => new DataProfilingDrilldown
-            {
-                DrilldownId = Guid.NewGuid(),
-                RunId = runId,
-                SummaryId = summary.SummaryId,
-                BusinessObjectName = "Customer",
-                EntityName = "Customer",
-                RootRecordId = x.Id.ToString(),
-                RecordId = x.Id.ToString(),
-                ColumnName = "CustomerName",
-                SummaryCode = "CUSTOMER_CUSTOMER_CUSTOMERNAME_NULL_COUNT",
-                SummaryType = "NullCount",
-                FieldValue = x.CustomerName,
-                Message = "Customer CustomerName missing count",
-                RecordSnapshotJson = JsonSerializer.Serialize(new { x.Id, x.CustomerName }),
-                CreatedOn = DateTimeOffset.UtcNow
-            }).ToList();
+            DrilldownId = Guid.NewGuid(),
+            RunId = runId,
+            SummaryId = summary.SummaryId,
+            BusinessObjectName = "Customer",
+            EntityName = "Customer",
+            RootRecordId = x.Id.ToString(),
+            RecordId = x.Id.ToString(),
+            ColumnName = "CustomerName",
+            SummaryCode = "CUSTOMER_CUSTOMERNAME_MISSING_COUNT",
+            SummaryType = "NullOrEmptyCount",
+            FieldValue = x.CustomerName,
+            Message = "Customer.CustomerName missing values",
+            RecordSnapshotJson = JsonSerializer.Serialize(new { x.Id, x.CustomerName }),
+            CreatedOn = DateTimeOffset.UtcNow
+        }).ToList();
 
-            _dbContext.DataProfilingDrilldowns.AddRange(affectedRecords);
-        }
+        _dbContext.DataProfilingDrilldowns.AddRange(affectedRecords);
 
         await _dbContext.SaveChangesAsync(cancellationToken);
     }
 
-    private async Task ProfileCustomerCustomerTypeNullCountAsync(Guid runId, CancellationToken cancellationToken)
+    private async Task ProfileCustomerCustomerTypeNullOrEmptyCountAsync(Guid runId, CancellationToken cancellationToken)
     {
         var totalRecords = await _dbContext.Customers.CountAsync(cancellationToken);
         var affectedSourceRecords = await _dbContext.Customers
@@ -155,46 +230,224 @@ public sealed class CustomerProfiler(IAnalysisDbContext dbContext)
             BusinessObjectName = "Customer",
             EntityName = "Customer",
             ColumnName = "CustomerType",
-            SummaryCode = "CUSTOMER_CUSTOMER_CUSTOMERTYPE_NULL_COUNT",
-            SummaryType = "NullCount",
-            Label = "Customer CustomerType missing count",
-            Severity = "Medium",
+            SummaryCode = "CUSTOMER_CUSTOMERTYPE_MISSING_COUNT",
+            SummaryType = "NullOrEmptyCount",
+            Label = "Customer.CustomerType missing values",
+            Severity = "High",
             MetricValue = affectedSourceRecords.Count,
             AffectedCount = affectedSourceRecords.Count,
             HasDrilldown = true,
-            DrilldownKey = "CUSTOMER_CUSTOMER_CUSTOMERTYPE_NULL_COUNT",
+            DrilldownKey = "CUSTOMER_CUSTOMERTYPE_MISSING_COUNT",
             CreatedOn = DateTimeOffset.UtcNow
         };
 
         _dbContext.DataProfilingSummaries.Add(summary);
 
-        if (true)
+        var affectedRecords = affectedSourceRecords.Select(x => new DataProfilingDrilldown
         {
-            var affectedRecords = affectedSourceRecords.Select(x => new DataProfilingDrilldown
-            {
-                DrilldownId = Guid.NewGuid(),
-                RunId = runId,
-                SummaryId = summary.SummaryId,
-                BusinessObjectName = "Customer",
-                EntityName = "Customer",
-                RootRecordId = x.Id.ToString(),
-                RecordId = x.Id.ToString(),
-                ColumnName = "CustomerType",
-                SummaryCode = "CUSTOMER_CUSTOMER_CUSTOMERTYPE_NULL_COUNT",
-                SummaryType = "NullCount",
-                FieldValue = x.CustomerType,
-                Message = "Customer CustomerType missing count",
-                RecordSnapshotJson = JsonSerializer.Serialize(new { x.Id, x.CustomerType }),
-                CreatedOn = DateTimeOffset.UtcNow
-            }).ToList();
+            DrilldownId = Guid.NewGuid(),
+            RunId = runId,
+            SummaryId = summary.SummaryId,
+            BusinessObjectName = "Customer",
+            EntityName = "Customer",
+            RootRecordId = x.Id.ToString(),
+            RecordId = x.Id.ToString(),
+            ColumnName = "CustomerType",
+            SummaryCode = "CUSTOMER_CUSTOMERTYPE_MISSING_COUNT",
+            SummaryType = "NullOrEmptyCount",
+            FieldValue = x.CustomerType,
+            Message = "Customer.CustomerType missing values",
+            RecordSnapshotJson = JsonSerializer.Serialize(new { x.Id, x.CustomerType }),
+            CreatedOn = DateTimeOffset.UtcNow
+        }).ToList();
 
-            _dbContext.DataProfilingDrilldowns.AddRange(affectedRecords);
-        }
+        _dbContext.DataProfilingDrilldowns.AddRange(affectedRecords);
 
         await _dbContext.SaveChangesAsync(cancellationToken);
     }
 
-    private async Task ProfileCustomerAddressAddressTypeNullCountAsync(Guid runId, CancellationToken cancellationToken)
+    private async Task ProfileCustomerEmailInvalidFormatCountAsync(Guid runId, CancellationToken cancellationToken)
+    {
+        var totalRecords = await _dbContext.Customers.CountAsync(cancellationToken);
+        var affectedSourceRecords = await _dbContext.Customers
+            .Where(x => x.Email != null && !x.Email.Contains("@"))
+            .ToListAsync(cancellationToken);
+
+        var summary = new DataProfilingSummary
+        {
+            SummaryId = Guid.NewGuid(),
+            RunId = runId,
+            BusinessObjectName = "Customer",
+            EntityName = "Customer",
+            ColumnName = "Email",
+            SummaryCode = "CUSTOMER_EMAIL_INVALID_EMAIL_COUNT",
+            SummaryType = "InvalidFormatCount",
+            Label = "Invalid email format in Customer.Email",
+            Severity = "High",
+            MetricValue = affectedSourceRecords.Count,
+            AffectedCount = affectedSourceRecords.Count,
+            HasDrilldown = true,
+            DrilldownKey = "CUSTOMER_EMAIL_INVALID_EMAIL_COUNT",
+            CreatedOn = DateTimeOffset.UtcNow
+        };
+
+        _dbContext.DataProfilingSummaries.Add(summary);
+
+        var affectedRecords = affectedSourceRecords.Select(x => new DataProfilingDrilldown
+        {
+            DrilldownId = Guid.NewGuid(),
+            RunId = runId,
+            SummaryId = summary.SummaryId,
+            BusinessObjectName = "Customer",
+            EntityName = "Customer",
+            RootRecordId = x.Id.ToString(),
+            RecordId = x.Id.ToString(),
+            ColumnName = "Email",
+            SummaryCode = "CUSTOMER_EMAIL_INVALID_EMAIL_COUNT",
+            SummaryType = "InvalidFormatCount",
+            FieldValue = x.Email,
+            Message = "Invalid email format in Customer.Email",
+            RecordSnapshotJson = JsonSerializer.Serialize(new { x.Id, x.Email }),
+            CreatedOn = DateTimeOffset.UtcNow
+        }).ToList();
+
+        _dbContext.DataProfilingDrilldowns.AddRange(affectedRecords);
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    private async Task ProfileCustomerCountryIdNullOrEmptyCountAsync(Guid runId, CancellationToken cancellationToken)
+    {
+        var totalRecords = await _dbContext.Customers.CountAsync(cancellationToken);
+        var affectedSourceRecords = await _dbContext.Customers
+            .Where(x => false)
+            .ToListAsync(cancellationToken);
+
+        var summary = new DataProfilingSummary
+        {
+            SummaryId = Guid.NewGuid(),
+            RunId = runId,
+            BusinessObjectName = "Customer",
+            EntityName = "Customer",
+            ColumnName = "CountryId",
+            SummaryCode = "CUSTOMER_COUNTRYID_MISSING_COUNT",
+            SummaryType = "NullOrEmptyCount",
+            Label = "Customer.CountryId missing values",
+            Severity = "High",
+            MetricValue = affectedSourceRecords.Count,
+            AffectedCount = affectedSourceRecords.Count,
+            HasDrilldown = true,
+            DrilldownKey = "CUSTOMER_COUNTRYID_MISSING_COUNT",
+            CreatedOn = DateTimeOffset.UtcNow
+        };
+
+        _dbContext.DataProfilingSummaries.Add(summary);
+
+        var affectedRecords = affectedSourceRecords.Select(x => new DataProfilingDrilldown
+        {
+            DrilldownId = Guid.NewGuid(),
+            RunId = runId,
+            SummaryId = summary.SummaryId,
+            BusinessObjectName = "Customer",
+            EntityName = "Customer",
+            RootRecordId = x.Id.ToString(),
+            RecordId = x.Id.ToString(),
+            ColumnName = "CountryId",
+            SummaryCode = "CUSTOMER_COUNTRYID_MISSING_COUNT",
+            SummaryType = "NullOrEmptyCount",
+            FieldValue = x.CountryId.ToString(),
+            Message = "Customer.CountryId missing values",
+            RecordSnapshotJson = JsonSerializer.Serialize(new { x.Id, x.CountryId }),
+            CreatedOn = DateTimeOffset.UtcNow
+        }).ToList();
+
+        _dbContext.DataProfilingDrilldowns.AddRange(affectedRecords);
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    private async Task ProfileCustomerCurrencyIdNullOrEmptyCountAsync(Guid runId, CancellationToken cancellationToken)
+    {
+        var totalRecords = await _dbContext.Customers.CountAsync(cancellationToken);
+        var affectedSourceRecords = await _dbContext.Customers
+            .Where(x => false)
+            .ToListAsync(cancellationToken);
+
+        var summary = new DataProfilingSummary
+        {
+            SummaryId = Guid.NewGuid(),
+            RunId = runId,
+            BusinessObjectName = "Customer",
+            EntityName = "Customer",
+            ColumnName = "CurrencyId",
+            SummaryCode = "CUSTOMER_CURRENCYID_MISSING_COUNT",
+            SummaryType = "NullOrEmptyCount",
+            Label = "Customer.CurrencyId missing values",
+            Severity = "High",
+            MetricValue = affectedSourceRecords.Count,
+            AffectedCount = affectedSourceRecords.Count,
+            HasDrilldown = true,
+            DrilldownKey = "CUSTOMER_CURRENCYID_MISSING_COUNT",
+            CreatedOn = DateTimeOffset.UtcNow
+        };
+
+        _dbContext.DataProfilingSummaries.Add(summary);
+
+        var affectedRecords = affectedSourceRecords.Select(x => new DataProfilingDrilldown
+        {
+            DrilldownId = Guid.NewGuid(),
+            RunId = runId,
+            SummaryId = summary.SummaryId,
+            BusinessObjectName = "Customer",
+            EntityName = "Customer",
+            RootRecordId = x.Id.ToString(),
+            RecordId = x.Id.ToString(),
+            ColumnName = "CurrencyId",
+            SummaryCode = "CUSTOMER_CURRENCYID_MISSING_COUNT",
+            SummaryType = "NullOrEmptyCount",
+            FieldValue = x.CurrencyId.ToString(),
+            Message = "Customer.CurrencyId missing values",
+            RecordSnapshotJson = JsonSerializer.Serialize(new { x.Id, x.CurrencyId }),
+            CreatedOn = DateTimeOffset.UtcNow
+        }).ToList();
+
+        _dbContext.DataProfilingDrilldowns.AddRange(affectedRecords);
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    private async Task ProfileCustomerAddressRecordsTotalRecordsAsync(Guid runId, CancellationToken cancellationToken)
+    {
+        var totalRecords = await _dbContext.CustomerAddresses.CountAsync(cancellationToken);
+        var affectedSourceRecords = await _dbContext.CustomerAddresses
+            .Where(x => true)
+            .ToListAsync(cancellationToken);
+
+        var summary = new DataProfilingSummary
+        {
+            SummaryId = Guid.NewGuid(),
+            RunId = runId,
+            BusinessObjectName = "Customer",
+            EntityName = "CustomerAddress",
+            ColumnName = "",
+            SummaryCode = "CUSTOMERADDRESS_TOTAL_RECORD_COUNT",
+            SummaryType = "TotalRecords",
+            Label = "Total records in CustomerAddress",
+            Severity = "",
+            MetricValue = affectedSourceRecords.Count,
+            AffectedCount = affectedSourceRecords.Count,
+            HasDrilldown = false,
+            DrilldownKey = "CUSTOMERADDRESS_TOTAL_RECORD_COUNT",
+            CreatedOn = DateTimeOffset.UtcNow
+        };
+
+        _dbContext.DataProfilingSummaries.Add(summary);
+
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    private async Task ProfileCustomerAddressAddressTypeNullOrEmptyCountAsync(Guid runId, CancellationToken cancellationToken)
     {
         var totalRecords = await _dbContext.CustomerAddresses.CountAsync(cancellationToken);
         var affectedSourceRecords = await _dbContext.CustomerAddresses
@@ -208,46 +461,43 @@ public sealed class CustomerProfiler(IAnalysisDbContext dbContext)
             BusinessObjectName = "Customer",
             EntityName = "CustomerAddress",
             ColumnName = "AddressType",
-            SummaryCode = "CUSTOMER_CUSTOMERADDRESS_ADDRESSTYPE_NULL_COUNT",
-            SummaryType = "NullCount",
-            Label = "CustomerAddress AddressType missing count",
-            Severity = "Medium",
+            SummaryCode = "CUSTOMERADDRESS_ADDRESSTYPE_MISSING_COUNT",
+            SummaryType = "NullOrEmptyCount",
+            Label = "CustomerAddress.AddressType missing values",
+            Severity = "High",
             MetricValue = affectedSourceRecords.Count,
             AffectedCount = affectedSourceRecords.Count,
             HasDrilldown = true,
-            DrilldownKey = "CUSTOMER_CUSTOMERADDRESS_ADDRESSTYPE_NULL_COUNT",
+            DrilldownKey = "CUSTOMERADDRESS_ADDRESSTYPE_MISSING_COUNT",
             CreatedOn = DateTimeOffset.UtcNow
         };
 
         _dbContext.DataProfilingSummaries.Add(summary);
 
-        if (true)
+        var affectedRecords = affectedSourceRecords.Select(x => new DataProfilingDrilldown
         {
-            var affectedRecords = affectedSourceRecords.Select(x => new DataProfilingDrilldown
-            {
-                DrilldownId = Guid.NewGuid(),
-                RunId = runId,
-                SummaryId = summary.SummaryId,
-                BusinessObjectName = "Customer",
-                EntityName = "CustomerAddress",
-                RootRecordId = x.CustomerId.ToString(),
-                RecordId = x.Id.ToString(),
-                ColumnName = "AddressType",
-                SummaryCode = "CUSTOMER_CUSTOMERADDRESS_ADDRESSTYPE_NULL_COUNT",
-                SummaryType = "NullCount",
-                FieldValue = x.AddressType,
-                Message = "CustomerAddress AddressType missing count",
-                RecordSnapshotJson = JsonSerializer.Serialize(new { x.Id, x.CustomerId, x.AddressType }),
-                CreatedOn = DateTimeOffset.UtcNow
-            }).ToList();
+            DrilldownId = Guid.NewGuid(),
+            RunId = runId,
+            SummaryId = summary.SummaryId,
+            BusinessObjectName = "Customer",
+            EntityName = "CustomerAddress",
+            RootRecordId = x.CustomerId.ToString(),
+            RecordId = x.Id.ToString(),
+            ColumnName = "AddressType",
+            SummaryCode = "CUSTOMERADDRESS_ADDRESSTYPE_MISSING_COUNT",
+            SummaryType = "NullOrEmptyCount",
+            FieldValue = x.AddressType,
+            Message = "CustomerAddress.AddressType missing values",
+            RecordSnapshotJson = JsonSerializer.Serialize(new { x.Id, x.CustomerId, x.AddressType }),
+            CreatedOn = DateTimeOffset.UtcNow
+        }).ToList();
 
-            _dbContext.DataProfilingDrilldowns.AddRange(affectedRecords);
-        }
+        _dbContext.DataProfilingDrilldowns.AddRange(affectedRecords);
 
         await _dbContext.SaveChangesAsync(cancellationToken);
     }
 
-    private async Task ProfileCustomerAddressAddressLine1NullCountAsync(Guid runId, CancellationToken cancellationToken)
+    private async Task ProfileCustomerAddressAddressLine1NullOrEmptyCountAsync(Guid runId, CancellationToken cancellationToken)
     {
         var totalRecords = await _dbContext.CustomerAddresses.CountAsync(cancellationToken);
         var affectedSourceRecords = await _dbContext.CustomerAddresses
@@ -261,46 +511,43 @@ public sealed class CustomerProfiler(IAnalysisDbContext dbContext)
             BusinessObjectName = "Customer",
             EntityName = "CustomerAddress",
             ColumnName = "AddressLine1",
-            SummaryCode = "CUSTOMER_CUSTOMERADDRESS_ADDRESSLINE1_NULL_COUNT",
-            SummaryType = "NullCount",
-            Label = "CustomerAddress AddressLine1 missing count",
-            Severity = "Medium",
+            SummaryCode = "CUSTOMERADDRESS_ADDRESSLINE1_MISSING_COUNT",
+            SummaryType = "NullOrEmptyCount",
+            Label = "CustomerAddress.AddressLine1 missing values",
+            Severity = "High",
             MetricValue = affectedSourceRecords.Count,
             AffectedCount = affectedSourceRecords.Count,
             HasDrilldown = true,
-            DrilldownKey = "CUSTOMER_CUSTOMERADDRESS_ADDRESSLINE1_NULL_COUNT",
+            DrilldownKey = "CUSTOMERADDRESS_ADDRESSLINE1_MISSING_COUNT",
             CreatedOn = DateTimeOffset.UtcNow
         };
 
         _dbContext.DataProfilingSummaries.Add(summary);
 
-        if (true)
+        var affectedRecords = affectedSourceRecords.Select(x => new DataProfilingDrilldown
         {
-            var affectedRecords = affectedSourceRecords.Select(x => new DataProfilingDrilldown
-            {
-                DrilldownId = Guid.NewGuid(),
-                RunId = runId,
-                SummaryId = summary.SummaryId,
-                BusinessObjectName = "Customer",
-                EntityName = "CustomerAddress",
-                RootRecordId = x.CustomerId.ToString(),
-                RecordId = x.Id.ToString(),
-                ColumnName = "AddressLine1",
-                SummaryCode = "CUSTOMER_CUSTOMERADDRESS_ADDRESSLINE1_NULL_COUNT",
-                SummaryType = "NullCount",
-                FieldValue = x.AddressLine1,
-                Message = "CustomerAddress AddressLine1 missing count",
-                RecordSnapshotJson = JsonSerializer.Serialize(new { x.Id, x.CustomerId, x.AddressLine1 }),
-                CreatedOn = DateTimeOffset.UtcNow
-            }).ToList();
+            DrilldownId = Guid.NewGuid(),
+            RunId = runId,
+            SummaryId = summary.SummaryId,
+            BusinessObjectName = "Customer",
+            EntityName = "CustomerAddress",
+            RootRecordId = x.CustomerId.ToString(),
+            RecordId = x.Id.ToString(),
+            ColumnName = "AddressLine1",
+            SummaryCode = "CUSTOMERADDRESS_ADDRESSLINE1_MISSING_COUNT",
+            SummaryType = "NullOrEmptyCount",
+            FieldValue = x.AddressLine1,
+            Message = "CustomerAddress.AddressLine1 missing values",
+            RecordSnapshotJson = JsonSerializer.Serialize(new { x.Id, x.CustomerId, x.AddressLine1 }),
+            CreatedOn = DateTimeOffset.UtcNow
+        }).ToList();
 
-            _dbContext.DataProfilingDrilldowns.AddRange(affectedRecords);
-        }
+        _dbContext.DataProfilingDrilldowns.AddRange(affectedRecords);
 
         await _dbContext.SaveChangesAsync(cancellationToken);
     }
 
-    private async Task ProfileCustomerAddressCityNullCountAsync(Guid runId, CancellationToken cancellationToken)
+    private async Task ProfileCustomerAddressCityNullOrEmptyCountAsync(Guid runId, CancellationToken cancellationToken)
     {
         var totalRecords = await _dbContext.CustomerAddresses.CountAsync(cancellationToken);
         var affectedSourceRecords = await _dbContext.CustomerAddresses
@@ -314,46 +561,43 @@ public sealed class CustomerProfiler(IAnalysisDbContext dbContext)
             BusinessObjectName = "Customer",
             EntityName = "CustomerAddress",
             ColumnName = "City",
-            SummaryCode = "CUSTOMER_CUSTOMERADDRESS_CITY_NULL_COUNT",
-            SummaryType = "NullCount",
-            Label = "CustomerAddress City missing count",
-            Severity = "Medium",
+            SummaryCode = "CUSTOMERADDRESS_CITY_MISSING_COUNT",
+            SummaryType = "NullOrEmptyCount",
+            Label = "CustomerAddress.City missing values",
+            Severity = "High",
             MetricValue = affectedSourceRecords.Count,
             AffectedCount = affectedSourceRecords.Count,
             HasDrilldown = true,
-            DrilldownKey = "CUSTOMER_CUSTOMERADDRESS_CITY_NULL_COUNT",
+            DrilldownKey = "CUSTOMERADDRESS_CITY_MISSING_COUNT",
             CreatedOn = DateTimeOffset.UtcNow
         };
 
         _dbContext.DataProfilingSummaries.Add(summary);
 
-        if (true)
+        var affectedRecords = affectedSourceRecords.Select(x => new DataProfilingDrilldown
         {
-            var affectedRecords = affectedSourceRecords.Select(x => new DataProfilingDrilldown
-            {
-                DrilldownId = Guid.NewGuid(),
-                RunId = runId,
-                SummaryId = summary.SummaryId,
-                BusinessObjectName = "Customer",
-                EntityName = "CustomerAddress",
-                RootRecordId = x.CustomerId.ToString(),
-                RecordId = x.Id.ToString(),
-                ColumnName = "City",
-                SummaryCode = "CUSTOMER_CUSTOMERADDRESS_CITY_NULL_COUNT",
-                SummaryType = "NullCount",
-                FieldValue = x.City,
-                Message = "CustomerAddress City missing count",
-                RecordSnapshotJson = JsonSerializer.Serialize(new { x.Id, x.CustomerId, x.City }),
-                CreatedOn = DateTimeOffset.UtcNow
-            }).ToList();
+            DrilldownId = Guid.NewGuid(),
+            RunId = runId,
+            SummaryId = summary.SummaryId,
+            BusinessObjectName = "Customer",
+            EntityName = "CustomerAddress",
+            RootRecordId = x.CustomerId.ToString(),
+            RecordId = x.Id.ToString(),
+            ColumnName = "City",
+            SummaryCode = "CUSTOMERADDRESS_CITY_MISSING_COUNT",
+            SummaryType = "NullOrEmptyCount",
+            FieldValue = x.City,
+            Message = "CustomerAddress.City missing values",
+            RecordSnapshotJson = JsonSerializer.Serialize(new { x.Id, x.CustomerId, x.City }),
+            CreatedOn = DateTimeOffset.UtcNow
+        }).ToList();
 
-            _dbContext.DataProfilingDrilldowns.AddRange(affectedRecords);
-        }
+        _dbContext.DataProfilingDrilldowns.AddRange(affectedRecords);
 
         await _dbContext.SaveChangesAsync(cancellationToken);
     }
 
-    private async Task ProfileCustomerAddressPostalCodeNullCountAsync(Guid runId, CancellationToken cancellationToken)
+    private async Task ProfileCustomerAddressPostalCodeNullOrEmptyCountAsync(Guid runId, CancellationToken cancellationToken)
     {
         var totalRecords = await _dbContext.CustomerAddresses.CountAsync(cancellationToken);
         var affectedSourceRecords = await _dbContext.CustomerAddresses
@@ -367,46 +611,124 @@ public sealed class CustomerProfiler(IAnalysisDbContext dbContext)
             BusinessObjectName = "Customer",
             EntityName = "CustomerAddress",
             ColumnName = "PostalCode",
-            SummaryCode = "CUSTOMER_CUSTOMERADDRESS_POSTALCODE_NULL_COUNT",
-            SummaryType = "NullCount",
-            Label = "CustomerAddress PostalCode missing count",
-            Severity = "Medium",
+            SummaryCode = "CUSTOMERADDRESS_POSTALCODE_MISSING_COUNT",
+            SummaryType = "NullOrEmptyCount",
+            Label = "CustomerAddress.PostalCode missing values",
+            Severity = "High",
             MetricValue = affectedSourceRecords.Count,
             AffectedCount = affectedSourceRecords.Count,
             HasDrilldown = true,
-            DrilldownKey = "CUSTOMER_CUSTOMERADDRESS_POSTALCODE_NULL_COUNT",
+            DrilldownKey = "CUSTOMERADDRESS_POSTALCODE_MISSING_COUNT",
             CreatedOn = DateTimeOffset.UtcNow
         };
 
         _dbContext.DataProfilingSummaries.Add(summary);
 
-        if (true)
+        var affectedRecords = affectedSourceRecords.Select(x => new DataProfilingDrilldown
         {
-            var affectedRecords = affectedSourceRecords.Select(x => new DataProfilingDrilldown
-            {
-                DrilldownId = Guid.NewGuid(),
-                RunId = runId,
-                SummaryId = summary.SummaryId,
-                BusinessObjectName = "Customer",
-                EntityName = "CustomerAddress",
-                RootRecordId = x.CustomerId.ToString(),
-                RecordId = x.Id.ToString(),
-                ColumnName = "PostalCode",
-                SummaryCode = "CUSTOMER_CUSTOMERADDRESS_POSTALCODE_NULL_COUNT",
-                SummaryType = "NullCount",
-                FieldValue = x.PostalCode,
-                Message = "CustomerAddress PostalCode missing count",
-                RecordSnapshotJson = JsonSerializer.Serialize(new { x.Id, x.CustomerId, x.PostalCode }),
-                CreatedOn = DateTimeOffset.UtcNow
-            }).ToList();
+            DrilldownId = Guid.NewGuid(),
+            RunId = runId,
+            SummaryId = summary.SummaryId,
+            BusinessObjectName = "Customer",
+            EntityName = "CustomerAddress",
+            RootRecordId = x.CustomerId.ToString(),
+            RecordId = x.Id.ToString(),
+            ColumnName = "PostalCode",
+            SummaryCode = "CUSTOMERADDRESS_POSTALCODE_MISSING_COUNT",
+            SummaryType = "NullOrEmptyCount",
+            FieldValue = x.PostalCode,
+            Message = "CustomerAddress.PostalCode missing values",
+            RecordSnapshotJson = JsonSerializer.Serialize(new { x.Id, x.CustomerId, x.PostalCode }),
+            CreatedOn = DateTimeOffset.UtcNow
+        }).ToList();
 
-            _dbContext.DataProfilingDrilldowns.AddRange(affectedRecords);
-        }
+        _dbContext.DataProfilingDrilldowns.AddRange(affectedRecords);
 
         await _dbContext.SaveChangesAsync(cancellationToken);
     }
 
-    private async Task ProfileCustomerContactFirstNameNullCountAsync(Guid runId, CancellationToken cancellationToken)
+    private async Task ProfileCustomerAddressCountryIdNullOrEmptyCountAsync(Guid runId, CancellationToken cancellationToken)
+    {
+        var totalRecords = await _dbContext.CustomerAddresses.CountAsync(cancellationToken);
+        var affectedSourceRecords = await _dbContext.CustomerAddresses
+            .Where(x => false)
+            .ToListAsync(cancellationToken);
+
+        var summary = new DataProfilingSummary
+        {
+            SummaryId = Guid.NewGuid(),
+            RunId = runId,
+            BusinessObjectName = "Customer",
+            EntityName = "CustomerAddress",
+            ColumnName = "CountryId",
+            SummaryCode = "CUSTOMERADDRESS_COUNTRYID_MISSING_COUNT",
+            SummaryType = "NullOrEmptyCount",
+            Label = "CustomerAddress.CountryId missing values",
+            Severity = "High",
+            MetricValue = affectedSourceRecords.Count,
+            AffectedCount = affectedSourceRecords.Count,
+            HasDrilldown = true,
+            DrilldownKey = "CUSTOMERADDRESS_COUNTRYID_MISSING_COUNT",
+            CreatedOn = DateTimeOffset.UtcNow
+        };
+
+        _dbContext.DataProfilingSummaries.Add(summary);
+
+        var affectedRecords = affectedSourceRecords.Select(x => new DataProfilingDrilldown
+        {
+            DrilldownId = Guid.NewGuid(),
+            RunId = runId,
+            SummaryId = summary.SummaryId,
+            BusinessObjectName = "Customer",
+            EntityName = "CustomerAddress",
+            RootRecordId = x.CustomerId.ToString(),
+            RecordId = x.Id.ToString(),
+            ColumnName = "CountryId",
+            SummaryCode = "CUSTOMERADDRESS_COUNTRYID_MISSING_COUNT",
+            SummaryType = "NullOrEmptyCount",
+            FieldValue = x.CountryId.ToString(),
+            Message = "CustomerAddress.CountryId missing values",
+            RecordSnapshotJson = JsonSerializer.Serialize(new { x.Id, x.CustomerId, x.CountryId }),
+            CreatedOn = DateTimeOffset.UtcNow
+        }).ToList();
+
+        _dbContext.DataProfilingDrilldowns.AddRange(affectedRecords);
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    private async Task ProfileCustomerContactRecordsTotalRecordsAsync(Guid runId, CancellationToken cancellationToken)
+    {
+        var totalRecords = await _dbContext.CustomerContacts.CountAsync(cancellationToken);
+        var affectedSourceRecords = await _dbContext.CustomerContacts
+            .Where(x => true)
+            .ToListAsync(cancellationToken);
+
+        var summary = new DataProfilingSummary
+        {
+            SummaryId = Guid.NewGuid(),
+            RunId = runId,
+            BusinessObjectName = "Customer",
+            EntityName = "CustomerContact",
+            ColumnName = "",
+            SummaryCode = "CUSTOMERCONTACT_TOTAL_RECORD_COUNT",
+            SummaryType = "TotalRecords",
+            Label = "Total records in CustomerContact",
+            Severity = "",
+            MetricValue = affectedSourceRecords.Count,
+            AffectedCount = affectedSourceRecords.Count,
+            HasDrilldown = false,
+            DrilldownKey = "CUSTOMERCONTACT_TOTAL_RECORD_COUNT",
+            CreatedOn = DateTimeOffset.UtcNow
+        };
+
+        _dbContext.DataProfilingSummaries.Add(summary);
+
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    private async Task ProfileCustomerContactFirstNameNullOrEmptyCountAsync(Guid runId, CancellationToken cancellationToken)
     {
         var totalRecords = await _dbContext.CustomerContacts.CountAsync(cancellationToken);
         var affectedSourceRecords = await _dbContext.CustomerContacts
@@ -420,46 +742,43 @@ public sealed class CustomerProfiler(IAnalysisDbContext dbContext)
             BusinessObjectName = "Customer",
             EntityName = "CustomerContact",
             ColumnName = "FirstName",
-            SummaryCode = "CUSTOMER_CUSTOMERCONTACT_FIRSTNAME_NULL_COUNT",
-            SummaryType = "NullCount",
-            Label = "CustomerContact FirstName missing count",
-            Severity = "Medium",
+            SummaryCode = "CUSTOMERCONTACT_FIRSTNAME_MISSING_COUNT",
+            SummaryType = "NullOrEmptyCount",
+            Label = "CustomerContact.FirstName missing values",
+            Severity = "High",
             MetricValue = affectedSourceRecords.Count,
             AffectedCount = affectedSourceRecords.Count,
             HasDrilldown = true,
-            DrilldownKey = "CUSTOMER_CUSTOMERCONTACT_FIRSTNAME_NULL_COUNT",
+            DrilldownKey = "CUSTOMERCONTACT_FIRSTNAME_MISSING_COUNT",
             CreatedOn = DateTimeOffset.UtcNow
         };
 
         _dbContext.DataProfilingSummaries.Add(summary);
 
-        if (true)
+        var affectedRecords = affectedSourceRecords.Select(x => new DataProfilingDrilldown
         {
-            var affectedRecords = affectedSourceRecords.Select(x => new DataProfilingDrilldown
-            {
-                DrilldownId = Guid.NewGuid(),
-                RunId = runId,
-                SummaryId = summary.SummaryId,
-                BusinessObjectName = "Customer",
-                EntityName = "CustomerContact",
-                RootRecordId = x.CustomerId.ToString(),
-                RecordId = x.Id.ToString(),
-                ColumnName = "FirstName",
-                SummaryCode = "CUSTOMER_CUSTOMERCONTACT_FIRSTNAME_NULL_COUNT",
-                SummaryType = "NullCount",
-                FieldValue = x.FirstName,
-                Message = "CustomerContact FirstName missing count",
-                RecordSnapshotJson = JsonSerializer.Serialize(new { x.Id, x.CustomerId, x.FirstName }),
-                CreatedOn = DateTimeOffset.UtcNow
-            }).ToList();
+            DrilldownId = Guid.NewGuid(),
+            RunId = runId,
+            SummaryId = summary.SummaryId,
+            BusinessObjectName = "Customer",
+            EntityName = "CustomerContact",
+            RootRecordId = x.CustomerId.ToString(),
+            RecordId = x.Id.ToString(),
+            ColumnName = "FirstName",
+            SummaryCode = "CUSTOMERCONTACT_FIRSTNAME_MISSING_COUNT",
+            SummaryType = "NullOrEmptyCount",
+            FieldValue = x.FirstName,
+            Message = "CustomerContact.FirstName missing values",
+            RecordSnapshotJson = JsonSerializer.Serialize(new { x.Id, x.CustomerId, x.FirstName }),
+            CreatedOn = DateTimeOffset.UtcNow
+        }).ToList();
 
-            _dbContext.DataProfilingDrilldowns.AddRange(affectedRecords);
-        }
+        _dbContext.DataProfilingDrilldowns.AddRange(affectedRecords);
 
         await _dbContext.SaveChangesAsync(cancellationToken);
     }
 
-    private async Task ProfileCustomerContactLastNameNullCountAsync(Guid runId, CancellationToken cancellationToken)
+    private async Task ProfileCustomerContactLastNameNullOrEmptyCountAsync(Guid runId, CancellationToken cancellationToken)
     {
         var totalRecords = await _dbContext.CustomerContacts.CountAsync(cancellationToken);
         var affectedSourceRecords = await _dbContext.CustomerContacts
@@ -473,46 +792,124 @@ public sealed class CustomerProfiler(IAnalysisDbContext dbContext)
             BusinessObjectName = "Customer",
             EntityName = "CustomerContact",
             ColumnName = "LastName",
-            SummaryCode = "CUSTOMER_CUSTOMERCONTACT_LASTNAME_NULL_COUNT",
-            SummaryType = "NullCount",
-            Label = "CustomerContact LastName missing count",
-            Severity = "Medium",
+            SummaryCode = "CUSTOMERCONTACT_LASTNAME_MISSING_COUNT",
+            SummaryType = "NullOrEmptyCount",
+            Label = "CustomerContact.LastName missing values",
+            Severity = "High",
             MetricValue = affectedSourceRecords.Count,
             AffectedCount = affectedSourceRecords.Count,
             HasDrilldown = true,
-            DrilldownKey = "CUSTOMER_CUSTOMERCONTACT_LASTNAME_NULL_COUNT",
+            DrilldownKey = "CUSTOMERCONTACT_LASTNAME_MISSING_COUNT",
             CreatedOn = DateTimeOffset.UtcNow
         };
 
         _dbContext.DataProfilingSummaries.Add(summary);
 
-        if (true)
+        var affectedRecords = affectedSourceRecords.Select(x => new DataProfilingDrilldown
         {
-            var affectedRecords = affectedSourceRecords.Select(x => new DataProfilingDrilldown
-            {
-                DrilldownId = Guid.NewGuid(),
-                RunId = runId,
-                SummaryId = summary.SummaryId,
-                BusinessObjectName = "Customer",
-                EntityName = "CustomerContact",
-                RootRecordId = x.CustomerId.ToString(),
-                RecordId = x.Id.ToString(),
-                ColumnName = "LastName",
-                SummaryCode = "CUSTOMER_CUSTOMERCONTACT_LASTNAME_NULL_COUNT",
-                SummaryType = "NullCount",
-                FieldValue = x.LastName,
-                Message = "CustomerContact LastName missing count",
-                RecordSnapshotJson = JsonSerializer.Serialize(new { x.Id, x.CustomerId, x.LastName }),
-                CreatedOn = DateTimeOffset.UtcNow
-            }).ToList();
+            DrilldownId = Guid.NewGuid(),
+            RunId = runId,
+            SummaryId = summary.SummaryId,
+            BusinessObjectName = "Customer",
+            EntityName = "CustomerContact",
+            RootRecordId = x.CustomerId.ToString(),
+            RecordId = x.Id.ToString(),
+            ColumnName = "LastName",
+            SummaryCode = "CUSTOMERCONTACT_LASTNAME_MISSING_COUNT",
+            SummaryType = "NullOrEmptyCount",
+            FieldValue = x.LastName,
+            Message = "CustomerContact.LastName missing values",
+            RecordSnapshotJson = JsonSerializer.Serialize(new { x.Id, x.CustomerId, x.LastName }),
+            CreatedOn = DateTimeOffset.UtcNow
+        }).ToList();
 
-            _dbContext.DataProfilingDrilldowns.AddRange(affectedRecords);
-        }
+        _dbContext.DataProfilingDrilldowns.AddRange(affectedRecords);
 
         await _dbContext.SaveChangesAsync(cancellationToken);
     }
 
-    private async Task ProfileCustomerBankAccountBankNameNullCountAsync(Guid runId, CancellationToken cancellationToken)
+    private async Task ProfileCustomerContactEmailInvalidFormatCountAsync(Guid runId, CancellationToken cancellationToken)
+    {
+        var totalRecords = await _dbContext.CustomerContacts.CountAsync(cancellationToken);
+        var affectedSourceRecords = await _dbContext.CustomerContacts
+            .Where(x => x.Email != null && !x.Email.Contains("@"))
+            .ToListAsync(cancellationToken);
+
+        var summary = new DataProfilingSummary
+        {
+            SummaryId = Guid.NewGuid(),
+            RunId = runId,
+            BusinessObjectName = "Customer",
+            EntityName = "CustomerContact",
+            ColumnName = "Email",
+            SummaryCode = "CUSTOMERCONTACT_EMAIL_INVALID_EMAIL_COUNT",
+            SummaryType = "InvalidFormatCount",
+            Label = "Invalid email format in CustomerContact.Email",
+            Severity = "High",
+            MetricValue = affectedSourceRecords.Count,
+            AffectedCount = affectedSourceRecords.Count,
+            HasDrilldown = true,
+            DrilldownKey = "CUSTOMERCONTACT_EMAIL_INVALID_EMAIL_COUNT",
+            CreatedOn = DateTimeOffset.UtcNow
+        };
+
+        _dbContext.DataProfilingSummaries.Add(summary);
+
+        var affectedRecords = affectedSourceRecords.Select(x => new DataProfilingDrilldown
+        {
+            DrilldownId = Guid.NewGuid(),
+            RunId = runId,
+            SummaryId = summary.SummaryId,
+            BusinessObjectName = "Customer",
+            EntityName = "CustomerContact",
+            RootRecordId = x.CustomerId.ToString(),
+            RecordId = x.Id.ToString(),
+            ColumnName = "Email",
+            SummaryCode = "CUSTOMERCONTACT_EMAIL_INVALID_EMAIL_COUNT",
+            SummaryType = "InvalidFormatCount",
+            FieldValue = x.Email,
+            Message = "Invalid email format in CustomerContact.Email",
+            RecordSnapshotJson = JsonSerializer.Serialize(new { x.Id, x.CustomerId, x.Email }),
+            CreatedOn = DateTimeOffset.UtcNow
+        }).ToList();
+
+        _dbContext.DataProfilingDrilldowns.AddRange(affectedRecords);
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    private async Task ProfileCustomerBankAccountRecordsTotalRecordsAsync(Guid runId, CancellationToken cancellationToken)
+    {
+        var totalRecords = await _dbContext.CustomerBankAccounts.CountAsync(cancellationToken);
+        var affectedSourceRecords = await _dbContext.CustomerBankAccounts
+            .Where(x => true)
+            .ToListAsync(cancellationToken);
+
+        var summary = new DataProfilingSummary
+        {
+            SummaryId = Guid.NewGuid(),
+            RunId = runId,
+            BusinessObjectName = "Customer",
+            EntityName = "CustomerBankAccount",
+            ColumnName = "",
+            SummaryCode = "CUSTOMERBANKACCOUNT_TOTAL_RECORD_COUNT",
+            SummaryType = "TotalRecords",
+            Label = "Total records in CustomerBankAccount",
+            Severity = "",
+            MetricValue = affectedSourceRecords.Count,
+            AffectedCount = affectedSourceRecords.Count,
+            HasDrilldown = false,
+            DrilldownKey = "CUSTOMERBANKACCOUNT_TOTAL_RECORD_COUNT",
+            CreatedOn = DateTimeOffset.UtcNow
+        };
+
+        _dbContext.DataProfilingSummaries.Add(summary);
+
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    private async Task ProfileCustomerBankAccountBankNameNullOrEmptyCountAsync(Guid runId, CancellationToken cancellationToken)
     {
         var totalRecords = await _dbContext.CustomerBankAccounts.CountAsync(cancellationToken);
         var affectedSourceRecords = await _dbContext.CustomerBankAccounts
@@ -526,46 +923,43 @@ public sealed class CustomerProfiler(IAnalysisDbContext dbContext)
             BusinessObjectName = "Customer",
             EntityName = "CustomerBankAccount",
             ColumnName = "BankName",
-            SummaryCode = "CUSTOMER_CUSTOMERBANKACCOUNT_BANKNAME_NULL_COUNT",
-            SummaryType = "NullCount",
-            Label = "CustomerBankAccount BankName missing count",
-            Severity = "Medium",
+            SummaryCode = "CUSTOMERBANKACCOUNT_BANKNAME_MISSING_COUNT",
+            SummaryType = "NullOrEmptyCount",
+            Label = "CustomerBankAccount.BankName missing values",
+            Severity = "High",
             MetricValue = affectedSourceRecords.Count,
             AffectedCount = affectedSourceRecords.Count,
             HasDrilldown = true,
-            DrilldownKey = "CUSTOMER_CUSTOMERBANKACCOUNT_BANKNAME_NULL_COUNT",
+            DrilldownKey = "CUSTOMERBANKACCOUNT_BANKNAME_MISSING_COUNT",
             CreatedOn = DateTimeOffset.UtcNow
         };
 
         _dbContext.DataProfilingSummaries.Add(summary);
 
-        if (true)
+        var affectedRecords = affectedSourceRecords.Select(x => new DataProfilingDrilldown
         {
-            var affectedRecords = affectedSourceRecords.Select(x => new DataProfilingDrilldown
-            {
-                DrilldownId = Guid.NewGuid(),
-                RunId = runId,
-                SummaryId = summary.SummaryId,
-                BusinessObjectName = "Customer",
-                EntityName = "CustomerBankAccount",
-                RootRecordId = x.CustomerId.ToString(),
-                RecordId = x.Id.ToString(),
-                ColumnName = "BankName",
-                SummaryCode = "CUSTOMER_CUSTOMERBANKACCOUNT_BANKNAME_NULL_COUNT",
-                SummaryType = "NullCount",
-                FieldValue = x.BankName,
-                Message = "CustomerBankAccount BankName missing count",
-                RecordSnapshotJson = JsonSerializer.Serialize(new { x.Id, x.CustomerId, x.BankName }),
-                CreatedOn = DateTimeOffset.UtcNow
-            }).ToList();
+            DrilldownId = Guid.NewGuid(),
+            RunId = runId,
+            SummaryId = summary.SummaryId,
+            BusinessObjectName = "Customer",
+            EntityName = "CustomerBankAccount",
+            RootRecordId = x.CustomerId.ToString(),
+            RecordId = x.Id.ToString(),
+            ColumnName = "BankName",
+            SummaryCode = "CUSTOMERBANKACCOUNT_BANKNAME_MISSING_COUNT",
+            SummaryType = "NullOrEmptyCount",
+            FieldValue = x.BankName,
+            Message = "CustomerBankAccount.BankName missing values",
+            RecordSnapshotJson = JsonSerializer.Serialize(new { x.Id, x.CustomerId, x.BankName }),
+            CreatedOn = DateTimeOffset.UtcNow
+        }).ToList();
 
-            _dbContext.DataProfilingDrilldowns.AddRange(affectedRecords);
-        }
+        _dbContext.DataProfilingDrilldowns.AddRange(affectedRecords);
 
         await _dbContext.SaveChangesAsync(cancellationToken);
     }
 
-    private async Task ProfileCustomerBankAccountAccountNumberNullCountAsync(Guid runId, CancellationToken cancellationToken)
+    private async Task ProfileCustomerBankAccountAccountNumberNullOrEmptyCountAsync(Guid runId, CancellationToken cancellationToken)
     {
         var totalRecords = await _dbContext.CustomerBankAccounts.CountAsync(cancellationToken);
         var affectedSourceRecords = await _dbContext.CustomerBankAccounts
@@ -579,50 +973,97 @@ public sealed class CustomerProfiler(IAnalysisDbContext dbContext)
             BusinessObjectName = "Customer",
             EntityName = "CustomerBankAccount",
             ColumnName = "AccountNumber",
-            SummaryCode = "CUSTOMER_CUSTOMERBANKACCOUNT_ACCOUNTNUMBER_NULL_COUNT",
-            SummaryType = "NullCount",
-            Label = "CustomerBankAccount AccountNumber missing count",
-            Severity = "Medium",
+            SummaryCode = "CUSTOMERBANKACCOUNT_ACCOUNTNUMBER_MISSING_COUNT",
+            SummaryType = "NullOrEmptyCount",
+            Label = "CustomerBankAccount.AccountNumber missing values",
+            Severity = "High",
             MetricValue = affectedSourceRecords.Count,
             AffectedCount = affectedSourceRecords.Count,
             HasDrilldown = true,
-            DrilldownKey = "CUSTOMER_CUSTOMERBANKACCOUNT_ACCOUNTNUMBER_NULL_COUNT",
+            DrilldownKey = "CUSTOMERBANKACCOUNT_ACCOUNTNUMBER_MISSING_COUNT",
             CreatedOn = DateTimeOffset.UtcNow
         };
 
         _dbContext.DataProfilingSummaries.Add(summary);
 
-        if (true)
+        var affectedRecords = affectedSourceRecords.Select(x => new DataProfilingDrilldown
         {
-            var affectedRecords = affectedSourceRecords.Select(x => new DataProfilingDrilldown
-            {
-                DrilldownId = Guid.NewGuid(),
-                RunId = runId,
-                SummaryId = summary.SummaryId,
-                BusinessObjectName = "Customer",
-                EntityName = "CustomerBankAccount",
-                RootRecordId = x.CustomerId.ToString(),
-                RecordId = x.Id.ToString(),
-                ColumnName = "AccountNumber",
-                SummaryCode = "CUSTOMER_CUSTOMERBANKACCOUNT_ACCOUNTNUMBER_NULL_COUNT",
-                SummaryType = "NullCount",
-                FieldValue = x.AccountNumber,
-                Message = "CustomerBankAccount AccountNumber missing count",
-                RecordSnapshotJson = JsonSerializer.Serialize(new { x.Id, x.CustomerId, x.AccountNumber }),
-                CreatedOn = DateTimeOffset.UtcNow
-            }).ToList();
+            DrilldownId = Guid.NewGuid(),
+            RunId = runId,
+            SummaryId = summary.SummaryId,
+            BusinessObjectName = "Customer",
+            EntityName = "CustomerBankAccount",
+            RootRecordId = x.CustomerId.ToString(),
+            RecordId = x.Id.ToString(),
+            ColumnName = "AccountNumber",
+            SummaryCode = "CUSTOMERBANKACCOUNT_ACCOUNTNUMBER_MISSING_COUNT",
+            SummaryType = "NullOrEmptyCount",
+            FieldValue = x.AccountNumber,
+            Message = "CustomerBankAccount.AccountNumber missing values",
+            RecordSnapshotJson = JsonSerializer.Serialize(new { x.Id, x.CustomerId, x.AccountNumber }),
+            CreatedOn = DateTimeOffset.UtcNow
+        }).ToList();
 
-            _dbContext.DataProfilingDrilldowns.AddRange(affectedRecords);
-        }
+        _dbContext.DataProfilingDrilldowns.AddRange(affectedRecords);
 
         await _dbContext.SaveChangesAsync(cancellationToken);
     }
 
-    private async Task ProfileCustomerSalesAreaDistributionChannelNullCountAsync(Guid runId, CancellationToken cancellationToken)
+    private async Task ProfileCustomerBankAccountCurrencyIdNullOrEmptyCountAsync(Guid runId, CancellationToken cancellationToken)
+    {
+        var totalRecords = await _dbContext.CustomerBankAccounts.CountAsync(cancellationToken);
+        var affectedSourceRecords = await _dbContext.CustomerBankAccounts
+            .Where(x => false)
+            .ToListAsync(cancellationToken);
+
+        var summary = new DataProfilingSummary
+        {
+            SummaryId = Guid.NewGuid(),
+            RunId = runId,
+            BusinessObjectName = "Customer",
+            EntityName = "CustomerBankAccount",
+            ColumnName = "CurrencyId",
+            SummaryCode = "CUSTOMERBANKACCOUNT_CURRENCYID_MISSING_COUNT",
+            SummaryType = "NullOrEmptyCount",
+            Label = "CustomerBankAccount.CurrencyId missing values",
+            Severity = "High",
+            MetricValue = affectedSourceRecords.Count,
+            AffectedCount = affectedSourceRecords.Count,
+            HasDrilldown = true,
+            DrilldownKey = "CUSTOMERBANKACCOUNT_CURRENCYID_MISSING_COUNT",
+            CreatedOn = DateTimeOffset.UtcNow
+        };
+
+        _dbContext.DataProfilingSummaries.Add(summary);
+
+        var affectedRecords = affectedSourceRecords.Select(x => new DataProfilingDrilldown
+        {
+            DrilldownId = Guid.NewGuid(),
+            RunId = runId,
+            SummaryId = summary.SummaryId,
+            BusinessObjectName = "Customer",
+            EntityName = "CustomerBankAccount",
+            RootRecordId = x.CustomerId.ToString(),
+            RecordId = x.Id.ToString(),
+            ColumnName = "CurrencyId",
+            SummaryCode = "CUSTOMERBANKACCOUNT_CURRENCYID_MISSING_COUNT",
+            SummaryType = "NullOrEmptyCount",
+            FieldValue = x.CurrencyId.ToString(),
+            Message = "CustomerBankAccount.CurrencyId missing values",
+            RecordSnapshotJson = JsonSerializer.Serialize(new { x.Id, x.CustomerId, x.CurrencyId }),
+            CreatedOn = DateTimeOffset.UtcNow
+        }).ToList();
+
+        _dbContext.DataProfilingDrilldowns.AddRange(affectedRecords);
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    private async Task ProfileCustomerSalesAreaRecordsTotalRecordsAsync(Guid runId, CancellationToken cancellationToken)
     {
         var totalRecords = await _dbContext.CustomerSalesAreas.CountAsync(cancellationToken);
         var affectedSourceRecords = await _dbContext.CustomerSalesAreas
-            .Where(x => string.IsNullOrEmpty(x.DistributionChannel))
+            .Where(x => true)
             .ToListAsync(cancellationToken);
 
         var summary = new DataProfilingSummary
@@ -631,51 +1072,29 @@ public sealed class CustomerProfiler(IAnalysisDbContext dbContext)
             RunId = runId,
             BusinessObjectName = "Customer",
             EntityName = "CustomerSalesArea",
-            ColumnName = "DistributionChannel",
-            SummaryCode = "CUSTOMER_CUSTOMERSALESAREA_DISTRIBUTIONCHANNEL_NULL_COUNT",
-            SummaryType = "NullCount",
-            Label = "CustomerSalesArea DistributionChannel missing count",
-            Severity = "Medium",
+            ColumnName = "",
+            SummaryCode = "CUSTOMERSALESAREA_TOTAL_RECORD_COUNT",
+            SummaryType = "TotalRecords",
+            Label = "Total records in CustomerSalesArea",
+            Severity = "",
             MetricValue = affectedSourceRecords.Count,
             AffectedCount = affectedSourceRecords.Count,
-            HasDrilldown = true,
-            DrilldownKey = "CUSTOMER_CUSTOMERSALESAREA_DISTRIBUTIONCHANNEL_NULL_COUNT",
+            HasDrilldown = false,
+            DrilldownKey = "CUSTOMERSALESAREA_TOTAL_RECORD_COUNT",
             CreatedOn = DateTimeOffset.UtcNow
         };
 
         _dbContext.DataProfilingSummaries.Add(summary);
 
-        if (true)
-        {
-            var affectedRecords = affectedSourceRecords.Select(x => new DataProfilingDrilldown
-            {
-                DrilldownId = Guid.NewGuid(),
-                RunId = runId,
-                SummaryId = summary.SummaryId,
-                BusinessObjectName = "Customer",
-                EntityName = "CustomerSalesArea",
-                RootRecordId = x.CustomerId.ToString(),
-                RecordId = x.Id.ToString(),
-                ColumnName = "DistributionChannel",
-                SummaryCode = "CUSTOMER_CUSTOMERSALESAREA_DISTRIBUTIONCHANNEL_NULL_COUNT",
-                SummaryType = "NullCount",
-                FieldValue = x.DistributionChannel,
-                Message = "CustomerSalesArea DistributionChannel missing count",
-                RecordSnapshotJson = JsonSerializer.Serialize(new { x.Id, x.CustomerId, x.DistributionChannel }),
-                CreatedOn = DateTimeOffset.UtcNow
-            }).ToList();
-
-            _dbContext.DataProfilingDrilldowns.AddRange(affectedRecords);
-        }
 
         await _dbContext.SaveChangesAsync(cancellationToken);
     }
 
-    private async Task ProfileCustomerSalesAreaDivisionNullCountAsync(Guid runId, CancellationToken cancellationToken)
+    private async Task ProfileCustomerSalesAreaCreditLimitBelowMinimumCountAsync(Guid runId, CancellationToken cancellationToken)
     {
         var totalRecords = await _dbContext.CustomerSalesAreas.CountAsync(cancellationToken);
         var affectedSourceRecords = await _dbContext.CustomerSalesAreas
-            .Where(x => string.IsNullOrEmpty(x.Division))
+            .Where(x => x.CreditLimit < 0)
             .ToListAsync(cancellationToken);
 
         var summary = new DataProfilingSummary
@@ -684,47 +1103,75 @@ public sealed class CustomerProfiler(IAnalysisDbContext dbContext)
             RunId = runId,
             BusinessObjectName = "Customer",
             EntityName = "CustomerSalesArea",
-            ColumnName = "Division",
-            SummaryCode = "CUSTOMER_CUSTOMERSALESAREA_DIVISION_NULL_COUNT",
-            SummaryType = "NullCount",
-            Label = "CustomerSalesArea Division missing count",
-            Severity = "Medium",
+            ColumnName = "CreditLimit",
+            SummaryCode = "CUSTOMERSALESAREA_CREDITLIMIT_BELOW_MIN",
+            SummaryType = "BelowMinimumCount",
+            Label = "CustomerSalesArea.CreditLimit below minimum 0",
+            Severity = "High",
             MetricValue = affectedSourceRecords.Count,
             AffectedCount = affectedSourceRecords.Count,
             HasDrilldown = true,
-            DrilldownKey = "CUSTOMER_CUSTOMERSALESAREA_DIVISION_NULL_COUNT",
+            DrilldownKey = "CUSTOMERSALESAREA_CREDITLIMIT_BELOW_MIN",
             CreatedOn = DateTimeOffset.UtcNow
         };
 
         _dbContext.DataProfilingSummaries.Add(summary);
 
-        if (true)
+        var affectedRecords = affectedSourceRecords.Select(x => new DataProfilingDrilldown
         {
-            var affectedRecords = affectedSourceRecords.Select(x => new DataProfilingDrilldown
-            {
-                DrilldownId = Guid.NewGuid(),
-                RunId = runId,
-                SummaryId = summary.SummaryId,
-                BusinessObjectName = "Customer",
-                EntityName = "CustomerSalesArea",
-                RootRecordId = x.CustomerId.ToString(),
-                RecordId = x.Id.ToString(),
-                ColumnName = "Division",
-                SummaryCode = "CUSTOMER_CUSTOMERSALESAREA_DIVISION_NULL_COUNT",
-                SummaryType = "NullCount",
-                FieldValue = x.Division,
-                Message = "CustomerSalesArea Division missing count",
-                RecordSnapshotJson = JsonSerializer.Serialize(new { x.Id, x.CustomerId, x.Division }),
-                CreatedOn = DateTimeOffset.UtcNow
-            }).ToList();
+            DrilldownId = Guid.NewGuid(),
+            RunId = runId,
+            SummaryId = summary.SummaryId,
+            BusinessObjectName = "Customer",
+            EntityName = "CustomerSalesArea",
+            RootRecordId = x.CustomerId.ToString(),
+            RecordId = x.Id.ToString(),
+            ColumnName = "CreditLimit",
+            SummaryCode = "CUSTOMERSALESAREA_CREDITLIMIT_BELOW_MIN",
+            SummaryType = "BelowMinimumCount",
+            FieldValue = x.CreditLimit.ToString(),
+            Message = "CustomerSalesArea.CreditLimit below minimum 0",
+            RecordSnapshotJson = JsonSerializer.Serialize(new { x.Id, x.CustomerId, x.CreditLimit }),
+            CreatedOn = DateTimeOffset.UtcNow
+        }).ToList();
 
-            _dbContext.DataProfilingDrilldowns.AddRange(affectedRecords);
-        }
+        _dbContext.DataProfilingDrilldowns.AddRange(affectedRecords);
 
         await _dbContext.SaveChangesAsync(cancellationToken);
     }
 
-    private async Task ProfileCustomerTaxTaxTypeNullCountAsync(Guid runId, CancellationToken cancellationToken)
+    private async Task ProfileCustomerTaxRecordsTotalRecordsAsync(Guid runId, CancellationToken cancellationToken)
+    {
+        var totalRecords = await _dbContext.CustomerTaxs.CountAsync(cancellationToken);
+        var affectedSourceRecords = await _dbContext.CustomerTaxs
+            .Where(x => true)
+            .ToListAsync(cancellationToken);
+
+        var summary = new DataProfilingSummary
+        {
+            SummaryId = Guid.NewGuid(),
+            RunId = runId,
+            BusinessObjectName = "Customer",
+            EntityName = "CustomerTax",
+            ColumnName = "",
+            SummaryCode = "CUSTOMERTAX_TOTAL_RECORD_COUNT",
+            SummaryType = "TotalRecords",
+            Label = "Total records in CustomerTax",
+            Severity = "",
+            MetricValue = affectedSourceRecords.Count,
+            AffectedCount = affectedSourceRecords.Count,
+            HasDrilldown = false,
+            DrilldownKey = "CUSTOMERTAX_TOTAL_RECORD_COUNT",
+            CreatedOn = DateTimeOffset.UtcNow
+        };
+
+        _dbContext.DataProfilingSummaries.Add(summary);
+
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    private async Task ProfileCustomerTaxTaxTypeNullOrEmptyCountAsync(Guid runId, CancellationToken cancellationToken)
     {
         var totalRecords = await _dbContext.CustomerTaxs.CountAsync(cancellationToken);
         var affectedSourceRecords = await _dbContext.CustomerTaxs
@@ -738,46 +1185,43 @@ public sealed class CustomerProfiler(IAnalysisDbContext dbContext)
             BusinessObjectName = "Customer",
             EntityName = "CustomerTax",
             ColumnName = "TaxType",
-            SummaryCode = "CUSTOMER_CUSTOMERTAX_TAXTYPE_NULL_COUNT",
-            SummaryType = "NullCount",
-            Label = "CustomerTax TaxType missing count",
-            Severity = "Medium",
+            SummaryCode = "CUSTOMERTAX_TAXTYPE_MISSING_COUNT",
+            SummaryType = "NullOrEmptyCount",
+            Label = "CustomerTax.TaxType missing values",
+            Severity = "High",
             MetricValue = affectedSourceRecords.Count,
             AffectedCount = affectedSourceRecords.Count,
             HasDrilldown = true,
-            DrilldownKey = "CUSTOMER_CUSTOMERTAX_TAXTYPE_NULL_COUNT",
+            DrilldownKey = "CUSTOMERTAX_TAXTYPE_MISSING_COUNT",
             CreatedOn = DateTimeOffset.UtcNow
         };
 
         _dbContext.DataProfilingSummaries.Add(summary);
 
-        if (true)
+        var affectedRecords = affectedSourceRecords.Select(x => new DataProfilingDrilldown
         {
-            var affectedRecords = affectedSourceRecords.Select(x => new DataProfilingDrilldown
-            {
-                DrilldownId = Guid.NewGuid(),
-                RunId = runId,
-                SummaryId = summary.SummaryId,
-                BusinessObjectName = "Customer",
-                EntityName = "CustomerTax",
-                RootRecordId = x.CustomerId.ToString(),
-                RecordId = x.Id.ToString(),
-                ColumnName = "TaxType",
-                SummaryCode = "CUSTOMER_CUSTOMERTAX_TAXTYPE_NULL_COUNT",
-                SummaryType = "NullCount",
-                FieldValue = x.TaxType,
-                Message = "CustomerTax TaxType missing count",
-                RecordSnapshotJson = JsonSerializer.Serialize(new { x.Id, x.CustomerId, x.TaxType }),
-                CreatedOn = DateTimeOffset.UtcNow
-            }).ToList();
+            DrilldownId = Guid.NewGuid(),
+            RunId = runId,
+            SummaryId = summary.SummaryId,
+            BusinessObjectName = "Customer",
+            EntityName = "CustomerTax",
+            RootRecordId = x.CustomerId.ToString(),
+            RecordId = x.Id.ToString(),
+            ColumnName = "TaxType",
+            SummaryCode = "CUSTOMERTAX_TAXTYPE_MISSING_COUNT",
+            SummaryType = "NullOrEmptyCount",
+            FieldValue = x.TaxType,
+            Message = "CustomerTax.TaxType missing values",
+            RecordSnapshotJson = JsonSerializer.Serialize(new { x.Id, x.CustomerId, x.TaxType }),
+            CreatedOn = DateTimeOffset.UtcNow
+        }).ToList();
 
-            _dbContext.DataProfilingDrilldowns.AddRange(affectedRecords);
-        }
+        _dbContext.DataProfilingDrilldowns.AddRange(affectedRecords);
 
         await _dbContext.SaveChangesAsync(cancellationToken);
     }
 
-    private async Task ProfileCustomerTaxTaxNumberNullCountAsync(Guid runId, CancellationToken cancellationToken)
+    private async Task ProfileCustomerTaxTaxNumberNullOrEmptyCountAsync(Guid runId, CancellationToken cancellationToken)
     {
         var totalRecords = await _dbContext.CustomerTaxs.CountAsync(cancellationToken);
         var affectedSourceRecords = await _dbContext.CustomerTaxs
@@ -791,46 +1235,124 @@ public sealed class CustomerProfiler(IAnalysisDbContext dbContext)
             BusinessObjectName = "Customer",
             EntityName = "CustomerTax",
             ColumnName = "TaxNumber",
-            SummaryCode = "CUSTOMER_CUSTOMERTAX_TAXNUMBER_NULL_COUNT",
-            SummaryType = "NullCount",
-            Label = "CustomerTax TaxNumber missing count",
-            Severity = "Medium",
+            SummaryCode = "CUSTOMERTAX_TAXNUMBER_MISSING_COUNT",
+            SummaryType = "NullOrEmptyCount",
+            Label = "CustomerTax.TaxNumber missing values",
+            Severity = "High",
             MetricValue = affectedSourceRecords.Count,
             AffectedCount = affectedSourceRecords.Count,
             HasDrilldown = true,
-            DrilldownKey = "CUSTOMER_CUSTOMERTAX_TAXNUMBER_NULL_COUNT",
+            DrilldownKey = "CUSTOMERTAX_TAXNUMBER_MISSING_COUNT",
             CreatedOn = DateTimeOffset.UtcNow
         };
 
         _dbContext.DataProfilingSummaries.Add(summary);
 
-        if (true)
+        var affectedRecords = affectedSourceRecords.Select(x => new DataProfilingDrilldown
         {
-            var affectedRecords = affectedSourceRecords.Select(x => new DataProfilingDrilldown
-            {
-                DrilldownId = Guid.NewGuid(),
-                RunId = runId,
-                SummaryId = summary.SummaryId,
-                BusinessObjectName = "Customer",
-                EntityName = "CustomerTax",
-                RootRecordId = x.CustomerId.ToString(),
-                RecordId = x.Id.ToString(),
-                ColumnName = "TaxNumber",
-                SummaryCode = "CUSTOMER_CUSTOMERTAX_TAXNUMBER_NULL_COUNT",
-                SummaryType = "NullCount",
-                FieldValue = x.TaxNumber,
-                Message = "CustomerTax TaxNumber missing count",
-                RecordSnapshotJson = JsonSerializer.Serialize(new { x.Id, x.CustomerId, x.TaxNumber }),
-                CreatedOn = DateTimeOffset.UtcNow
-            }).ToList();
+            DrilldownId = Guid.NewGuid(),
+            RunId = runId,
+            SummaryId = summary.SummaryId,
+            BusinessObjectName = "Customer",
+            EntityName = "CustomerTax",
+            RootRecordId = x.CustomerId.ToString(),
+            RecordId = x.Id.ToString(),
+            ColumnName = "TaxNumber",
+            SummaryCode = "CUSTOMERTAX_TAXNUMBER_MISSING_COUNT",
+            SummaryType = "NullOrEmptyCount",
+            FieldValue = x.TaxNumber,
+            Message = "CustomerTax.TaxNumber missing values",
+            RecordSnapshotJson = JsonSerializer.Serialize(new { x.Id, x.CustomerId, x.TaxNumber }),
+            CreatedOn = DateTimeOffset.UtcNow
+        }).ToList();
 
-            _dbContext.DataProfilingDrilldowns.AddRange(affectedRecords);
-        }
+        _dbContext.DataProfilingDrilldowns.AddRange(affectedRecords);
 
         await _dbContext.SaveChangesAsync(cancellationToken);
     }
 
-    private async Task ProfileCustomerClassificationClassificationTypeNullCountAsync(Guid runId, CancellationToken cancellationToken)
+    private async Task ProfileCustomerTaxCountryIdNullOrEmptyCountAsync(Guid runId, CancellationToken cancellationToken)
+    {
+        var totalRecords = await _dbContext.CustomerTaxs.CountAsync(cancellationToken);
+        var affectedSourceRecords = await _dbContext.CustomerTaxs
+            .Where(x => false)
+            .ToListAsync(cancellationToken);
+
+        var summary = new DataProfilingSummary
+        {
+            SummaryId = Guid.NewGuid(),
+            RunId = runId,
+            BusinessObjectName = "Customer",
+            EntityName = "CustomerTax",
+            ColumnName = "CountryId",
+            SummaryCode = "CUSTOMERTAX_COUNTRYID_MISSING_COUNT",
+            SummaryType = "NullOrEmptyCount",
+            Label = "CustomerTax.CountryId missing values",
+            Severity = "High",
+            MetricValue = affectedSourceRecords.Count,
+            AffectedCount = affectedSourceRecords.Count,
+            HasDrilldown = true,
+            DrilldownKey = "CUSTOMERTAX_COUNTRYID_MISSING_COUNT",
+            CreatedOn = DateTimeOffset.UtcNow
+        };
+
+        _dbContext.DataProfilingSummaries.Add(summary);
+
+        var affectedRecords = affectedSourceRecords.Select(x => new DataProfilingDrilldown
+        {
+            DrilldownId = Guid.NewGuid(),
+            RunId = runId,
+            SummaryId = summary.SummaryId,
+            BusinessObjectName = "Customer",
+            EntityName = "CustomerTax",
+            RootRecordId = x.CustomerId.ToString(),
+            RecordId = x.Id.ToString(),
+            ColumnName = "CountryId",
+            SummaryCode = "CUSTOMERTAX_COUNTRYID_MISSING_COUNT",
+            SummaryType = "NullOrEmptyCount",
+            FieldValue = x.CountryId.ToString(),
+            Message = "CustomerTax.CountryId missing values",
+            RecordSnapshotJson = JsonSerializer.Serialize(new { x.Id, x.CustomerId, x.CountryId }),
+            CreatedOn = DateTimeOffset.UtcNow
+        }).ToList();
+
+        _dbContext.DataProfilingDrilldowns.AddRange(affectedRecords);
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    private async Task ProfileCustomerClassificationRecordsTotalRecordsAsync(Guid runId, CancellationToken cancellationToken)
+    {
+        var totalRecords = await _dbContext.CustomerClassifications.CountAsync(cancellationToken);
+        var affectedSourceRecords = await _dbContext.CustomerClassifications
+            .Where(x => true)
+            .ToListAsync(cancellationToken);
+
+        var summary = new DataProfilingSummary
+        {
+            SummaryId = Guid.NewGuid(),
+            RunId = runId,
+            BusinessObjectName = "Customer",
+            EntityName = "CustomerClassification",
+            ColumnName = "",
+            SummaryCode = "CUSTOMERCLASSIFICATION_TOTAL_RECORD_COUNT",
+            SummaryType = "TotalRecords",
+            Label = "Total records in CustomerClassification",
+            Severity = "",
+            MetricValue = affectedSourceRecords.Count,
+            AffectedCount = affectedSourceRecords.Count,
+            HasDrilldown = false,
+            DrilldownKey = "CUSTOMERCLASSIFICATION_TOTAL_RECORD_COUNT",
+            CreatedOn = DateTimeOffset.UtcNow
+        };
+
+        _dbContext.DataProfilingSummaries.Add(summary);
+
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    private async Task ProfileCustomerClassificationClassificationTypeNullOrEmptyCountAsync(Guid runId, CancellationToken cancellationToken)
     {
         var totalRecords = await _dbContext.CustomerClassifications.CountAsync(cancellationToken);
         var affectedSourceRecords = await _dbContext.CustomerClassifications
@@ -844,46 +1366,43 @@ public sealed class CustomerProfiler(IAnalysisDbContext dbContext)
             BusinessObjectName = "Customer",
             EntityName = "CustomerClassification",
             ColumnName = "ClassificationType",
-            SummaryCode = "CUSTOMER_CUSTOMERCLASSIFICATION_CLASSIFICATIONTYPE_NULL_COUNT",
-            SummaryType = "NullCount",
-            Label = "CustomerClassification ClassificationType missing count",
-            Severity = "Medium",
+            SummaryCode = "CUSTOMERCLASSIFICATION_CLASSIFICATIONTYPE_MISSING_COUNT",
+            SummaryType = "NullOrEmptyCount",
+            Label = "CustomerClassification.ClassificationType missing values",
+            Severity = "High",
             MetricValue = affectedSourceRecords.Count,
             AffectedCount = affectedSourceRecords.Count,
             HasDrilldown = true,
-            DrilldownKey = "CUSTOMER_CUSTOMERCLASSIFICATION_CLASSIFICATIONTYPE_NULL_COUNT",
+            DrilldownKey = "CUSTOMERCLASSIFICATION_CLASSIFICATIONTYPE_MISSING_COUNT",
             CreatedOn = DateTimeOffset.UtcNow
         };
 
         _dbContext.DataProfilingSummaries.Add(summary);
 
-        if (true)
+        var affectedRecords = affectedSourceRecords.Select(x => new DataProfilingDrilldown
         {
-            var affectedRecords = affectedSourceRecords.Select(x => new DataProfilingDrilldown
-            {
-                DrilldownId = Guid.NewGuid(),
-                RunId = runId,
-                SummaryId = summary.SummaryId,
-                BusinessObjectName = "Customer",
-                EntityName = "CustomerClassification",
-                RootRecordId = x.CustomerId.ToString(),
-                RecordId = x.Id.ToString(),
-                ColumnName = "ClassificationType",
-                SummaryCode = "CUSTOMER_CUSTOMERCLASSIFICATION_CLASSIFICATIONTYPE_NULL_COUNT",
-                SummaryType = "NullCount",
-                FieldValue = x.ClassificationType,
-                Message = "CustomerClassification ClassificationType missing count",
-                RecordSnapshotJson = JsonSerializer.Serialize(new { x.Id, x.CustomerId, x.ClassificationType }),
-                CreatedOn = DateTimeOffset.UtcNow
-            }).ToList();
+            DrilldownId = Guid.NewGuid(),
+            RunId = runId,
+            SummaryId = summary.SummaryId,
+            BusinessObjectName = "Customer",
+            EntityName = "CustomerClassification",
+            RootRecordId = x.CustomerId.ToString(),
+            RecordId = x.Id.ToString(),
+            ColumnName = "ClassificationType",
+            SummaryCode = "CUSTOMERCLASSIFICATION_CLASSIFICATIONTYPE_MISSING_COUNT",
+            SummaryType = "NullOrEmptyCount",
+            FieldValue = x.ClassificationType,
+            Message = "CustomerClassification.ClassificationType missing values",
+            RecordSnapshotJson = JsonSerializer.Serialize(new { x.Id, x.CustomerId, x.ClassificationType }),
+            CreatedOn = DateTimeOffset.UtcNow
+        }).ToList();
 
-            _dbContext.DataProfilingDrilldowns.AddRange(affectedRecords);
-        }
+        _dbContext.DataProfilingDrilldowns.AddRange(affectedRecords);
 
         await _dbContext.SaveChangesAsync(cancellationToken);
     }
 
-    private async Task ProfileCustomerClassificationClassificationValueNullCountAsync(Guid runId, CancellationToken cancellationToken)
+    private async Task ProfileCustomerClassificationClassificationValueNullOrEmptyCountAsync(Guid runId, CancellationToken cancellationToken)
     {
         var totalRecords = await _dbContext.CustomerClassifications.CountAsync(cancellationToken);
         var affectedSourceRecords = await _dbContext.CustomerClassifications
@@ -897,46 +1416,74 @@ public sealed class CustomerProfiler(IAnalysisDbContext dbContext)
             BusinessObjectName = "Customer",
             EntityName = "CustomerClassification",
             ColumnName = "ClassificationValue",
-            SummaryCode = "CUSTOMER_CUSTOMERCLASSIFICATION_CLASSIFICATIONVALUE_NULL_COUNT",
-            SummaryType = "NullCount",
-            Label = "CustomerClassification ClassificationValue missing count",
-            Severity = "Medium",
+            SummaryCode = "CUSTOMERCLASSIFICATION_CLASSIFICATIONVALUE_MISSING_COUNT",
+            SummaryType = "NullOrEmptyCount",
+            Label = "CustomerClassification.ClassificationValue missing values",
+            Severity = "High",
             MetricValue = affectedSourceRecords.Count,
             AffectedCount = affectedSourceRecords.Count,
             HasDrilldown = true,
-            DrilldownKey = "CUSTOMER_CUSTOMERCLASSIFICATION_CLASSIFICATIONVALUE_NULL_COUNT",
+            DrilldownKey = "CUSTOMERCLASSIFICATION_CLASSIFICATIONVALUE_MISSING_COUNT",
             CreatedOn = DateTimeOffset.UtcNow
         };
 
         _dbContext.DataProfilingSummaries.Add(summary);
 
-        if (true)
+        var affectedRecords = affectedSourceRecords.Select(x => new DataProfilingDrilldown
         {
-            var affectedRecords = affectedSourceRecords.Select(x => new DataProfilingDrilldown
-            {
-                DrilldownId = Guid.NewGuid(),
-                RunId = runId,
-                SummaryId = summary.SummaryId,
-                BusinessObjectName = "Customer",
-                EntityName = "CustomerClassification",
-                RootRecordId = x.CustomerId.ToString(),
-                RecordId = x.Id.ToString(),
-                ColumnName = "ClassificationValue",
-                SummaryCode = "CUSTOMER_CUSTOMERCLASSIFICATION_CLASSIFICATIONVALUE_NULL_COUNT",
-                SummaryType = "NullCount",
-                FieldValue = x.ClassificationValue,
-                Message = "CustomerClassification ClassificationValue missing count",
-                RecordSnapshotJson = JsonSerializer.Serialize(new { x.Id, x.CustomerId, x.ClassificationValue }),
-                CreatedOn = DateTimeOffset.UtcNow
-            }).ToList();
+            DrilldownId = Guid.NewGuid(),
+            RunId = runId,
+            SummaryId = summary.SummaryId,
+            BusinessObjectName = "Customer",
+            EntityName = "CustomerClassification",
+            RootRecordId = x.CustomerId.ToString(),
+            RecordId = x.Id.ToString(),
+            ColumnName = "ClassificationValue",
+            SummaryCode = "CUSTOMERCLASSIFICATION_CLASSIFICATIONVALUE_MISSING_COUNT",
+            SummaryType = "NullOrEmptyCount",
+            FieldValue = x.ClassificationValue,
+            Message = "CustomerClassification.ClassificationValue missing values",
+            RecordSnapshotJson = JsonSerializer.Serialize(new { x.Id, x.CustomerId, x.ClassificationValue }),
+            CreatedOn = DateTimeOffset.UtcNow
+        }).ToList();
 
-            _dbContext.DataProfilingDrilldowns.AddRange(affectedRecords);
-        }
+        _dbContext.DataProfilingDrilldowns.AddRange(affectedRecords);
 
         await _dbContext.SaveChangesAsync(cancellationToken);
     }
 
-    private async Task ProfileCustomerCreditProfileCreditControlAreaNullCountAsync(Guid runId, CancellationToken cancellationToken)
+    private async Task ProfileCustomerCreditProfileRecordsTotalRecordsAsync(Guid runId, CancellationToken cancellationToken)
+    {
+        var totalRecords = await _dbContext.CustomerCreditProfiles.CountAsync(cancellationToken);
+        var affectedSourceRecords = await _dbContext.CustomerCreditProfiles
+            .Where(x => true)
+            .ToListAsync(cancellationToken);
+
+        var summary = new DataProfilingSummary
+        {
+            SummaryId = Guid.NewGuid(),
+            RunId = runId,
+            BusinessObjectName = "Customer",
+            EntityName = "CustomerCreditProfile",
+            ColumnName = "",
+            SummaryCode = "CUSTOMERCREDITPROFILE_TOTAL_RECORD_COUNT",
+            SummaryType = "TotalRecords",
+            Label = "Total records in CustomerCreditProfile",
+            Severity = "",
+            MetricValue = affectedSourceRecords.Count,
+            AffectedCount = affectedSourceRecords.Count,
+            HasDrilldown = false,
+            DrilldownKey = "CUSTOMERCREDITPROFILE_TOTAL_RECORD_COUNT",
+            CreatedOn = DateTimeOffset.UtcNow
+        };
+
+        _dbContext.DataProfilingSummaries.Add(summary);
+
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    private async Task ProfileCustomerCreditProfileCreditControlAreaNullOrEmptyCountAsync(Guid runId, CancellationToken cancellationToken)
     {
         var totalRecords = await _dbContext.CustomerCreditProfiles.CountAsync(cancellationToken);
         var affectedSourceRecords = await _dbContext.CustomerCreditProfiles
@@ -950,46 +1497,174 @@ public sealed class CustomerProfiler(IAnalysisDbContext dbContext)
             BusinessObjectName = "Customer",
             EntityName = "CustomerCreditProfile",
             ColumnName = "CreditControlArea",
-            SummaryCode = "CUSTOMER_CUSTOMERCREDITPROFILE_CREDITCONTROLAREA_NULL_COUNT",
-            SummaryType = "NullCount",
-            Label = "CustomerCreditProfile CreditControlArea missing count",
-            Severity = "Medium",
+            SummaryCode = "CUSTOMERCREDITPROFILE_CREDITCONTROLAREA_MISSING_COUNT",
+            SummaryType = "NullOrEmptyCount",
+            Label = "CustomerCreditProfile.CreditControlArea missing values",
+            Severity = "High",
             MetricValue = affectedSourceRecords.Count,
             AffectedCount = affectedSourceRecords.Count,
             HasDrilldown = true,
-            DrilldownKey = "CUSTOMER_CUSTOMERCREDITPROFILE_CREDITCONTROLAREA_NULL_COUNT",
+            DrilldownKey = "CUSTOMERCREDITPROFILE_CREDITCONTROLAREA_MISSING_COUNT",
             CreatedOn = DateTimeOffset.UtcNow
         };
 
         _dbContext.DataProfilingSummaries.Add(summary);
 
-        if (true)
+        var affectedRecords = affectedSourceRecords.Select(x => new DataProfilingDrilldown
         {
-            var affectedRecords = affectedSourceRecords.Select(x => new DataProfilingDrilldown
-            {
-                DrilldownId = Guid.NewGuid(),
-                RunId = runId,
-                SummaryId = summary.SummaryId,
-                BusinessObjectName = "Customer",
-                EntityName = "CustomerCreditProfile",
-                RootRecordId = x.CustomerId.ToString(),
-                RecordId = x.Id.ToString(),
-                ColumnName = "CreditControlArea",
-                SummaryCode = "CUSTOMER_CUSTOMERCREDITPROFILE_CREDITCONTROLAREA_NULL_COUNT",
-                SummaryType = "NullCount",
-                FieldValue = x.CreditControlArea,
-                Message = "CustomerCreditProfile CreditControlArea missing count",
-                RecordSnapshotJson = JsonSerializer.Serialize(new { x.Id, x.CustomerId, x.CreditControlArea }),
-                CreatedOn = DateTimeOffset.UtcNow
-            }).ToList();
+            DrilldownId = Guid.NewGuid(),
+            RunId = runId,
+            SummaryId = summary.SummaryId,
+            BusinessObjectName = "Customer",
+            EntityName = "CustomerCreditProfile",
+            RootRecordId = x.CustomerId.ToString(),
+            RecordId = x.Id.ToString(),
+            ColumnName = "CreditControlArea",
+            SummaryCode = "CUSTOMERCREDITPROFILE_CREDITCONTROLAREA_MISSING_COUNT",
+            SummaryType = "NullOrEmptyCount",
+            FieldValue = x.CreditControlArea,
+            Message = "CustomerCreditProfile.CreditControlArea missing values",
+            RecordSnapshotJson = JsonSerializer.Serialize(new { x.Id, x.CustomerId, x.CreditControlArea }),
+            CreatedOn = DateTimeOffset.UtcNow
+        }).ToList();
 
-            _dbContext.DataProfilingDrilldowns.AddRange(affectedRecords);
-        }
+        _dbContext.DataProfilingDrilldowns.AddRange(affectedRecords);
 
         await _dbContext.SaveChangesAsync(cancellationToken);
     }
 
-    private async Task ProfileCustomerPartnerFunctionPartnerFunctionCodeNullCountAsync(Guid runId, CancellationToken cancellationToken)
+    private async Task ProfileCustomerCreditProfileCreditLimitNullOrEmptyCountAsync(Guid runId, CancellationToken cancellationToken)
+    {
+        var totalRecords = await _dbContext.CustomerCreditProfiles.CountAsync(cancellationToken);
+        var affectedSourceRecords = await _dbContext.CustomerCreditProfiles
+            .Where(x => false)
+            .ToListAsync(cancellationToken);
+
+        var summary = new DataProfilingSummary
+        {
+            SummaryId = Guid.NewGuid(),
+            RunId = runId,
+            BusinessObjectName = "Customer",
+            EntityName = "CustomerCreditProfile",
+            ColumnName = "CreditLimit",
+            SummaryCode = "CUSTOMERCREDITPROFILE_CREDITLIMIT_MISSING_COUNT",
+            SummaryType = "NullOrEmptyCount",
+            Label = "CustomerCreditProfile.CreditLimit missing values",
+            Severity = "High",
+            MetricValue = affectedSourceRecords.Count,
+            AffectedCount = affectedSourceRecords.Count,
+            HasDrilldown = true,
+            DrilldownKey = "CUSTOMERCREDITPROFILE_CREDITLIMIT_MISSING_COUNT",
+            CreatedOn = DateTimeOffset.UtcNow
+        };
+
+        _dbContext.DataProfilingSummaries.Add(summary);
+
+        var affectedRecords = affectedSourceRecords.Select(x => new DataProfilingDrilldown
+        {
+            DrilldownId = Guid.NewGuid(),
+            RunId = runId,
+            SummaryId = summary.SummaryId,
+            BusinessObjectName = "Customer",
+            EntityName = "CustomerCreditProfile",
+            RootRecordId = x.CustomerId.ToString(),
+            RecordId = x.Id.ToString(),
+            ColumnName = "CreditLimit",
+            SummaryCode = "CUSTOMERCREDITPROFILE_CREDITLIMIT_MISSING_COUNT",
+            SummaryType = "NullOrEmptyCount",
+            FieldValue = x.CreditLimit.ToString(),
+            Message = "CustomerCreditProfile.CreditLimit missing values",
+            RecordSnapshotJson = JsonSerializer.Serialize(new { x.Id, x.CustomerId, x.CreditLimit }),
+            CreatedOn = DateTimeOffset.UtcNow
+        }).ToList();
+
+        _dbContext.DataProfilingDrilldowns.AddRange(affectedRecords);
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    private async Task ProfileCustomerCreditProfileCreditLimitBelowMinimumCountAsync(Guid runId, CancellationToken cancellationToken)
+    {
+        var totalRecords = await _dbContext.CustomerCreditProfiles.CountAsync(cancellationToken);
+        var affectedSourceRecords = await _dbContext.CustomerCreditProfiles
+            .Where(x => x.CreditLimit < 0)
+            .ToListAsync(cancellationToken);
+
+        var summary = new DataProfilingSummary
+        {
+            SummaryId = Guid.NewGuid(),
+            RunId = runId,
+            BusinessObjectName = "Customer",
+            EntityName = "CustomerCreditProfile",
+            ColumnName = "CreditLimit",
+            SummaryCode = "CUSTOMERCREDITPROFILE_CREDITLIMIT_BELOW_MIN",
+            SummaryType = "BelowMinimumCount",
+            Label = "CustomerCreditProfile.CreditLimit below minimum 0",
+            Severity = "High",
+            MetricValue = affectedSourceRecords.Count,
+            AffectedCount = affectedSourceRecords.Count,
+            HasDrilldown = true,
+            DrilldownKey = "CUSTOMERCREDITPROFILE_CREDITLIMIT_BELOW_MIN",
+            CreatedOn = DateTimeOffset.UtcNow
+        };
+
+        _dbContext.DataProfilingSummaries.Add(summary);
+
+        var affectedRecords = affectedSourceRecords.Select(x => new DataProfilingDrilldown
+        {
+            DrilldownId = Guid.NewGuid(),
+            RunId = runId,
+            SummaryId = summary.SummaryId,
+            BusinessObjectName = "Customer",
+            EntityName = "CustomerCreditProfile",
+            RootRecordId = x.CustomerId.ToString(),
+            RecordId = x.Id.ToString(),
+            ColumnName = "CreditLimit",
+            SummaryCode = "CUSTOMERCREDITPROFILE_CREDITLIMIT_BELOW_MIN",
+            SummaryType = "BelowMinimumCount",
+            FieldValue = x.CreditLimit.ToString(),
+            Message = "CustomerCreditProfile.CreditLimit below minimum 0",
+            RecordSnapshotJson = JsonSerializer.Serialize(new { x.Id, x.CustomerId, x.CreditLimit }),
+            CreatedOn = DateTimeOffset.UtcNow
+        }).ToList();
+
+        _dbContext.DataProfilingDrilldowns.AddRange(affectedRecords);
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    private async Task ProfileCustomerPartnerFunctionRecordsTotalRecordsAsync(Guid runId, CancellationToken cancellationToken)
+    {
+        var totalRecords = await _dbContext.CustomerPartnerFunctions.CountAsync(cancellationToken);
+        var affectedSourceRecords = await _dbContext.CustomerPartnerFunctions
+            .Where(x => true)
+            .ToListAsync(cancellationToken);
+
+        var summary = new DataProfilingSummary
+        {
+            SummaryId = Guid.NewGuid(),
+            RunId = runId,
+            BusinessObjectName = "Customer",
+            EntityName = "CustomerPartnerFunction",
+            ColumnName = "",
+            SummaryCode = "CUSTOMERPARTNERFUNCTION_TOTAL_RECORD_COUNT",
+            SummaryType = "TotalRecords",
+            Label = "Total records in CustomerPartnerFunction",
+            Severity = "",
+            MetricValue = affectedSourceRecords.Count,
+            AffectedCount = affectedSourceRecords.Count,
+            HasDrilldown = false,
+            DrilldownKey = "CUSTOMERPARTNERFUNCTION_TOTAL_RECORD_COUNT",
+            CreatedOn = DateTimeOffset.UtcNow
+        };
+
+        _dbContext.DataProfilingSummaries.Add(summary);
+
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    private async Task ProfileCustomerPartnerFunctionPartnerFunctionCodeNullOrEmptyCountAsync(Guid runId, CancellationToken cancellationToken)
     {
         var totalRecords = await _dbContext.CustomerPartnerFunctions.CountAsync(cancellationToken);
         var affectedSourceRecords = await _dbContext.CustomerPartnerFunctions
@@ -1003,46 +1678,74 @@ public sealed class CustomerProfiler(IAnalysisDbContext dbContext)
             BusinessObjectName = "Customer",
             EntityName = "CustomerPartnerFunction",
             ColumnName = "PartnerFunctionCode",
-            SummaryCode = "CUSTOMER_CUSTOMERPARTNERFUNCTION_PARTNERFUNCTIONCODE_NULL_COUNT",
-            SummaryType = "NullCount",
-            Label = "CustomerPartnerFunction PartnerFunctionCode missing count",
-            Severity = "Medium",
+            SummaryCode = "CUSTOMERPARTNERFUNCTION_PARTNERFUNCTIONCODE_MISSING_COUNT",
+            SummaryType = "NullOrEmptyCount",
+            Label = "CustomerPartnerFunction.PartnerFunctionCode missing values",
+            Severity = "High",
             MetricValue = affectedSourceRecords.Count,
             AffectedCount = affectedSourceRecords.Count,
             HasDrilldown = true,
-            DrilldownKey = "CUSTOMER_CUSTOMERPARTNERFUNCTION_PARTNERFUNCTIONCODE_NULL_COUNT",
+            DrilldownKey = "CUSTOMERPARTNERFUNCTION_PARTNERFUNCTIONCODE_MISSING_COUNT",
             CreatedOn = DateTimeOffset.UtcNow
         };
 
         _dbContext.DataProfilingSummaries.Add(summary);
 
-        if (true)
+        var affectedRecords = affectedSourceRecords.Select(x => new DataProfilingDrilldown
         {
-            var affectedRecords = affectedSourceRecords.Select(x => new DataProfilingDrilldown
-            {
-                DrilldownId = Guid.NewGuid(),
-                RunId = runId,
-                SummaryId = summary.SummaryId,
-                BusinessObjectName = "Customer",
-                EntityName = "CustomerPartnerFunction",
-                RootRecordId = x.CustomerId.ToString(),
-                RecordId = x.Id.ToString(),
-                ColumnName = "PartnerFunctionCode",
-                SummaryCode = "CUSTOMER_CUSTOMERPARTNERFUNCTION_PARTNERFUNCTIONCODE_NULL_COUNT",
-                SummaryType = "NullCount",
-                FieldValue = x.PartnerFunctionCode,
-                Message = "CustomerPartnerFunction PartnerFunctionCode missing count",
-                RecordSnapshotJson = JsonSerializer.Serialize(new { x.Id, x.CustomerId, x.PartnerFunctionCode }),
-                CreatedOn = DateTimeOffset.UtcNow
-            }).ToList();
+            DrilldownId = Guid.NewGuid(),
+            RunId = runId,
+            SummaryId = summary.SummaryId,
+            BusinessObjectName = "Customer",
+            EntityName = "CustomerPartnerFunction",
+            RootRecordId = x.CustomerId.ToString(),
+            RecordId = x.Id.ToString(),
+            ColumnName = "PartnerFunctionCode",
+            SummaryCode = "CUSTOMERPARTNERFUNCTION_PARTNERFUNCTIONCODE_MISSING_COUNT",
+            SummaryType = "NullOrEmptyCount",
+            FieldValue = x.PartnerFunctionCode,
+            Message = "CustomerPartnerFunction.PartnerFunctionCode missing values",
+            RecordSnapshotJson = JsonSerializer.Serialize(new { x.Id, x.CustomerId, x.PartnerFunctionCode }),
+            CreatedOn = DateTimeOffset.UtcNow
+        }).ToList();
 
-            _dbContext.DataProfilingDrilldowns.AddRange(affectedRecords);
-        }
+        _dbContext.DataProfilingDrilldowns.AddRange(affectedRecords);
 
         await _dbContext.SaveChangesAsync(cancellationToken);
     }
 
-    private async Task ProfileCustomerAttachmentDocumentTypeNullCountAsync(Guid runId, CancellationToken cancellationToken)
+    private async Task ProfileCustomerAttachmentRecordsTotalRecordsAsync(Guid runId, CancellationToken cancellationToken)
+    {
+        var totalRecords = await _dbContext.CustomerAttachments.CountAsync(cancellationToken);
+        var affectedSourceRecords = await _dbContext.CustomerAttachments
+            .Where(x => true)
+            .ToListAsync(cancellationToken);
+
+        var summary = new DataProfilingSummary
+        {
+            SummaryId = Guid.NewGuid(),
+            RunId = runId,
+            BusinessObjectName = "Customer",
+            EntityName = "CustomerAttachment",
+            ColumnName = "",
+            SummaryCode = "CUSTOMERATTACHMENT_TOTAL_RECORD_COUNT",
+            SummaryType = "TotalRecords",
+            Label = "Total records in CustomerAttachment",
+            Severity = "",
+            MetricValue = affectedSourceRecords.Count,
+            AffectedCount = affectedSourceRecords.Count,
+            HasDrilldown = false,
+            DrilldownKey = "CUSTOMERATTACHMENT_TOTAL_RECORD_COUNT",
+            CreatedOn = DateTimeOffset.UtcNow
+        };
+
+        _dbContext.DataProfilingSummaries.Add(summary);
+
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    private async Task ProfileCustomerAttachmentDocumentTypeNullOrEmptyCountAsync(Guid runId, CancellationToken cancellationToken)
     {
         var totalRecords = await _dbContext.CustomerAttachments.CountAsync(cancellationToken);
         var affectedSourceRecords = await _dbContext.CustomerAttachments
@@ -1056,46 +1759,43 @@ public sealed class CustomerProfiler(IAnalysisDbContext dbContext)
             BusinessObjectName = "Customer",
             EntityName = "CustomerAttachment",
             ColumnName = "DocumentType",
-            SummaryCode = "CUSTOMER_CUSTOMERATTACHMENT_DOCUMENTTYPE_NULL_COUNT",
-            SummaryType = "NullCount",
-            Label = "CustomerAttachment DocumentType missing count",
-            Severity = "Medium",
+            SummaryCode = "CUSTOMERATTACHMENT_DOCUMENTTYPE_MISSING_COUNT",
+            SummaryType = "NullOrEmptyCount",
+            Label = "CustomerAttachment.DocumentType missing values",
+            Severity = "High",
             MetricValue = affectedSourceRecords.Count,
             AffectedCount = affectedSourceRecords.Count,
             HasDrilldown = true,
-            DrilldownKey = "CUSTOMER_CUSTOMERATTACHMENT_DOCUMENTTYPE_NULL_COUNT",
+            DrilldownKey = "CUSTOMERATTACHMENT_DOCUMENTTYPE_MISSING_COUNT",
             CreatedOn = DateTimeOffset.UtcNow
         };
 
         _dbContext.DataProfilingSummaries.Add(summary);
 
-        if (true)
+        var affectedRecords = affectedSourceRecords.Select(x => new DataProfilingDrilldown
         {
-            var affectedRecords = affectedSourceRecords.Select(x => new DataProfilingDrilldown
-            {
-                DrilldownId = Guid.NewGuid(),
-                RunId = runId,
-                SummaryId = summary.SummaryId,
-                BusinessObjectName = "Customer",
-                EntityName = "CustomerAttachment",
-                RootRecordId = x.CustomerId.ToString(),
-                RecordId = x.Id.ToString(),
-                ColumnName = "DocumentType",
-                SummaryCode = "CUSTOMER_CUSTOMERATTACHMENT_DOCUMENTTYPE_NULL_COUNT",
-                SummaryType = "NullCount",
-                FieldValue = x.DocumentType,
-                Message = "CustomerAttachment DocumentType missing count",
-                RecordSnapshotJson = JsonSerializer.Serialize(new { x.Id, x.CustomerId, x.DocumentType }),
-                CreatedOn = DateTimeOffset.UtcNow
-            }).ToList();
+            DrilldownId = Guid.NewGuid(),
+            RunId = runId,
+            SummaryId = summary.SummaryId,
+            BusinessObjectName = "Customer",
+            EntityName = "CustomerAttachment",
+            RootRecordId = x.CustomerId.ToString(),
+            RecordId = x.Id.ToString(),
+            ColumnName = "DocumentType",
+            SummaryCode = "CUSTOMERATTACHMENT_DOCUMENTTYPE_MISSING_COUNT",
+            SummaryType = "NullOrEmptyCount",
+            FieldValue = x.DocumentType,
+            Message = "CustomerAttachment.DocumentType missing values",
+            RecordSnapshotJson = JsonSerializer.Serialize(new { x.Id, x.CustomerId, x.DocumentType }),
+            CreatedOn = DateTimeOffset.UtcNow
+        }).ToList();
 
-            _dbContext.DataProfilingDrilldowns.AddRange(affectedRecords);
-        }
+        _dbContext.DataProfilingDrilldowns.AddRange(affectedRecords);
 
         await _dbContext.SaveChangesAsync(cancellationToken);
     }
 
-    private async Task ProfileCustomerAttachmentFileNameNullCountAsync(Guid runId, CancellationToken cancellationToken)
+    private async Task ProfileCustomerAttachmentFileNameNullOrEmptyCountAsync(Guid runId, CancellationToken cancellationToken)
     {
         var totalRecords = await _dbContext.CustomerAttachments.CountAsync(cancellationToken);
         var affectedSourceRecords = await _dbContext.CustomerAttachments
@@ -1109,46 +1809,43 @@ public sealed class CustomerProfiler(IAnalysisDbContext dbContext)
             BusinessObjectName = "Customer",
             EntityName = "CustomerAttachment",
             ColumnName = "FileName",
-            SummaryCode = "CUSTOMER_CUSTOMERATTACHMENT_FILENAME_NULL_COUNT",
-            SummaryType = "NullCount",
-            Label = "CustomerAttachment FileName missing count",
-            Severity = "Medium",
+            SummaryCode = "CUSTOMERATTACHMENT_FILENAME_MISSING_COUNT",
+            SummaryType = "NullOrEmptyCount",
+            Label = "CustomerAttachment.FileName missing values",
+            Severity = "High",
             MetricValue = affectedSourceRecords.Count,
             AffectedCount = affectedSourceRecords.Count,
             HasDrilldown = true,
-            DrilldownKey = "CUSTOMER_CUSTOMERATTACHMENT_FILENAME_NULL_COUNT",
+            DrilldownKey = "CUSTOMERATTACHMENT_FILENAME_MISSING_COUNT",
             CreatedOn = DateTimeOffset.UtcNow
         };
 
         _dbContext.DataProfilingSummaries.Add(summary);
 
-        if (true)
+        var affectedRecords = affectedSourceRecords.Select(x => new DataProfilingDrilldown
         {
-            var affectedRecords = affectedSourceRecords.Select(x => new DataProfilingDrilldown
-            {
-                DrilldownId = Guid.NewGuid(),
-                RunId = runId,
-                SummaryId = summary.SummaryId,
-                BusinessObjectName = "Customer",
-                EntityName = "CustomerAttachment",
-                RootRecordId = x.CustomerId.ToString(),
-                RecordId = x.Id.ToString(),
-                ColumnName = "FileName",
-                SummaryCode = "CUSTOMER_CUSTOMERATTACHMENT_FILENAME_NULL_COUNT",
-                SummaryType = "NullCount",
-                FieldValue = x.FileName,
-                Message = "CustomerAttachment FileName missing count",
-                RecordSnapshotJson = JsonSerializer.Serialize(new { x.Id, x.CustomerId, x.FileName }),
-                CreatedOn = DateTimeOffset.UtcNow
-            }).ToList();
+            DrilldownId = Guid.NewGuid(),
+            RunId = runId,
+            SummaryId = summary.SummaryId,
+            BusinessObjectName = "Customer",
+            EntityName = "CustomerAttachment",
+            RootRecordId = x.CustomerId.ToString(),
+            RecordId = x.Id.ToString(),
+            ColumnName = "FileName",
+            SummaryCode = "CUSTOMERATTACHMENT_FILENAME_MISSING_COUNT",
+            SummaryType = "NullOrEmptyCount",
+            FieldValue = x.FileName,
+            Message = "CustomerAttachment.FileName missing values",
+            RecordSnapshotJson = JsonSerializer.Serialize(new { x.Id, x.CustomerId, x.FileName }),
+            CreatedOn = DateTimeOffset.UtcNow
+        }).ToList();
 
-            _dbContext.DataProfilingDrilldowns.AddRange(affectedRecords);
-        }
+        _dbContext.DataProfilingDrilldowns.AddRange(affectedRecords);
 
         await _dbContext.SaveChangesAsync(cancellationToken);
     }
 
-    private async Task ProfileCustomerAttachmentStoragePathNullCountAsync(Guid runId, CancellationToken cancellationToken)
+    private async Task ProfileCustomerAttachmentStoragePathNullOrEmptyCountAsync(Guid runId, CancellationToken cancellationToken)
     {
         var totalRecords = await _dbContext.CustomerAttachments.CountAsync(cancellationToken);
         var affectedSourceRecords = await _dbContext.CustomerAttachments
@@ -1162,41 +1859,38 @@ public sealed class CustomerProfiler(IAnalysisDbContext dbContext)
             BusinessObjectName = "Customer",
             EntityName = "CustomerAttachment",
             ColumnName = "StoragePath",
-            SummaryCode = "CUSTOMER_CUSTOMERATTACHMENT_STORAGEPATH_NULL_COUNT",
-            SummaryType = "NullCount",
-            Label = "CustomerAttachment StoragePath missing count",
-            Severity = "Medium",
+            SummaryCode = "CUSTOMERATTACHMENT_STORAGEPATH_MISSING_COUNT",
+            SummaryType = "NullOrEmptyCount",
+            Label = "CustomerAttachment.StoragePath missing values",
+            Severity = "High",
             MetricValue = affectedSourceRecords.Count,
             AffectedCount = affectedSourceRecords.Count,
             HasDrilldown = true,
-            DrilldownKey = "CUSTOMER_CUSTOMERATTACHMENT_STORAGEPATH_NULL_COUNT",
+            DrilldownKey = "CUSTOMERATTACHMENT_STORAGEPATH_MISSING_COUNT",
             CreatedOn = DateTimeOffset.UtcNow
         };
 
         _dbContext.DataProfilingSummaries.Add(summary);
 
-        if (true)
+        var affectedRecords = affectedSourceRecords.Select(x => new DataProfilingDrilldown
         {
-            var affectedRecords = affectedSourceRecords.Select(x => new DataProfilingDrilldown
-            {
-                DrilldownId = Guid.NewGuid(),
-                RunId = runId,
-                SummaryId = summary.SummaryId,
-                BusinessObjectName = "Customer",
-                EntityName = "CustomerAttachment",
-                RootRecordId = x.CustomerId.ToString(),
-                RecordId = x.Id.ToString(),
-                ColumnName = "StoragePath",
-                SummaryCode = "CUSTOMER_CUSTOMERATTACHMENT_STORAGEPATH_NULL_COUNT",
-                SummaryType = "NullCount",
-                FieldValue = x.StoragePath,
-                Message = "CustomerAttachment StoragePath missing count",
-                RecordSnapshotJson = JsonSerializer.Serialize(new { x.Id, x.CustomerId, x.StoragePath }),
-                CreatedOn = DateTimeOffset.UtcNow
-            }).ToList();
+            DrilldownId = Guid.NewGuid(),
+            RunId = runId,
+            SummaryId = summary.SummaryId,
+            BusinessObjectName = "Customer",
+            EntityName = "CustomerAttachment",
+            RootRecordId = x.CustomerId.ToString(),
+            RecordId = x.Id.ToString(),
+            ColumnName = "StoragePath",
+            SummaryCode = "CUSTOMERATTACHMENT_STORAGEPATH_MISSING_COUNT",
+            SummaryType = "NullOrEmptyCount",
+            FieldValue = x.StoragePath,
+            Message = "CustomerAttachment.StoragePath missing values",
+            RecordSnapshotJson = JsonSerializer.Serialize(new { x.Id, x.CustomerId, x.StoragePath }),
+            CreatedOn = DateTimeOffset.UtcNow
+        }).ToList();
 
-            _dbContext.DataProfilingDrilldowns.AddRange(affectedRecords);
-        }
+        _dbContext.DataProfilingDrilldowns.AddRange(affectedRecords);
 
         await _dbContext.SaveChangesAsync(cancellationToken);
     }

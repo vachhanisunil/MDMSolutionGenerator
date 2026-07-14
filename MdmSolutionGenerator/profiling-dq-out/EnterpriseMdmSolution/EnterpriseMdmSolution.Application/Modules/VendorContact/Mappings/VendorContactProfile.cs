@@ -10,6 +10,7 @@ public sealed class VendorContactProfile : Profile
     {
         CreateMap<Entity, VendorContactDto>();
         CreateMap<CreateVendorContactDto, Entity>();
-        CreateMap<UpdateVendorContactDto, Entity>();
+        CreateMap<UpdateVendorContactDto, Entity>()
+            .ForMember(x => x.Id, options => options.Ignore());
     }
 }

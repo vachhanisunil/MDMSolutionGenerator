@@ -23,4 +23,6 @@ public sealed class UpdateVendorDto
     public List<EnterpriseMdmSolution.Application.Modules.VendorCompliance.DTOs.UpdateVendorComplianceDto> VendorCompliances { get; init; } = [];
     public List<EnterpriseMdmSolution.Application.Modules.VendorEvaluation.DTOs.UpdateVendorEvaluationDto> VendorEvaluations { get; init; } = [];
     public List<EnterpriseMdmSolution.Application.Modules.VendorCertificate.DTOs.UpdateVendorCertificateDto> VendorCertificates { get; init; } = [];
+
+    public int Id { get; init; }
 }

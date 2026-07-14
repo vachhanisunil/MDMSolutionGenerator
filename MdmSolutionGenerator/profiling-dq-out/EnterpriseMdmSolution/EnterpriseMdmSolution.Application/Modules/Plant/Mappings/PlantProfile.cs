@@ -10,6 +10,7 @@ public sealed class PlantProfile : Profile
     {
         CreateMap<Entity, PlantDto>();
         CreateMap<CreatePlantDto, Entity>();
-        CreateMap<UpdatePlantDto, Entity>();
+        CreateMap<UpdatePlantDto, Entity>()
+            .ForMember(x => x.Id, options => options.Ignore());
     }
 }

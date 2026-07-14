@@ -10,6 +10,7 @@ public sealed class CurrencyProfile : Profile
     {
         CreateMap<Entity, CurrencyDto>();
         CreateMap<CreateCurrencyDto, Entity>();
-        CreateMap<UpdateCurrencyDto, Entity>();
+        CreateMap<UpdateCurrencyDto, Entity>()
+            .ForMember(x => x.Id, options => options.Ignore());
     }
 }

@@ -9,4 +9,6 @@ public sealed class UpdateVendorComplianceDto
     public DateTime? ValidFrom { get; init; }
     public DateTime? ValidTo { get; init; }
     public string? ReviewOwner { get; init; }
+
+    public int Id { get; init; }
 }

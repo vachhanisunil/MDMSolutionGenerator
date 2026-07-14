@@ -28,6 +28,9 @@ internal sealed class LinqExpressionTemplateProvider
         {
             return conditionType switch
             {
+                "CountAll" => ".Where(x => true)",
+                "TotalRecords" => ".Where(x => true)",
+                "TotalRootObjects" => ".Where(x => true)",
                 "DistinctCount" => ".Where(x => true)",
                 "Duplicate" => ".Where(x => true)",
                 "LookupExists" => ".Where(x => true)",
@@ -61,6 +64,11 @@ internal sealed class LinqExpressionTemplateProvider
                     : $".Where(x => !allowedValues.Contains(x.{field}.ToString()))",
             "Regex" when isFieldString => $".Where(x => x.{field} != null)",
             "Regex" => ".Where(x => false)",
+            "EmailFormat" when isFieldString => $".Where(x => x.{field} != null && !x.{field}.Contains(\"@\"))",
+            "EmailFormat" => ".Where(x => false)",
+            "CountAll" => ".Where(x => true)",
+            "TotalRecords" => ".Where(x => true)",
+            "TotalRootObjects" => ".Where(x => true)",
             "DateRangeValid" => ".Where(x => false)",
             "DistinctCount" => ".Where(x => true)",
             "MinLength" => $".Where(x => x.{field} != null)",

@@ -10,6 +10,7 @@ public sealed class UnitOfMeasureProfile : Profile
     {
         CreateMap<Entity, UnitOfMeasureDto>();
         CreateMap<CreateUnitOfMeasureDto, Entity>();
-        CreateMap<UpdateUnitOfMeasureDto, Entity>();
+        CreateMap<UpdateUnitOfMeasureDto, Entity>()
+            .ForMember(x => x.Id, options => options.Ignore());
     }
 }

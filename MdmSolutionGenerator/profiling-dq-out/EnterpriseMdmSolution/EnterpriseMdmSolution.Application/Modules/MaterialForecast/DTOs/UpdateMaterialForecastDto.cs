@@ -8,4 +8,6 @@ public sealed class UpdateMaterialForecastDto
     public decimal ForecastQuantity { get; init; }
     public int ForecastUnitOfMeasureId { get; init; }
     public decimal? ConfidencePercent { get; init; }
+
+    public int Id { get; init; }
 }

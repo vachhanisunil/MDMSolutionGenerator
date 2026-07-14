@@ -10,6 +10,7 @@ public sealed class MaterialUOMProfile : Profile
     {
         CreateMap<Entity, MaterialUOMDto>();
         CreateMap<CreateMaterialUOMDto, Entity>();
-        CreateMap<UpdateMaterialUOMDto, Entity>();
+        CreateMap<UpdateMaterialUOMDto, Entity>()
+            .ForMember(x => x.Id, options => options.Ignore());
     }
 }

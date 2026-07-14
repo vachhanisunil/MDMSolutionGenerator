@@ -7,4 +7,6 @@ public sealed class UpdateMaterialBarcodeDto
     public string BarcodeValue { get; init; } = string.Empty;
     public int? UnitOfMeasureId { get; init; }
     public bool IsPrimary { get; init; }
+
+    public int Id { get; init; }
 }

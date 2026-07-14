@@ -11,4 +11,6 @@ public sealed class UpdateMaterialPlantDto
     public string? MrpType { get; init; }
     public int? PlanningTimeFenceDays { get; init; }
     public string? ProfitCenter { get; init; }
+
+    public int Id { get; init; }
 }

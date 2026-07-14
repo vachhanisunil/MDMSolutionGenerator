@@ -8,4 +8,6 @@ public sealed class UpdateCustomerAttachmentDto
     public string? ContentType { get; init; }
     public string StoragePath { get; init; } = string.Empty;
     public DateTime UploadedOn { get; init; }
+
+    public int Id { get; init; }
 }

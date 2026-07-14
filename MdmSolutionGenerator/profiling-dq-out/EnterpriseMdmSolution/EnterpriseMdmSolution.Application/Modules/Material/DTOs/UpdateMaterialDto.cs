@@ -24,4 +24,6 @@ public sealed class UpdateMaterialDto
     public List<EnterpriseMdmSolution.Application.Modules.MaterialQualityInspection.DTOs.UpdateMaterialQualityInspectionDto> MaterialQualityInspections { get; init; } = [];
     public List<EnterpriseMdmSolution.Application.Modules.MaterialForecast.DTOs.UpdateMaterialForecastDto> MaterialForecasts { get; init; } = [];
     public List<EnterpriseMdmSolution.Application.Modules.MaterialBarcode.DTOs.UpdateMaterialBarcodeDto> MaterialBarcodes { get; init; } = [];
+
+    public int Id { get; init; }
 }

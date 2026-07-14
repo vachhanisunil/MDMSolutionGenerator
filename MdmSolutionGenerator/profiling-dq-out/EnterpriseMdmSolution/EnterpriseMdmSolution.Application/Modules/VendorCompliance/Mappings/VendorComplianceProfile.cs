@@ -10,6 +10,7 @@ public sealed class VendorComplianceProfile : Profile
     {
         CreateMap<Entity, VendorComplianceDto>();
         CreateMap<CreateVendorComplianceDto, Entity>();
-        CreateMap<UpdateVendorComplianceDto, Entity>();
+        CreateMap<UpdateVendorComplianceDto, Entity>()
+            .ForMember(x => x.Id, options => options.Ignore());
     }
 }

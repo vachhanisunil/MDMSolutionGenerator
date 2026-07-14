@@ -5,4 +5,6 @@ public sealed class UpdateStorageLocationDto
     public string StorageLocationCode { get; init; } = string.Empty;
     public string StorageLocationName { get; init; } = string.Empty;
     public int PlantId { get; init; }
+
+    public int Id { get; init; }
 }

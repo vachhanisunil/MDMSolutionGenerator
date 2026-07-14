@@ -23,4 +23,6 @@ public sealed class UpdateCustomerDto
     public List<EnterpriseMdmSolution.Application.Modules.CustomerCreditProfile.DTOs.UpdateCustomerCreditProfileDto> CustomerCreditProfiles { get; init; } = [];
     public List<EnterpriseMdmSolution.Application.Modules.CustomerPartnerFunction.DTOs.UpdateCustomerPartnerFunctionDto> CustomerPartnerFunctions { get; init; } = [];
     public List<EnterpriseMdmSolution.Application.Modules.CustomerAttachment.DTOs.UpdateCustomerAttachmentDto> CustomerAttachments { get; init; } = [];
+
+    public int Id { get; init; }
 }

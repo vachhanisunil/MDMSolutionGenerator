@@ -10,4 +10,6 @@ public sealed class UpdateMaterialPriceDto
     public DateTime ValidFrom { get; init; }
     public DateTime? ValidTo { get; init; }
     public string? SourceSystem { get; init; }
+
+    public int Id { get; init; }
 }

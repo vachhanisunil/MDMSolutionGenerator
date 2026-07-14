@@ -594,7 +594,7 @@ public static class DependencyInjection
     }
 
     private string EmitDto(EntityDefinition entity) => EmitDtoClass(entity, $"{entity.Name}Dto", includeKey: true);
-    private string EmitMutateDto(EntityDefinition entity, string prefix) => EmitDtoClass(entity, $"{prefix}{entity.Name}Dto", includeKey: false);
+    private string EmitMutateDto(EntityDefinition entity, string prefix) => EmitDtoClass(entity, $"{prefix}{entity.Name}Dto", includeKey: prefix.Equals("Update", StringComparison.OrdinalIgnoreCase));
 
     private string EmitAnalysisDtos(BusinessObjectDefinition businessObject, EntityDefinition root) => $$"""
 namespace {{_rootNamespace}}.Application.Modules.{{businessObject.Name}}.DTOs;
@@ -1322,7 +1322,7 @@ public sealed class Update{{entity.Name}}Handler(IRepository<Entity> repository,
         }
 
         mapper.Map(request.Input, entity);
-{{AggregateReplaceCollections(entity)}}
+{{AggregateSyncCollections(entity)}}
         repository.Update(entity);
         await repository.SaveChangesAsync(cancellationToken);
         return mapper.Map<{{entity.Name}}Dto>(entity);
@@ -2096,12 +2096,17 @@ public sealed class {{businessObject.Name}}AnalysisController(IMediator mediator
     private string UpdateProfileIgnores(EntityDefinition entity)
     {
         var children = AggregateChildren(entity);
-        if (children.Count == 0)
+        var builder = new StringBuilder();
+        builder.AppendLine();
+        builder.Append($"            .ForMember(x => x.{KeyProperty(entity).Name}, options => options.Ignore())");
+
+        foreach (var child in children)
         {
-            return "";
+            builder.AppendLine();
+            builder.Append($"            .ForMember(x => x.{Naming.Plural(child.Name)}, options => options.Ignore())");
         }
 
-        return string.Concat(children.Select(child => $"{Environment.NewLine}            .ForMember(x => x.{Naming.Plural(child.Name)}, options => options.Ignore())"));
+        return builder.ToString();
     }
 
     private string AggregateIncludesExpression(EntityDefinition entity)
@@ -2116,17 +2121,56 @@ public sealed class {{businessObject.Name}}AnalysisController(IMediator mediator
         return $"new[] {{ {includes} }}";
     }
 
-    private string AggregateReplaceCollections(EntityDefinition entity)
+    private string AggregateSyncCollections(EntityDefinition entity)
     {
         var builder = new StringBuilder();
         foreach (var child in AggregateChildren(entity))
         {
             var collection = Naming.Plural(child.Name);
-            builder.AppendLine($"        repository.ReplaceCollection(entity.{collection}, mapper.Map<List<{_rootNamespace}.Core.Entities.{child.Name}>>(request.Input.{collection}));");
+            var childKey = KeyProperty(child);
+            var childKeyDefault = DefaultKeyLiteral(childKey);
+            builder.AppendLine($"        Sync{collection}(entity.{collection}, request.Input.{collection});");
+            builder.AppendLine();
+            builder.AppendLine($"        void Sync{collection}(ICollection<{_rootNamespace}.Core.Entities.{child.Name}> existingItems, IEnumerable<{_rootNamespace}.Application.Modules.{child.Name}.DTOs.Update{child.Name}Dto> requestedItems)");
+            builder.AppendLine("        {");
+            builder.AppendLine("            var requestedList = requestedItems.ToList();");
+            builder.AppendLine($"            var requestedExistingIds = requestedList.Where(item => !EqualityComparer<{KeyType(child)}>.Default.Equals(item.{childKey.Name}, {childKeyDefault})).Select(item => item.{childKey.Name}).ToHashSet();");
+            builder.AppendLine($"            var itemsToRemove = existingItems.Where(item => !requestedExistingIds.Contains(item.{childKey.Name})).ToList();");
+            builder.AppendLine("            foreach (var item in itemsToRemove)");
+            builder.AppendLine("            {");
+            builder.AppendLine("                existingItems.Remove(item);");
+            builder.AppendLine("            }");
+            builder.AppendLine();
+            builder.AppendLine("            foreach (var requestedItem in requestedList)");
+            builder.AppendLine("            {");
+            builder.AppendLine($"                if (EqualityComparer<{KeyType(child)}>.Default.Equals(requestedItem.{childKey.Name}, {childKeyDefault}))");
+            builder.AppendLine("                {");
+            builder.AppendLine($"                    existingItems.Add(mapper.Map<{_rootNamespace}.Core.Entities.{child.Name}>(requestedItem));");
+            builder.AppendLine("                    continue;");
+            builder.AppendLine("                }");
+            builder.AppendLine();
+            builder.AppendLine($"                var existingItem = existingItems.FirstOrDefault(item => EqualityComparer<{KeyType(child)}>.Default.Equals(item.{childKey.Name}, requestedItem.{childKey.Name}));");
+            builder.AppendLine("                if (existingItem is null)");
+            builder.AppendLine("                {");
+            builder.AppendLine($"                    existingItems.Add(mapper.Map<{_rootNamespace}.Core.Entities.{child.Name}>(requestedItem));");
+            builder.AppendLine("                    continue;");
+            builder.AppendLine("                }");
+            builder.AppendLine();
+            builder.AppendLine("                mapper.Map(requestedItem, existingItem);");
+            builder.AppendLine("            }");
+            builder.AppendLine("        }");
         }
 
         return builder.ToString().TrimEnd();
     }
+
+    private static string DefaultKeyLiteral(PropertyDefinition property)
+        => ClrType(property, forEntity: false).Replace("?", "", StringComparison.Ordinal) switch
+        {
+            "Guid" => "Guid.Empty",
+            "string" => "\"\"",
+            _ => "0"
+        };
 
     private bool IsAggregateChildRelationship(RelationshipDefinition relationship)
     {

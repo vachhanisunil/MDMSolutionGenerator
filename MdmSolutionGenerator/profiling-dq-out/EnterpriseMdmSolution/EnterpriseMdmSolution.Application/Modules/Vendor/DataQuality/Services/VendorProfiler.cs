@@ -11,27 +11,111 @@ public sealed class VendorProfiler(IAnalysisDbContext dbContext)
 
     public async Task ExecuteAsync(Guid runId, CancellationToken cancellationToken)
     {
-        await ProfileVendorVendorNumberNullCountAsync(runId, cancellationToken);
-        await ProfileVendorVendorNameNullCountAsync(runId, cancellationToken);
-        await ProfileVendorVendorTypeNullCountAsync(runId, cancellationToken);
-        await ProfileVendorAddressAddressTypeNullCountAsync(runId, cancellationToken);
-        await ProfileVendorAddressAddressLine1NullCountAsync(runId, cancellationToken);
-        await ProfileVendorAddressCityNullCountAsync(runId, cancellationToken);
-        await ProfileVendorAddressPostalCodeNullCountAsync(runId, cancellationToken);
-        await ProfileVendorContactFirstNameNullCountAsync(runId, cancellationToken);
-        await ProfileVendorContactLastNameNullCountAsync(runId, cancellationToken);
-        await ProfileVendorBankAccountBankNameNullCountAsync(runId, cancellationToken);
-        await ProfileVendorBankAccountAccountNumberNullCountAsync(runId, cancellationToken);
-        await ProfileVendorTaxTaxTypeNullCountAsync(runId, cancellationToken);
-        await ProfileVendorTaxTaxNumberNullCountAsync(runId, cancellationToken);
-        await ProfileVendorComplianceComplianceTypeNullCountAsync(runId, cancellationToken);
-        await ProfileVendorComplianceComplianceStatusNullCountAsync(runId, cancellationToken);
-        await ProfileVendorEvaluationEvaluationPeriodNullCountAsync(runId, cancellationToken);
-        await ProfileVendorCertificateCertificateTypeNullCountAsync(runId, cancellationToken);
-        await ProfileVendorCertificateCertificateNameNullCountAsync(runId, cancellationToken);
+        await ProfileVendorRecordsTotalRootObjectsAsync(runId, cancellationToken);
+        await ProfileVendorRecordsTotalRecordsAsync(runId, cancellationToken);
+        await ProfileVendorVendorNumberNullOrEmptyCountAsync(runId, cancellationToken);
+        await ProfileVendorVendorNameNullOrEmptyCountAsync(runId, cancellationToken);
+        await ProfileVendorVendorTypeNullOrEmptyCountAsync(runId, cancellationToken);
+        await ProfileVendorEmailInvalidFormatCountAsync(runId, cancellationToken);
+        await ProfileVendorCountryIdNullOrEmptyCountAsync(runId, cancellationToken);
+        await ProfileVendorCurrencyIdNullOrEmptyCountAsync(runId, cancellationToken);
+        await ProfileVendorAddressRecordsTotalRecordsAsync(runId, cancellationToken);
+        await ProfileVendorAddressVendorIdNullOrEmptyCountAsync(runId, cancellationToken);
+        await ProfileVendorAddressAddressTypeNullOrEmptyCountAsync(runId, cancellationToken);
+        await ProfileVendorAddressAddressLine1NullOrEmptyCountAsync(runId, cancellationToken);
+        await ProfileVendorAddressCityNullOrEmptyCountAsync(runId, cancellationToken);
+        await ProfileVendorAddressPostalCodeNullOrEmptyCountAsync(runId, cancellationToken);
+        await ProfileVendorAddressCountryIdNullOrEmptyCountAsync(runId, cancellationToken);
+        await ProfileVendorContactRecordsTotalRecordsAsync(runId, cancellationToken);
+        await ProfileVendorContactVendorIdNullOrEmptyCountAsync(runId, cancellationToken);
+        await ProfileVendorContactFirstNameNullOrEmptyCountAsync(runId, cancellationToken);
+        await ProfileVendorContactLastNameNullOrEmptyCountAsync(runId, cancellationToken);
+        await ProfileVendorContactEmailInvalidFormatCountAsync(runId, cancellationToken);
+        await ProfileVendorBankAccountRecordsTotalRecordsAsync(runId, cancellationToken);
+        await ProfileVendorBankAccountVendorIdNullOrEmptyCountAsync(runId, cancellationToken);
+        await ProfileVendorBankAccountBankNameNullOrEmptyCountAsync(runId, cancellationToken);
+        await ProfileVendorBankAccountAccountNumberNullOrEmptyCountAsync(runId, cancellationToken);
+        await ProfileVendorBankAccountCurrencyIdNullOrEmptyCountAsync(runId, cancellationToken);
+        await ProfileVendorTaxRecordsTotalRecordsAsync(runId, cancellationToken);
+        await ProfileVendorTaxVendorIdNullOrEmptyCountAsync(runId, cancellationToken);
+        await ProfileVendorTaxTaxTypeNullOrEmptyCountAsync(runId, cancellationToken);
+        await ProfileVendorTaxTaxNumberNullOrEmptyCountAsync(runId, cancellationToken);
+        await ProfileVendorTaxCountryIdNullOrEmptyCountAsync(runId, cancellationToken);
+        await ProfileVendorPurchasingOrganizationRecordsTotalRecordsAsync(runId, cancellationToken);
+        await ProfileVendorPurchasingOrganizationVendorIdNullOrEmptyCountAsync(runId, cancellationToken);
+        await ProfileVendorPurchasingOrganizationPurchasingOrganizationIdNullOrEmptyCountAsync(runId, cancellationToken);
+        await ProfileVendorComplianceRecordsTotalRecordsAsync(runId, cancellationToken);
+        await ProfileVendorComplianceVendorIdNullOrEmptyCountAsync(runId, cancellationToken);
+        await ProfileVendorComplianceComplianceTypeNullOrEmptyCountAsync(runId, cancellationToken);
+        await ProfileVendorEvaluationRecordsTotalRecordsAsync(runId, cancellationToken);
+        await ProfileVendorEvaluationVendorIdNullOrEmptyCountAsync(runId, cancellationToken);
+        await ProfileVendorCertificateRecordsTotalRecordsAsync(runId, cancellationToken);
+        await ProfileVendorCertificateVendorIdNullOrEmptyCountAsync(runId, cancellationToken);
     }
 
-    private async Task ProfileVendorVendorNumberNullCountAsync(Guid runId, CancellationToken cancellationToken)
+    private async Task ProfileVendorRecordsTotalRootObjectsAsync(Guid runId, CancellationToken cancellationToken)
+    {
+        var totalRecords = await _dbContext.Vendors.CountAsync(cancellationToken);
+        var affectedSourceRecords = await _dbContext.Vendors
+            .Where(x => true)
+            .ToListAsync(cancellationToken);
+
+        var summary = new DataProfilingSummary
+        {
+            SummaryId = Guid.NewGuid(),
+            RunId = runId,
+            BusinessObjectName = "Vendor",
+            EntityName = "Vendor",
+            ColumnName = "",
+            SummaryCode = "VENDOR_ROOT_OBJECT_COUNT",
+            SummaryType = "TotalRootObjects",
+            Label = "Total Vendor root objects",
+            Severity = "",
+            MetricValue = affectedSourceRecords.Count,
+            AffectedCount = affectedSourceRecords.Count,
+            HasDrilldown = false,
+            DrilldownKey = "VENDOR_ROOT_OBJECT_COUNT",
+            CreatedOn = DateTimeOffset.UtcNow
+        };
+
+        _dbContext.DataProfilingSummaries.Add(summary);
+
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    private async Task ProfileVendorRecordsTotalRecordsAsync(Guid runId, CancellationToken cancellationToken)
+    {
+        var totalRecords = await _dbContext.Vendors.CountAsync(cancellationToken);
+        var affectedSourceRecords = await _dbContext.Vendors
+            .Where(x => true)
+            .ToListAsync(cancellationToken);
+
+        var summary = new DataProfilingSummary
+        {
+            SummaryId = Guid.NewGuid(),
+            RunId = runId,
+            BusinessObjectName = "Vendor",
+            EntityName = "Vendor",
+            ColumnName = "",
+            SummaryCode = "VENDOR_TOTAL_RECORD_COUNT",
+            SummaryType = "TotalRecords",
+            Label = "Total records in Vendor",
+            Severity = "",
+            MetricValue = affectedSourceRecords.Count,
+            AffectedCount = affectedSourceRecords.Count,
+            HasDrilldown = false,
+            DrilldownKey = "VENDOR_TOTAL_RECORD_COUNT",
+            CreatedOn = DateTimeOffset.UtcNow
+        };
+
+        _dbContext.DataProfilingSummaries.Add(summary);
+
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    private async Task ProfileVendorVendorNumberNullOrEmptyCountAsync(Guid runId, CancellationToken cancellationToken)
     {
         var totalRecords = await _dbContext.Vendors.CountAsync(cancellationToken);
         var affectedSourceRecords = await _dbContext.Vendors
@@ -45,46 +129,43 @@ public sealed class VendorProfiler(IAnalysisDbContext dbContext)
             BusinessObjectName = "Vendor",
             EntityName = "Vendor",
             ColumnName = "VendorNumber",
-            SummaryCode = "VENDOR_VENDOR_VENDORNUMBER_NULL_COUNT",
-            SummaryType = "NullCount",
-            Label = "Vendor VendorNumber missing count",
-            Severity = "Medium",
+            SummaryCode = "VENDOR_VENDORNUMBER_MISSING_COUNT",
+            SummaryType = "NullOrEmptyCount",
+            Label = "Vendor.VendorNumber missing values",
+            Severity = "High",
             MetricValue = affectedSourceRecords.Count,
             AffectedCount = affectedSourceRecords.Count,
             HasDrilldown = true,
-            DrilldownKey = "VENDOR_VENDOR_VENDORNUMBER_NULL_COUNT",
+            DrilldownKey = "VENDOR_VENDORNUMBER_MISSING_COUNT",
             CreatedOn = DateTimeOffset.UtcNow
         };
 
         _dbContext.DataProfilingSummaries.Add(summary);
 
-        if (true)
+        var affectedRecords = affectedSourceRecords.Select(x => new DataProfilingDrilldown
         {
-            var affectedRecords = affectedSourceRecords.Select(x => new DataProfilingDrilldown
-            {
-                DrilldownId = Guid.NewGuid(),
-                RunId = runId,
-                SummaryId = summary.SummaryId,
-                BusinessObjectName = "Vendor",
-                EntityName = "Vendor",
-                RootRecordId = x.Id.ToString(),
-                RecordId = x.Id.ToString(),
-                ColumnName = "VendorNumber",
-                SummaryCode = "VENDOR_VENDOR_VENDORNUMBER_NULL_COUNT",
-                SummaryType = "NullCount",
-                FieldValue = x.VendorNumber,
-                Message = "Vendor VendorNumber missing count",
-                RecordSnapshotJson = JsonSerializer.Serialize(new { x.Id, x.VendorNumber }),
-                CreatedOn = DateTimeOffset.UtcNow
-            }).ToList();
+            DrilldownId = Guid.NewGuid(),
+            RunId = runId,
+            SummaryId = summary.SummaryId,
+            BusinessObjectName = "Vendor",
+            EntityName = "Vendor",
+            RootRecordId = x.Id.ToString(),
+            RecordId = x.Id.ToString(),
+            ColumnName = "VendorNumber",
+            SummaryCode = "VENDOR_VENDORNUMBER_MISSING_COUNT",
+            SummaryType = "NullOrEmptyCount",
+            FieldValue = x.VendorNumber,
+            Message = "Vendor.VendorNumber missing values",
+            RecordSnapshotJson = JsonSerializer.Serialize(new { x.Id, x.VendorNumber }),
+            CreatedOn = DateTimeOffset.UtcNow
+        }).ToList();
 
-            _dbContext.DataProfilingDrilldowns.AddRange(affectedRecords);
-        }
+        _dbContext.DataProfilingDrilldowns.AddRange(affectedRecords);
 
         await _dbContext.SaveChangesAsync(cancellationToken);
     }
 
-    private async Task ProfileVendorVendorNameNullCountAsync(Guid runId, CancellationToken cancellationToken)
+    private async Task ProfileVendorVendorNameNullOrEmptyCountAsync(Guid runId, CancellationToken cancellationToken)
     {
         var totalRecords = await _dbContext.Vendors.CountAsync(cancellationToken);
         var affectedSourceRecords = await _dbContext.Vendors
@@ -98,46 +179,43 @@ public sealed class VendorProfiler(IAnalysisDbContext dbContext)
             BusinessObjectName = "Vendor",
             EntityName = "Vendor",
             ColumnName = "VendorName",
-            SummaryCode = "VENDOR_VENDOR_VENDORNAME_NULL_COUNT",
-            SummaryType = "NullCount",
-            Label = "Vendor VendorName missing count",
-            Severity = "Medium",
+            SummaryCode = "VENDOR_VENDORNAME_MISSING_COUNT",
+            SummaryType = "NullOrEmptyCount",
+            Label = "Vendor.VendorName missing values",
+            Severity = "High",
             MetricValue = affectedSourceRecords.Count,
             AffectedCount = affectedSourceRecords.Count,
             HasDrilldown = true,
-            DrilldownKey = "VENDOR_VENDOR_VENDORNAME_NULL_COUNT",
+            DrilldownKey = "VENDOR_VENDORNAME_MISSING_COUNT",
             CreatedOn = DateTimeOffset.UtcNow
         };
 
         _dbContext.DataProfilingSummaries.Add(summary);
 
-        if (true)
+        var affectedRecords = affectedSourceRecords.Select(x => new DataProfilingDrilldown
         {
-            var affectedRecords = affectedSourceRecords.Select(x => new DataProfilingDrilldown
-            {
-                DrilldownId = Guid.NewGuid(),
-                RunId = runId,
-                SummaryId = summary.SummaryId,
-                BusinessObjectName = "Vendor",
-                EntityName = "Vendor",
-                RootRecordId = x.Id.ToString(),
-                RecordId = x.Id.ToString(),
-                ColumnName = "VendorName",
-                SummaryCode = "VENDOR_VENDOR_VENDORNAME_NULL_COUNT",
-                SummaryType = "NullCount",
-                FieldValue = x.VendorName,
-                Message = "Vendor VendorName missing count",
-                RecordSnapshotJson = JsonSerializer.Serialize(new { x.Id, x.VendorName }),
-                CreatedOn = DateTimeOffset.UtcNow
-            }).ToList();
+            DrilldownId = Guid.NewGuid(),
+            RunId = runId,
+            SummaryId = summary.SummaryId,
+            BusinessObjectName = "Vendor",
+            EntityName = "Vendor",
+            RootRecordId = x.Id.ToString(),
+            RecordId = x.Id.ToString(),
+            ColumnName = "VendorName",
+            SummaryCode = "VENDOR_VENDORNAME_MISSING_COUNT",
+            SummaryType = "NullOrEmptyCount",
+            FieldValue = x.VendorName,
+            Message = "Vendor.VendorName missing values",
+            RecordSnapshotJson = JsonSerializer.Serialize(new { x.Id, x.VendorName }),
+            CreatedOn = DateTimeOffset.UtcNow
+        }).ToList();
 
-            _dbContext.DataProfilingDrilldowns.AddRange(affectedRecords);
-        }
+        _dbContext.DataProfilingDrilldowns.AddRange(affectedRecords);
 
         await _dbContext.SaveChangesAsync(cancellationToken);
     }
 
-    private async Task ProfileVendorVendorTypeNullCountAsync(Guid runId, CancellationToken cancellationToken)
+    private async Task ProfileVendorVendorTypeNullOrEmptyCountAsync(Guid runId, CancellationToken cancellationToken)
     {
         var totalRecords = await _dbContext.Vendors.CountAsync(cancellationToken);
         var affectedSourceRecords = await _dbContext.Vendors
@@ -151,46 +229,274 @@ public sealed class VendorProfiler(IAnalysisDbContext dbContext)
             BusinessObjectName = "Vendor",
             EntityName = "Vendor",
             ColumnName = "VendorType",
-            SummaryCode = "VENDOR_VENDOR_VENDORTYPE_NULL_COUNT",
-            SummaryType = "NullCount",
-            Label = "Vendor VendorType missing count",
-            Severity = "Medium",
+            SummaryCode = "VENDOR_VENDORTYPE_MISSING_COUNT",
+            SummaryType = "NullOrEmptyCount",
+            Label = "Vendor.VendorType missing values",
+            Severity = "High",
             MetricValue = affectedSourceRecords.Count,
             AffectedCount = affectedSourceRecords.Count,
             HasDrilldown = true,
-            DrilldownKey = "VENDOR_VENDOR_VENDORTYPE_NULL_COUNT",
+            DrilldownKey = "VENDOR_VENDORTYPE_MISSING_COUNT",
             CreatedOn = DateTimeOffset.UtcNow
         };
 
         _dbContext.DataProfilingSummaries.Add(summary);
 
-        if (true)
+        var affectedRecords = affectedSourceRecords.Select(x => new DataProfilingDrilldown
         {
-            var affectedRecords = affectedSourceRecords.Select(x => new DataProfilingDrilldown
-            {
-                DrilldownId = Guid.NewGuid(),
-                RunId = runId,
-                SummaryId = summary.SummaryId,
-                BusinessObjectName = "Vendor",
-                EntityName = "Vendor",
-                RootRecordId = x.Id.ToString(),
-                RecordId = x.Id.ToString(),
-                ColumnName = "VendorType",
-                SummaryCode = "VENDOR_VENDOR_VENDORTYPE_NULL_COUNT",
-                SummaryType = "NullCount",
-                FieldValue = x.VendorType,
-                Message = "Vendor VendorType missing count",
-                RecordSnapshotJson = JsonSerializer.Serialize(new { x.Id, x.VendorType }),
-                CreatedOn = DateTimeOffset.UtcNow
-            }).ToList();
+            DrilldownId = Guid.NewGuid(),
+            RunId = runId,
+            SummaryId = summary.SummaryId,
+            BusinessObjectName = "Vendor",
+            EntityName = "Vendor",
+            RootRecordId = x.Id.ToString(),
+            RecordId = x.Id.ToString(),
+            ColumnName = "VendorType",
+            SummaryCode = "VENDOR_VENDORTYPE_MISSING_COUNT",
+            SummaryType = "NullOrEmptyCount",
+            FieldValue = x.VendorType,
+            Message = "Vendor.VendorType missing values",
+            RecordSnapshotJson = JsonSerializer.Serialize(new { x.Id, x.VendorType }),
+            CreatedOn = DateTimeOffset.UtcNow
+        }).ToList();
 
-            _dbContext.DataProfilingDrilldowns.AddRange(affectedRecords);
-        }
+        _dbContext.DataProfilingDrilldowns.AddRange(affectedRecords);
 
         await _dbContext.SaveChangesAsync(cancellationToken);
     }
 
-    private async Task ProfileVendorAddressAddressTypeNullCountAsync(Guid runId, CancellationToken cancellationToken)
+    private async Task ProfileVendorEmailInvalidFormatCountAsync(Guid runId, CancellationToken cancellationToken)
+    {
+        var totalRecords = await _dbContext.Vendors.CountAsync(cancellationToken);
+        var affectedSourceRecords = await _dbContext.Vendors
+            .Where(x => x.Email != null && !x.Email.Contains("@"))
+            .ToListAsync(cancellationToken);
+
+        var summary = new DataProfilingSummary
+        {
+            SummaryId = Guid.NewGuid(),
+            RunId = runId,
+            BusinessObjectName = "Vendor",
+            EntityName = "Vendor",
+            ColumnName = "Email",
+            SummaryCode = "VENDOR_EMAIL_INVALID_EMAIL_COUNT",
+            SummaryType = "InvalidFormatCount",
+            Label = "Invalid email format in Vendor.Email",
+            Severity = "High",
+            MetricValue = affectedSourceRecords.Count,
+            AffectedCount = affectedSourceRecords.Count,
+            HasDrilldown = true,
+            DrilldownKey = "VENDOR_EMAIL_INVALID_EMAIL_COUNT",
+            CreatedOn = DateTimeOffset.UtcNow
+        };
+
+        _dbContext.DataProfilingSummaries.Add(summary);
+
+        var affectedRecords = affectedSourceRecords.Select(x => new DataProfilingDrilldown
+        {
+            DrilldownId = Guid.NewGuid(),
+            RunId = runId,
+            SummaryId = summary.SummaryId,
+            BusinessObjectName = "Vendor",
+            EntityName = "Vendor",
+            RootRecordId = x.Id.ToString(),
+            RecordId = x.Id.ToString(),
+            ColumnName = "Email",
+            SummaryCode = "VENDOR_EMAIL_INVALID_EMAIL_COUNT",
+            SummaryType = "InvalidFormatCount",
+            FieldValue = x.Email,
+            Message = "Invalid email format in Vendor.Email",
+            RecordSnapshotJson = JsonSerializer.Serialize(new { x.Id, x.Email }),
+            CreatedOn = DateTimeOffset.UtcNow
+        }).ToList();
+
+        _dbContext.DataProfilingDrilldowns.AddRange(affectedRecords);
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    private async Task ProfileVendorCountryIdNullOrEmptyCountAsync(Guid runId, CancellationToken cancellationToken)
+    {
+        var totalRecords = await _dbContext.Vendors.CountAsync(cancellationToken);
+        var affectedSourceRecords = await _dbContext.Vendors
+            .Where(x => false)
+            .ToListAsync(cancellationToken);
+
+        var summary = new DataProfilingSummary
+        {
+            SummaryId = Guid.NewGuid(),
+            RunId = runId,
+            BusinessObjectName = "Vendor",
+            EntityName = "Vendor",
+            ColumnName = "CountryId",
+            SummaryCode = "VENDOR_COUNTRYID_MISSING_COUNT",
+            SummaryType = "NullOrEmptyCount",
+            Label = "Vendor.CountryId missing values",
+            Severity = "High",
+            MetricValue = affectedSourceRecords.Count,
+            AffectedCount = affectedSourceRecords.Count,
+            HasDrilldown = true,
+            DrilldownKey = "VENDOR_COUNTRYID_MISSING_COUNT",
+            CreatedOn = DateTimeOffset.UtcNow
+        };
+
+        _dbContext.DataProfilingSummaries.Add(summary);
+
+        var affectedRecords = affectedSourceRecords.Select(x => new DataProfilingDrilldown
+        {
+            DrilldownId = Guid.NewGuid(),
+            RunId = runId,
+            SummaryId = summary.SummaryId,
+            BusinessObjectName = "Vendor",
+            EntityName = "Vendor",
+            RootRecordId = x.Id.ToString(),
+            RecordId = x.Id.ToString(),
+            ColumnName = "CountryId",
+            SummaryCode = "VENDOR_COUNTRYID_MISSING_COUNT",
+            SummaryType = "NullOrEmptyCount",
+            FieldValue = x.CountryId.ToString(),
+            Message = "Vendor.CountryId missing values",
+            RecordSnapshotJson = JsonSerializer.Serialize(new { x.Id, x.CountryId }),
+            CreatedOn = DateTimeOffset.UtcNow
+        }).ToList();
+
+        _dbContext.DataProfilingDrilldowns.AddRange(affectedRecords);
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    private async Task ProfileVendorCurrencyIdNullOrEmptyCountAsync(Guid runId, CancellationToken cancellationToken)
+    {
+        var totalRecords = await _dbContext.Vendors.CountAsync(cancellationToken);
+        var affectedSourceRecords = await _dbContext.Vendors
+            .Where(x => false)
+            .ToListAsync(cancellationToken);
+
+        var summary = new DataProfilingSummary
+        {
+            SummaryId = Guid.NewGuid(),
+            RunId = runId,
+            BusinessObjectName = "Vendor",
+            EntityName = "Vendor",
+            ColumnName = "CurrencyId",
+            SummaryCode = "VENDOR_CURRENCYID_MISSING_COUNT",
+            SummaryType = "NullOrEmptyCount",
+            Label = "Vendor.CurrencyId missing values",
+            Severity = "High",
+            MetricValue = affectedSourceRecords.Count,
+            AffectedCount = affectedSourceRecords.Count,
+            HasDrilldown = true,
+            DrilldownKey = "VENDOR_CURRENCYID_MISSING_COUNT",
+            CreatedOn = DateTimeOffset.UtcNow
+        };
+
+        _dbContext.DataProfilingSummaries.Add(summary);
+
+        var affectedRecords = affectedSourceRecords.Select(x => new DataProfilingDrilldown
+        {
+            DrilldownId = Guid.NewGuid(),
+            RunId = runId,
+            SummaryId = summary.SummaryId,
+            BusinessObjectName = "Vendor",
+            EntityName = "Vendor",
+            RootRecordId = x.Id.ToString(),
+            RecordId = x.Id.ToString(),
+            ColumnName = "CurrencyId",
+            SummaryCode = "VENDOR_CURRENCYID_MISSING_COUNT",
+            SummaryType = "NullOrEmptyCount",
+            FieldValue = x.CurrencyId.ToString(),
+            Message = "Vendor.CurrencyId missing values",
+            RecordSnapshotJson = JsonSerializer.Serialize(new { x.Id, x.CurrencyId }),
+            CreatedOn = DateTimeOffset.UtcNow
+        }).ToList();
+
+        _dbContext.DataProfilingDrilldowns.AddRange(affectedRecords);
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    private async Task ProfileVendorAddressRecordsTotalRecordsAsync(Guid runId, CancellationToken cancellationToken)
+    {
+        var totalRecords = await _dbContext.VendorAddresses.CountAsync(cancellationToken);
+        var affectedSourceRecords = await _dbContext.VendorAddresses
+            .Where(x => true)
+            .ToListAsync(cancellationToken);
+
+        var summary = new DataProfilingSummary
+        {
+            SummaryId = Guid.NewGuid(),
+            RunId = runId,
+            BusinessObjectName = "Vendor",
+            EntityName = "VendorAddress",
+            ColumnName = "",
+            SummaryCode = "VENDORADDRESS_TOTAL_RECORD_COUNT",
+            SummaryType = "TotalRecords",
+            Label = "Total records in VendorAddress",
+            Severity = "",
+            MetricValue = affectedSourceRecords.Count,
+            AffectedCount = affectedSourceRecords.Count,
+            HasDrilldown = false,
+            DrilldownKey = "VENDORADDRESS_TOTAL_RECORD_COUNT",
+            CreatedOn = DateTimeOffset.UtcNow
+        };
+
+        _dbContext.DataProfilingSummaries.Add(summary);
+
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    private async Task ProfileVendorAddressVendorIdNullOrEmptyCountAsync(Guid runId, CancellationToken cancellationToken)
+    {
+        var totalRecords = await _dbContext.VendorAddresses.CountAsync(cancellationToken);
+        var affectedSourceRecords = await _dbContext.VendorAddresses
+            .Where(x => false)
+            .ToListAsync(cancellationToken);
+
+        var summary = new DataProfilingSummary
+        {
+            SummaryId = Guid.NewGuid(),
+            RunId = runId,
+            BusinessObjectName = "Vendor",
+            EntityName = "VendorAddress",
+            ColumnName = "VendorId",
+            SummaryCode = "VENDORADDRESS_VENDORID_MISSING_COUNT",
+            SummaryType = "NullOrEmptyCount",
+            Label = "VendorAddress.VendorId missing values",
+            Severity = "High",
+            MetricValue = affectedSourceRecords.Count,
+            AffectedCount = affectedSourceRecords.Count,
+            HasDrilldown = true,
+            DrilldownKey = "VENDORADDRESS_VENDORID_MISSING_COUNT",
+            CreatedOn = DateTimeOffset.UtcNow
+        };
+
+        _dbContext.DataProfilingSummaries.Add(summary);
+
+        var affectedRecords = affectedSourceRecords.Select(x => new DataProfilingDrilldown
+        {
+            DrilldownId = Guid.NewGuid(),
+            RunId = runId,
+            SummaryId = summary.SummaryId,
+            BusinessObjectName = "Vendor",
+            EntityName = "VendorAddress",
+            RootRecordId = x.VendorId.ToString(),
+            RecordId = x.Id.ToString(),
+            ColumnName = "VendorId",
+            SummaryCode = "VENDORADDRESS_VENDORID_MISSING_COUNT",
+            SummaryType = "NullOrEmptyCount",
+            FieldValue = x.VendorId.ToString(),
+            Message = "VendorAddress.VendorId missing values",
+            RecordSnapshotJson = JsonSerializer.Serialize(new { x.Id, x.VendorId }),
+            CreatedOn = DateTimeOffset.UtcNow
+        }).ToList();
+
+        _dbContext.DataProfilingDrilldowns.AddRange(affectedRecords);
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    private async Task ProfileVendorAddressAddressTypeNullOrEmptyCountAsync(Guid runId, CancellationToken cancellationToken)
     {
         var totalRecords = await _dbContext.VendorAddresses.CountAsync(cancellationToken);
         var affectedSourceRecords = await _dbContext.VendorAddresses
@@ -204,46 +510,43 @@ public sealed class VendorProfiler(IAnalysisDbContext dbContext)
             BusinessObjectName = "Vendor",
             EntityName = "VendorAddress",
             ColumnName = "AddressType",
-            SummaryCode = "VENDOR_VENDORADDRESS_ADDRESSTYPE_NULL_COUNT",
-            SummaryType = "NullCount",
-            Label = "VendorAddress AddressType missing count",
-            Severity = "Medium",
+            SummaryCode = "VENDORADDRESS_ADDRESSTYPE_MISSING_COUNT",
+            SummaryType = "NullOrEmptyCount",
+            Label = "VendorAddress.AddressType missing values",
+            Severity = "High",
             MetricValue = affectedSourceRecords.Count,
             AffectedCount = affectedSourceRecords.Count,
             HasDrilldown = true,
-            DrilldownKey = "VENDOR_VENDORADDRESS_ADDRESSTYPE_NULL_COUNT",
+            DrilldownKey = "VENDORADDRESS_ADDRESSTYPE_MISSING_COUNT",
             CreatedOn = DateTimeOffset.UtcNow
         };
 
         _dbContext.DataProfilingSummaries.Add(summary);
 
-        if (true)
+        var affectedRecords = affectedSourceRecords.Select(x => new DataProfilingDrilldown
         {
-            var affectedRecords = affectedSourceRecords.Select(x => new DataProfilingDrilldown
-            {
-                DrilldownId = Guid.NewGuid(),
-                RunId = runId,
-                SummaryId = summary.SummaryId,
-                BusinessObjectName = "Vendor",
-                EntityName = "VendorAddress",
-                RootRecordId = x.VendorId.ToString(),
-                RecordId = x.Id.ToString(),
-                ColumnName = "AddressType",
-                SummaryCode = "VENDOR_VENDORADDRESS_ADDRESSTYPE_NULL_COUNT",
-                SummaryType = "NullCount",
-                FieldValue = x.AddressType,
-                Message = "VendorAddress AddressType missing count",
-                RecordSnapshotJson = JsonSerializer.Serialize(new { x.Id, x.VendorId, x.AddressType }),
-                CreatedOn = DateTimeOffset.UtcNow
-            }).ToList();
+            DrilldownId = Guid.NewGuid(),
+            RunId = runId,
+            SummaryId = summary.SummaryId,
+            BusinessObjectName = "Vendor",
+            EntityName = "VendorAddress",
+            RootRecordId = x.VendorId.ToString(),
+            RecordId = x.Id.ToString(),
+            ColumnName = "AddressType",
+            SummaryCode = "VENDORADDRESS_ADDRESSTYPE_MISSING_COUNT",
+            SummaryType = "NullOrEmptyCount",
+            FieldValue = x.AddressType,
+            Message = "VendorAddress.AddressType missing values",
+            RecordSnapshotJson = JsonSerializer.Serialize(new { x.Id, x.VendorId, x.AddressType }),
+            CreatedOn = DateTimeOffset.UtcNow
+        }).ToList();
 
-            _dbContext.DataProfilingDrilldowns.AddRange(affectedRecords);
-        }
+        _dbContext.DataProfilingDrilldowns.AddRange(affectedRecords);
 
         await _dbContext.SaveChangesAsync(cancellationToken);
     }
 
-    private async Task ProfileVendorAddressAddressLine1NullCountAsync(Guid runId, CancellationToken cancellationToken)
+    private async Task ProfileVendorAddressAddressLine1NullOrEmptyCountAsync(Guid runId, CancellationToken cancellationToken)
     {
         var totalRecords = await _dbContext.VendorAddresses.CountAsync(cancellationToken);
         var affectedSourceRecords = await _dbContext.VendorAddresses
@@ -257,46 +560,43 @@ public sealed class VendorProfiler(IAnalysisDbContext dbContext)
             BusinessObjectName = "Vendor",
             EntityName = "VendorAddress",
             ColumnName = "AddressLine1",
-            SummaryCode = "VENDOR_VENDORADDRESS_ADDRESSLINE1_NULL_COUNT",
-            SummaryType = "NullCount",
-            Label = "VendorAddress AddressLine1 missing count",
-            Severity = "Medium",
+            SummaryCode = "VENDORADDRESS_ADDRESSLINE1_MISSING_COUNT",
+            SummaryType = "NullOrEmptyCount",
+            Label = "VendorAddress.AddressLine1 missing values",
+            Severity = "High",
             MetricValue = affectedSourceRecords.Count,
             AffectedCount = affectedSourceRecords.Count,
             HasDrilldown = true,
-            DrilldownKey = "VENDOR_VENDORADDRESS_ADDRESSLINE1_NULL_COUNT",
+            DrilldownKey = "VENDORADDRESS_ADDRESSLINE1_MISSING_COUNT",
             CreatedOn = DateTimeOffset.UtcNow
         };
 
         _dbContext.DataProfilingSummaries.Add(summary);
 
-        if (true)
+        var affectedRecords = affectedSourceRecords.Select(x => new DataProfilingDrilldown
         {
-            var affectedRecords = affectedSourceRecords.Select(x => new DataProfilingDrilldown
-            {
-                DrilldownId = Guid.NewGuid(),
-                RunId = runId,
-                SummaryId = summary.SummaryId,
-                BusinessObjectName = "Vendor",
-                EntityName = "VendorAddress",
-                RootRecordId = x.VendorId.ToString(),
-                RecordId = x.Id.ToString(),
-                ColumnName = "AddressLine1",
-                SummaryCode = "VENDOR_VENDORADDRESS_ADDRESSLINE1_NULL_COUNT",
-                SummaryType = "NullCount",
-                FieldValue = x.AddressLine1,
-                Message = "VendorAddress AddressLine1 missing count",
-                RecordSnapshotJson = JsonSerializer.Serialize(new { x.Id, x.VendorId, x.AddressLine1 }),
-                CreatedOn = DateTimeOffset.UtcNow
-            }).ToList();
+            DrilldownId = Guid.NewGuid(),
+            RunId = runId,
+            SummaryId = summary.SummaryId,
+            BusinessObjectName = "Vendor",
+            EntityName = "VendorAddress",
+            RootRecordId = x.VendorId.ToString(),
+            RecordId = x.Id.ToString(),
+            ColumnName = "AddressLine1",
+            SummaryCode = "VENDORADDRESS_ADDRESSLINE1_MISSING_COUNT",
+            SummaryType = "NullOrEmptyCount",
+            FieldValue = x.AddressLine1,
+            Message = "VendorAddress.AddressLine1 missing values",
+            RecordSnapshotJson = JsonSerializer.Serialize(new { x.Id, x.VendorId, x.AddressLine1 }),
+            CreatedOn = DateTimeOffset.UtcNow
+        }).ToList();
 
-            _dbContext.DataProfilingDrilldowns.AddRange(affectedRecords);
-        }
+        _dbContext.DataProfilingDrilldowns.AddRange(affectedRecords);
 
         await _dbContext.SaveChangesAsync(cancellationToken);
     }
 
-    private async Task ProfileVendorAddressCityNullCountAsync(Guid runId, CancellationToken cancellationToken)
+    private async Task ProfileVendorAddressCityNullOrEmptyCountAsync(Guid runId, CancellationToken cancellationToken)
     {
         var totalRecords = await _dbContext.VendorAddresses.CountAsync(cancellationToken);
         var affectedSourceRecords = await _dbContext.VendorAddresses
@@ -310,46 +610,43 @@ public sealed class VendorProfiler(IAnalysisDbContext dbContext)
             BusinessObjectName = "Vendor",
             EntityName = "VendorAddress",
             ColumnName = "City",
-            SummaryCode = "VENDOR_VENDORADDRESS_CITY_NULL_COUNT",
-            SummaryType = "NullCount",
-            Label = "VendorAddress City missing count",
-            Severity = "Medium",
+            SummaryCode = "VENDORADDRESS_CITY_MISSING_COUNT",
+            SummaryType = "NullOrEmptyCount",
+            Label = "VendorAddress.City missing values",
+            Severity = "High",
             MetricValue = affectedSourceRecords.Count,
             AffectedCount = affectedSourceRecords.Count,
             HasDrilldown = true,
-            DrilldownKey = "VENDOR_VENDORADDRESS_CITY_NULL_COUNT",
+            DrilldownKey = "VENDORADDRESS_CITY_MISSING_COUNT",
             CreatedOn = DateTimeOffset.UtcNow
         };
 
         _dbContext.DataProfilingSummaries.Add(summary);
 
-        if (true)
+        var affectedRecords = affectedSourceRecords.Select(x => new DataProfilingDrilldown
         {
-            var affectedRecords = affectedSourceRecords.Select(x => new DataProfilingDrilldown
-            {
-                DrilldownId = Guid.NewGuid(),
-                RunId = runId,
-                SummaryId = summary.SummaryId,
-                BusinessObjectName = "Vendor",
-                EntityName = "VendorAddress",
-                RootRecordId = x.VendorId.ToString(),
-                RecordId = x.Id.ToString(),
-                ColumnName = "City",
-                SummaryCode = "VENDOR_VENDORADDRESS_CITY_NULL_COUNT",
-                SummaryType = "NullCount",
-                FieldValue = x.City,
-                Message = "VendorAddress City missing count",
-                RecordSnapshotJson = JsonSerializer.Serialize(new { x.Id, x.VendorId, x.City }),
-                CreatedOn = DateTimeOffset.UtcNow
-            }).ToList();
+            DrilldownId = Guid.NewGuid(),
+            RunId = runId,
+            SummaryId = summary.SummaryId,
+            BusinessObjectName = "Vendor",
+            EntityName = "VendorAddress",
+            RootRecordId = x.VendorId.ToString(),
+            RecordId = x.Id.ToString(),
+            ColumnName = "City",
+            SummaryCode = "VENDORADDRESS_CITY_MISSING_COUNT",
+            SummaryType = "NullOrEmptyCount",
+            FieldValue = x.City,
+            Message = "VendorAddress.City missing values",
+            RecordSnapshotJson = JsonSerializer.Serialize(new { x.Id, x.VendorId, x.City }),
+            CreatedOn = DateTimeOffset.UtcNow
+        }).ToList();
 
-            _dbContext.DataProfilingDrilldowns.AddRange(affectedRecords);
-        }
+        _dbContext.DataProfilingDrilldowns.AddRange(affectedRecords);
 
         await _dbContext.SaveChangesAsync(cancellationToken);
     }
 
-    private async Task ProfileVendorAddressPostalCodeNullCountAsync(Guid runId, CancellationToken cancellationToken)
+    private async Task ProfileVendorAddressPostalCodeNullOrEmptyCountAsync(Guid runId, CancellationToken cancellationToken)
     {
         var totalRecords = await _dbContext.VendorAddresses.CountAsync(cancellationToken);
         var affectedSourceRecords = await _dbContext.VendorAddresses
@@ -363,46 +660,174 @@ public sealed class VendorProfiler(IAnalysisDbContext dbContext)
             BusinessObjectName = "Vendor",
             EntityName = "VendorAddress",
             ColumnName = "PostalCode",
-            SummaryCode = "VENDOR_VENDORADDRESS_POSTALCODE_NULL_COUNT",
-            SummaryType = "NullCount",
-            Label = "VendorAddress PostalCode missing count",
-            Severity = "Medium",
+            SummaryCode = "VENDORADDRESS_POSTALCODE_MISSING_COUNT",
+            SummaryType = "NullOrEmptyCount",
+            Label = "VendorAddress.PostalCode missing values",
+            Severity = "High",
             MetricValue = affectedSourceRecords.Count,
             AffectedCount = affectedSourceRecords.Count,
             HasDrilldown = true,
-            DrilldownKey = "VENDOR_VENDORADDRESS_POSTALCODE_NULL_COUNT",
+            DrilldownKey = "VENDORADDRESS_POSTALCODE_MISSING_COUNT",
             CreatedOn = DateTimeOffset.UtcNow
         };
 
         _dbContext.DataProfilingSummaries.Add(summary);
 
-        if (true)
+        var affectedRecords = affectedSourceRecords.Select(x => new DataProfilingDrilldown
         {
-            var affectedRecords = affectedSourceRecords.Select(x => new DataProfilingDrilldown
-            {
-                DrilldownId = Guid.NewGuid(),
-                RunId = runId,
-                SummaryId = summary.SummaryId,
-                BusinessObjectName = "Vendor",
-                EntityName = "VendorAddress",
-                RootRecordId = x.VendorId.ToString(),
-                RecordId = x.Id.ToString(),
-                ColumnName = "PostalCode",
-                SummaryCode = "VENDOR_VENDORADDRESS_POSTALCODE_NULL_COUNT",
-                SummaryType = "NullCount",
-                FieldValue = x.PostalCode,
-                Message = "VendorAddress PostalCode missing count",
-                RecordSnapshotJson = JsonSerializer.Serialize(new { x.Id, x.VendorId, x.PostalCode }),
-                CreatedOn = DateTimeOffset.UtcNow
-            }).ToList();
+            DrilldownId = Guid.NewGuid(),
+            RunId = runId,
+            SummaryId = summary.SummaryId,
+            BusinessObjectName = "Vendor",
+            EntityName = "VendorAddress",
+            RootRecordId = x.VendorId.ToString(),
+            RecordId = x.Id.ToString(),
+            ColumnName = "PostalCode",
+            SummaryCode = "VENDORADDRESS_POSTALCODE_MISSING_COUNT",
+            SummaryType = "NullOrEmptyCount",
+            FieldValue = x.PostalCode,
+            Message = "VendorAddress.PostalCode missing values",
+            RecordSnapshotJson = JsonSerializer.Serialize(new { x.Id, x.VendorId, x.PostalCode }),
+            CreatedOn = DateTimeOffset.UtcNow
+        }).ToList();
 
-            _dbContext.DataProfilingDrilldowns.AddRange(affectedRecords);
-        }
+        _dbContext.DataProfilingDrilldowns.AddRange(affectedRecords);
 
         await _dbContext.SaveChangesAsync(cancellationToken);
     }
 
-    private async Task ProfileVendorContactFirstNameNullCountAsync(Guid runId, CancellationToken cancellationToken)
+    private async Task ProfileVendorAddressCountryIdNullOrEmptyCountAsync(Guid runId, CancellationToken cancellationToken)
+    {
+        var totalRecords = await _dbContext.VendorAddresses.CountAsync(cancellationToken);
+        var affectedSourceRecords = await _dbContext.VendorAddresses
+            .Where(x => false)
+            .ToListAsync(cancellationToken);
+
+        var summary = new DataProfilingSummary
+        {
+            SummaryId = Guid.NewGuid(),
+            RunId = runId,
+            BusinessObjectName = "Vendor",
+            EntityName = "VendorAddress",
+            ColumnName = "CountryId",
+            SummaryCode = "VENDORADDRESS_COUNTRYID_MISSING_COUNT",
+            SummaryType = "NullOrEmptyCount",
+            Label = "VendorAddress.CountryId missing values",
+            Severity = "High",
+            MetricValue = affectedSourceRecords.Count,
+            AffectedCount = affectedSourceRecords.Count,
+            HasDrilldown = true,
+            DrilldownKey = "VENDORADDRESS_COUNTRYID_MISSING_COUNT",
+            CreatedOn = DateTimeOffset.UtcNow
+        };
+
+        _dbContext.DataProfilingSummaries.Add(summary);
+
+        var affectedRecords = affectedSourceRecords.Select(x => new DataProfilingDrilldown
+        {
+            DrilldownId = Guid.NewGuid(),
+            RunId = runId,
+            SummaryId = summary.SummaryId,
+            BusinessObjectName = "Vendor",
+            EntityName = "VendorAddress",
+            RootRecordId = x.VendorId.ToString(),
+            RecordId = x.Id.ToString(),
+            ColumnName = "CountryId",
+            SummaryCode = "VENDORADDRESS_COUNTRYID_MISSING_COUNT",
+            SummaryType = "NullOrEmptyCount",
+            FieldValue = x.CountryId.ToString(),
+            Message = "VendorAddress.CountryId missing values",
+            RecordSnapshotJson = JsonSerializer.Serialize(new { x.Id, x.VendorId, x.CountryId }),
+            CreatedOn = DateTimeOffset.UtcNow
+        }).ToList();
+
+        _dbContext.DataProfilingDrilldowns.AddRange(affectedRecords);
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    private async Task ProfileVendorContactRecordsTotalRecordsAsync(Guid runId, CancellationToken cancellationToken)
+    {
+        var totalRecords = await _dbContext.VendorContacts.CountAsync(cancellationToken);
+        var affectedSourceRecords = await _dbContext.VendorContacts
+            .Where(x => true)
+            .ToListAsync(cancellationToken);
+
+        var summary = new DataProfilingSummary
+        {
+            SummaryId = Guid.NewGuid(),
+            RunId = runId,
+            BusinessObjectName = "Vendor",
+            EntityName = "VendorContact",
+            ColumnName = "",
+            SummaryCode = "VENDORCONTACT_TOTAL_RECORD_COUNT",
+            SummaryType = "TotalRecords",
+            Label = "Total records in VendorContact",
+            Severity = "",
+            MetricValue = affectedSourceRecords.Count,
+            AffectedCount = affectedSourceRecords.Count,
+            HasDrilldown = false,
+            DrilldownKey = "VENDORCONTACT_TOTAL_RECORD_COUNT",
+            CreatedOn = DateTimeOffset.UtcNow
+        };
+
+        _dbContext.DataProfilingSummaries.Add(summary);
+
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    private async Task ProfileVendorContactVendorIdNullOrEmptyCountAsync(Guid runId, CancellationToken cancellationToken)
+    {
+        var totalRecords = await _dbContext.VendorContacts.CountAsync(cancellationToken);
+        var affectedSourceRecords = await _dbContext.VendorContacts
+            .Where(x => false)
+            .ToListAsync(cancellationToken);
+
+        var summary = new DataProfilingSummary
+        {
+            SummaryId = Guid.NewGuid(),
+            RunId = runId,
+            BusinessObjectName = "Vendor",
+            EntityName = "VendorContact",
+            ColumnName = "VendorId",
+            SummaryCode = "VENDORCONTACT_VENDORID_MISSING_COUNT",
+            SummaryType = "NullOrEmptyCount",
+            Label = "VendorContact.VendorId missing values",
+            Severity = "High",
+            MetricValue = affectedSourceRecords.Count,
+            AffectedCount = affectedSourceRecords.Count,
+            HasDrilldown = true,
+            DrilldownKey = "VENDORCONTACT_VENDORID_MISSING_COUNT",
+            CreatedOn = DateTimeOffset.UtcNow
+        };
+
+        _dbContext.DataProfilingSummaries.Add(summary);
+
+        var affectedRecords = affectedSourceRecords.Select(x => new DataProfilingDrilldown
+        {
+            DrilldownId = Guid.NewGuid(),
+            RunId = runId,
+            SummaryId = summary.SummaryId,
+            BusinessObjectName = "Vendor",
+            EntityName = "VendorContact",
+            RootRecordId = x.VendorId.ToString(),
+            RecordId = x.Id.ToString(),
+            ColumnName = "VendorId",
+            SummaryCode = "VENDORCONTACT_VENDORID_MISSING_COUNT",
+            SummaryType = "NullOrEmptyCount",
+            FieldValue = x.VendorId.ToString(),
+            Message = "VendorContact.VendorId missing values",
+            RecordSnapshotJson = JsonSerializer.Serialize(new { x.Id, x.VendorId }),
+            CreatedOn = DateTimeOffset.UtcNow
+        }).ToList();
+
+        _dbContext.DataProfilingDrilldowns.AddRange(affectedRecords);
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    private async Task ProfileVendorContactFirstNameNullOrEmptyCountAsync(Guid runId, CancellationToken cancellationToken)
     {
         var totalRecords = await _dbContext.VendorContacts.CountAsync(cancellationToken);
         var affectedSourceRecords = await _dbContext.VendorContacts
@@ -416,46 +841,43 @@ public sealed class VendorProfiler(IAnalysisDbContext dbContext)
             BusinessObjectName = "Vendor",
             EntityName = "VendorContact",
             ColumnName = "FirstName",
-            SummaryCode = "VENDOR_VENDORCONTACT_FIRSTNAME_NULL_COUNT",
-            SummaryType = "NullCount",
-            Label = "VendorContact FirstName missing count",
-            Severity = "Medium",
+            SummaryCode = "VENDORCONTACT_FIRSTNAME_MISSING_COUNT",
+            SummaryType = "NullOrEmptyCount",
+            Label = "VendorContact.FirstName missing values",
+            Severity = "High",
             MetricValue = affectedSourceRecords.Count,
             AffectedCount = affectedSourceRecords.Count,
             HasDrilldown = true,
-            DrilldownKey = "VENDOR_VENDORCONTACT_FIRSTNAME_NULL_COUNT",
+            DrilldownKey = "VENDORCONTACT_FIRSTNAME_MISSING_COUNT",
             CreatedOn = DateTimeOffset.UtcNow
         };
 
         _dbContext.DataProfilingSummaries.Add(summary);
 
-        if (true)
+        var affectedRecords = affectedSourceRecords.Select(x => new DataProfilingDrilldown
         {
-            var affectedRecords = affectedSourceRecords.Select(x => new DataProfilingDrilldown
-            {
-                DrilldownId = Guid.NewGuid(),
-                RunId = runId,
-                SummaryId = summary.SummaryId,
-                BusinessObjectName = "Vendor",
-                EntityName = "VendorContact",
-                RootRecordId = x.VendorId.ToString(),
-                RecordId = x.Id.ToString(),
-                ColumnName = "FirstName",
-                SummaryCode = "VENDOR_VENDORCONTACT_FIRSTNAME_NULL_COUNT",
-                SummaryType = "NullCount",
-                FieldValue = x.FirstName,
-                Message = "VendorContact FirstName missing count",
-                RecordSnapshotJson = JsonSerializer.Serialize(new { x.Id, x.VendorId, x.FirstName }),
-                CreatedOn = DateTimeOffset.UtcNow
-            }).ToList();
+            DrilldownId = Guid.NewGuid(),
+            RunId = runId,
+            SummaryId = summary.SummaryId,
+            BusinessObjectName = "Vendor",
+            EntityName = "VendorContact",
+            RootRecordId = x.VendorId.ToString(),
+            RecordId = x.Id.ToString(),
+            ColumnName = "FirstName",
+            SummaryCode = "VENDORCONTACT_FIRSTNAME_MISSING_COUNT",
+            SummaryType = "NullOrEmptyCount",
+            FieldValue = x.FirstName,
+            Message = "VendorContact.FirstName missing values",
+            RecordSnapshotJson = JsonSerializer.Serialize(new { x.Id, x.VendorId, x.FirstName }),
+            CreatedOn = DateTimeOffset.UtcNow
+        }).ToList();
 
-            _dbContext.DataProfilingDrilldowns.AddRange(affectedRecords);
-        }
+        _dbContext.DataProfilingDrilldowns.AddRange(affectedRecords);
 
         await _dbContext.SaveChangesAsync(cancellationToken);
     }
 
-    private async Task ProfileVendorContactLastNameNullCountAsync(Guid runId, CancellationToken cancellationToken)
+    private async Task ProfileVendorContactLastNameNullOrEmptyCountAsync(Guid runId, CancellationToken cancellationToken)
     {
         var totalRecords = await _dbContext.VendorContacts.CountAsync(cancellationToken);
         var affectedSourceRecords = await _dbContext.VendorContacts
@@ -469,46 +891,174 @@ public sealed class VendorProfiler(IAnalysisDbContext dbContext)
             BusinessObjectName = "Vendor",
             EntityName = "VendorContact",
             ColumnName = "LastName",
-            SummaryCode = "VENDOR_VENDORCONTACT_LASTNAME_NULL_COUNT",
-            SummaryType = "NullCount",
-            Label = "VendorContact LastName missing count",
-            Severity = "Medium",
+            SummaryCode = "VENDORCONTACT_LASTNAME_MISSING_COUNT",
+            SummaryType = "NullOrEmptyCount",
+            Label = "VendorContact.LastName missing values",
+            Severity = "High",
             MetricValue = affectedSourceRecords.Count,
             AffectedCount = affectedSourceRecords.Count,
             HasDrilldown = true,
-            DrilldownKey = "VENDOR_VENDORCONTACT_LASTNAME_NULL_COUNT",
+            DrilldownKey = "VENDORCONTACT_LASTNAME_MISSING_COUNT",
             CreatedOn = DateTimeOffset.UtcNow
         };
 
         _dbContext.DataProfilingSummaries.Add(summary);
 
-        if (true)
+        var affectedRecords = affectedSourceRecords.Select(x => new DataProfilingDrilldown
         {
-            var affectedRecords = affectedSourceRecords.Select(x => new DataProfilingDrilldown
-            {
-                DrilldownId = Guid.NewGuid(),
-                RunId = runId,
-                SummaryId = summary.SummaryId,
-                BusinessObjectName = "Vendor",
-                EntityName = "VendorContact",
-                RootRecordId = x.VendorId.ToString(),
-                RecordId = x.Id.ToString(),
-                ColumnName = "LastName",
-                SummaryCode = "VENDOR_VENDORCONTACT_LASTNAME_NULL_COUNT",
-                SummaryType = "NullCount",
-                FieldValue = x.LastName,
-                Message = "VendorContact LastName missing count",
-                RecordSnapshotJson = JsonSerializer.Serialize(new { x.Id, x.VendorId, x.LastName }),
-                CreatedOn = DateTimeOffset.UtcNow
-            }).ToList();
+            DrilldownId = Guid.NewGuid(),
+            RunId = runId,
+            SummaryId = summary.SummaryId,
+            BusinessObjectName = "Vendor",
+            EntityName = "VendorContact",
+            RootRecordId = x.VendorId.ToString(),
+            RecordId = x.Id.ToString(),
+            ColumnName = "LastName",
+            SummaryCode = "VENDORCONTACT_LASTNAME_MISSING_COUNT",
+            SummaryType = "NullOrEmptyCount",
+            FieldValue = x.LastName,
+            Message = "VendorContact.LastName missing values",
+            RecordSnapshotJson = JsonSerializer.Serialize(new { x.Id, x.VendorId, x.LastName }),
+            CreatedOn = DateTimeOffset.UtcNow
+        }).ToList();
 
-            _dbContext.DataProfilingDrilldowns.AddRange(affectedRecords);
-        }
+        _dbContext.DataProfilingDrilldowns.AddRange(affectedRecords);
 
         await _dbContext.SaveChangesAsync(cancellationToken);
     }
 
-    private async Task ProfileVendorBankAccountBankNameNullCountAsync(Guid runId, CancellationToken cancellationToken)
+    private async Task ProfileVendorContactEmailInvalidFormatCountAsync(Guid runId, CancellationToken cancellationToken)
+    {
+        var totalRecords = await _dbContext.VendorContacts.CountAsync(cancellationToken);
+        var affectedSourceRecords = await _dbContext.VendorContacts
+            .Where(x => x.Email != null && !x.Email.Contains("@"))
+            .ToListAsync(cancellationToken);
+
+        var summary = new DataProfilingSummary
+        {
+            SummaryId = Guid.NewGuid(),
+            RunId = runId,
+            BusinessObjectName = "Vendor",
+            EntityName = "VendorContact",
+            ColumnName = "Email",
+            SummaryCode = "VENDORCONTACT_EMAIL_INVALID_EMAIL_COUNT",
+            SummaryType = "InvalidFormatCount",
+            Label = "Invalid email format in VendorContact.Email",
+            Severity = "High",
+            MetricValue = affectedSourceRecords.Count,
+            AffectedCount = affectedSourceRecords.Count,
+            HasDrilldown = true,
+            DrilldownKey = "VENDORCONTACT_EMAIL_INVALID_EMAIL_COUNT",
+            CreatedOn = DateTimeOffset.UtcNow
+        };
+
+        _dbContext.DataProfilingSummaries.Add(summary);
+
+        var affectedRecords = affectedSourceRecords.Select(x => new DataProfilingDrilldown
+        {
+            DrilldownId = Guid.NewGuid(),
+            RunId = runId,
+            SummaryId = summary.SummaryId,
+            BusinessObjectName = "Vendor",
+            EntityName = "VendorContact",
+            RootRecordId = x.VendorId.ToString(),
+            RecordId = x.Id.ToString(),
+            ColumnName = "Email",
+            SummaryCode = "VENDORCONTACT_EMAIL_INVALID_EMAIL_COUNT",
+            SummaryType = "InvalidFormatCount",
+            FieldValue = x.Email,
+            Message = "Invalid email format in VendorContact.Email",
+            RecordSnapshotJson = JsonSerializer.Serialize(new { x.Id, x.VendorId, x.Email }),
+            CreatedOn = DateTimeOffset.UtcNow
+        }).ToList();
+
+        _dbContext.DataProfilingDrilldowns.AddRange(affectedRecords);
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    private async Task ProfileVendorBankAccountRecordsTotalRecordsAsync(Guid runId, CancellationToken cancellationToken)
+    {
+        var totalRecords = await _dbContext.VendorBankAccounts.CountAsync(cancellationToken);
+        var affectedSourceRecords = await _dbContext.VendorBankAccounts
+            .Where(x => true)
+            .ToListAsync(cancellationToken);
+
+        var summary = new DataProfilingSummary
+        {
+            SummaryId = Guid.NewGuid(),
+            RunId = runId,
+            BusinessObjectName = "Vendor",
+            EntityName = "VendorBankAccount",
+            ColumnName = "",
+            SummaryCode = "VENDORBANKACCOUNT_TOTAL_RECORD_COUNT",
+            SummaryType = "TotalRecords",
+            Label = "Total records in VendorBankAccount",
+            Severity = "",
+            MetricValue = affectedSourceRecords.Count,
+            AffectedCount = affectedSourceRecords.Count,
+            HasDrilldown = false,
+            DrilldownKey = "VENDORBANKACCOUNT_TOTAL_RECORD_COUNT",
+            CreatedOn = DateTimeOffset.UtcNow
+        };
+
+        _dbContext.DataProfilingSummaries.Add(summary);
+
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    private async Task ProfileVendorBankAccountVendorIdNullOrEmptyCountAsync(Guid runId, CancellationToken cancellationToken)
+    {
+        var totalRecords = await _dbContext.VendorBankAccounts.CountAsync(cancellationToken);
+        var affectedSourceRecords = await _dbContext.VendorBankAccounts
+            .Where(x => false)
+            .ToListAsync(cancellationToken);
+
+        var summary = new DataProfilingSummary
+        {
+            SummaryId = Guid.NewGuid(),
+            RunId = runId,
+            BusinessObjectName = "Vendor",
+            EntityName = "VendorBankAccount",
+            ColumnName = "VendorId",
+            SummaryCode = "VENDORBANKACCOUNT_VENDORID_MISSING_COUNT",
+            SummaryType = "NullOrEmptyCount",
+            Label = "VendorBankAccount.VendorId missing values",
+            Severity = "High",
+            MetricValue = affectedSourceRecords.Count,
+            AffectedCount = affectedSourceRecords.Count,
+            HasDrilldown = true,
+            DrilldownKey = "VENDORBANKACCOUNT_VENDORID_MISSING_COUNT",
+            CreatedOn = DateTimeOffset.UtcNow
+        };
+
+        _dbContext.DataProfilingSummaries.Add(summary);
+
+        var affectedRecords = affectedSourceRecords.Select(x => new DataProfilingDrilldown
+        {
+            DrilldownId = Guid.NewGuid(),
+            RunId = runId,
+            SummaryId = summary.SummaryId,
+            BusinessObjectName = "Vendor",
+            EntityName = "VendorBankAccount",
+            RootRecordId = x.VendorId.ToString(),
+            RecordId = x.Id.ToString(),
+            ColumnName = "VendorId",
+            SummaryCode = "VENDORBANKACCOUNT_VENDORID_MISSING_COUNT",
+            SummaryType = "NullOrEmptyCount",
+            FieldValue = x.VendorId.ToString(),
+            Message = "VendorBankAccount.VendorId missing values",
+            RecordSnapshotJson = JsonSerializer.Serialize(new { x.Id, x.VendorId }),
+            CreatedOn = DateTimeOffset.UtcNow
+        }).ToList();
+
+        _dbContext.DataProfilingDrilldowns.AddRange(affectedRecords);
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    private async Task ProfileVendorBankAccountBankNameNullOrEmptyCountAsync(Guid runId, CancellationToken cancellationToken)
     {
         var totalRecords = await _dbContext.VendorBankAccounts.CountAsync(cancellationToken);
         var affectedSourceRecords = await _dbContext.VendorBankAccounts
@@ -522,46 +1072,43 @@ public sealed class VendorProfiler(IAnalysisDbContext dbContext)
             BusinessObjectName = "Vendor",
             EntityName = "VendorBankAccount",
             ColumnName = "BankName",
-            SummaryCode = "VENDOR_VENDORBANKACCOUNT_BANKNAME_NULL_COUNT",
-            SummaryType = "NullCount",
-            Label = "VendorBankAccount BankName missing count",
-            Severity = "Medium",
+            SummaryCode = "VENDORBANKACCOUNT_BANKNAME_MISSING_COUNT",
+            SummaryType = "NullOrEmptyCount",
+            Label = "VendorBankAccount.BankName missing values",
+            Severity = "High",
             MetricValue = affectedSourceRecords.Count,
             AffectedCount = affectedSourceRecords.Count,
             HasDrilldown = true,
-            DrilldownKey = "VENDOR_VENDORBANKACCOUNT_BANKNAME_NULL_COUNT",
+            DrilldownKey = "VENDORBANKACCOUNT_BANKNAME_MISSING_COUNT",
             CreatedOn = DateTimeOffset.UtcNow
         };
 
         _dbContext.DataProfilingSummaries.Add(summary);
 
-        if (true)
+        var affectedRecords = affectedSourceRecords.Select(x => new DataProfilingDrilldown
         {
-            var affectedRecords = affectedSourceRecords.Select(x => new DataProfilingDrilldown
-            {
-                DrilldownId = Guid.NewGuid(),
-                RunId = runId,
-                SummaryId = summary.SummaryId,
-                BusinessObjectName = "Vendor",
-                EntityName = "VendorBankAccount",
-                RootRecordId = x.VendorId.ToString(),
-                RecordId = x.Id.ToString(),
-                ColumnName = "BankName",
-                SummaryCode = "VENDOR_VENDORBANKACCOUNT_BANKNAME_NULL_COUNT",
-                SummaryType = "NullCount",
-                FieldValue = x.BankName,
-                Message = "VendorBankAccount BankName missing count",
-                RecordSnapshotJson = JsonSerializer.Serialize(new { x.Id, x.VendorId, x.BankName }),
-                CreatedOn = DateTimeOffset.UtcNow
-            }).ToList();
+            DrilldownId = Guid.NewGuid(),
+            RunId = runId,
+            SummaryId = summary.SummaryId,
+            BusinessObjectName = "Vendor",
+            EntityName = "VendorBankAccount",
+            RootRecordId = x.VendorId.ToString(),
+            RecordId = x.Id.ToString(),
+            ColumnName = "BankName",
+            SummaryCode = "VENDORBANKACCOUNT_BANKNAME_MISSING_COUNT",
+            SummaryType = "NullOrEmptyCount",
+            FieldValue = x.BankName,
+            Message = "VendorBankAccount.BankName missing values",
+            RecordSnapshotJson = JsonSerializer.Serialize(new { x.Id, x.VendorId, x.BankName }),
+            CreatedOn = DateTimeOffset.UtcNow
+        }).ToList();
 
-            _dbContext.DataProfilingDrilldowns.AddRange(affectedRecords);
-        }
+        _dbContext.DataProfilingDrilldowns.AddRange(affectedRecords);
 
         await _dbContext.SaveChangesAsync(cancellationToken);
     }
 
-    private async Task ProfileVendorBankAccountAccountNumberNullCountAsync(Guid runId, CancellationToken cancellationToken)
+    private async Task ProfileVendorBankAccountAccountNumberNullOrEmptyCountAsync(Guid runId, CancellationToken cancellationToken)
     {
         var totalRecords = await _dbContext.VendorBankAccounts.CountAsync(cancellationToken);
         var affectedSourceRecords = await _dbContext.VendorBankAccounts
@@ -575,46 +1122,174 @@ public sealed class VendorProfiler(IAnalysisDbContext dbContext)
             BusinessObjectName = "Vendor",
             EntityName = "VendorBankAccount",
             ColumnName = "AccountNumber",
-            SummaryCode = "VENDOR_VENDORBANKACCOUNT_ACCOUNTNUMBER_NULL_COUNT",
-            SummaryType = "NullCount",
-            Label = "VendorBankAccount AccountNumber missing count",
-            Severity = "Medium",
+            SummaryCode = "VENDORBANKACCOUNT_ACCOUNTNUMBER_MISSING_COUNT",
+            SummaryType = "NullOrEmptyCount",
+            Label = "VendorBankAccount.AccountNumber missing values",
+            Severity = "High",
             MetricValue = affectedSourceRecords.Count,
             AffectedCount = affectedSourceRecords.Count,
             HasDrilldown = true,
-            DrilldownKey = "VENDOR_VENDORBANKACCOUNT_ACCOUNTNUMBER_NULL_COUNT",
+            DrilldownKey = "VENDORBANKACCOUNT_ACCOUNTNUMBER_MISSING_COUNT",
             CreatedOn = DateTimeOffset.UtcNow
         };
 
         _dbContext.DataProfilingSummaries.Add(summary);
 
-        if (true)
+        var affectedRecords = affectedSourceRecords.Select(x => new DataProfilingDrilldown
         {
-            var affectedRecords = affectedSourceRecords.Select(x => new DataProfilingDrilldown
-            {
-                DrilldownId = Guid.NewGuid(),
-                RunId = runId,
-                SummaryId = summary.SummaryId,
-                BusinessObjectName = "Vendor",
-                EntityName = "VendorBankAccount",
-                RootRecordId = x.VendorId.ToString(),
-                RecordId = x.Id.ToString(),
-                ColumnName = "AccountNumber",
-                SummaryCode = "VENDOR_VENDORBANKACCOUNT_ACCOUNTNUMBER_NULL_COUNT",
-                SummaryType = "NullCount",
-                FieldValue = x.AccountNumber,
-                Message = "VendorBankAccount AccountNumber missing count",
-                RecordSnapshotJson = JsonSerializer.Serialize(new { x.Id, x.VendorId, x.AccountNumber }),
-                CreatedOn = DateTimeOffset.UtcNow
-            }).ToList();
+            DrilldownId = Guid.NewGuid(),
+            RunId = runId,
+            SummaryId = summary.SummaryId,
+            BusinessObjectName = "Vendor",
+            EntityName = "VendorBankAccount",
+            RootRecordId = x.VendorId.ToString(),
+            RecordId = x.Id.ToString(),
+            ColumnName = "AccountNumber",
+            SummaryCode = "VENDORBANKACCOUNT_ACCOUNTNUMBER_MISSING_COUNT",
+            SummaryType = "NullOrEmptyCount",
+            FieldValue = x.AccountNumber,
+            Message = "VendorBankAccount.AccountNumber missing values",
+            RecordSnapshotJson = JsonSerializer.Serialize(new { x.Id, x.VendorId, x.AccountNumber }),
+            CreatedOn = DateTimeOffset.UtcNow
+        }).ToList();
 
-            _dbContext.DataProfilingDrilldowns.AddRange(affectedRecords);
-        }
+        _dbContext.DataProfilingDrilldowns.AddRange(affectedRecords);
 
         await _dbContext.SaveChangesAsync(cancellationToken);
     }
 
-    private async Task ProfileVendorTaxTaxTypeNullCountAsync(Guid runId, CancellationToken cancellationToken)
+    private async Task ProfileVendorBankAccountCurrencyIdNullOrEmptyCountAsync(Guid runId, CancellationToken cancellationToken)
+    {
+        var totalRecords = await _dbContext.VendorBankAccounts.CountAsync(cancellationToken);
+        var affectedSourceRecords = await _dbContext.VendorBankAccounts
+            .Where(x => false)
+            .ToListAsync(cancellationToken);
+
+        var summary = new DataProfilingSummary
+        {
+            SummaryId = Guid.NewGuid(),
+            RunId = runId,
+            BusinessObjectName = "Vendor",
+            EntityName = "VendorBankAccount",
+            ColumnName = "CurrencyId",
+            SummaryCode = "VENDORBANKACCOUNT_CURRENCYID_MISSING_COUNT",
+            SummaryType = "NullOrEmptyCount",
+            Label = "VendorBankAccount.CurrencyId missing values",
+            Severity = "High",
+            MetricValue = affectedSourceRecords.Count,
+            AffectedCount = affectedSourceRecords.Count,
+            HasDrilldown = true,
+            DrilldownKey = "VENDORBANKACCOUNT_CURRENCYID_MISSING_COUNT",
+            CreatedOn = DateTimeOffset.UtcNow
+        };
+
+        _dbContext.DataProfilingSummaries.Add(summary);
+
+        var affectedRecords = affectedSourceRecords.Select(x => new DataProfilingDrilldown
+        {
+            DrilldownId = Guid.NewGuid(),
+            RunId = runId,
+            SummaryId = summary.SummaryId,
+            BusinessObjectName = "Vendor",
+            EntityName = "VendorBankAccount",
+            RootRecordId = x.VendorId.ToString(),
+            RecordId = x.Id.ToString(),
+            ColumnName = "CurrencyId",
+            SummaryCode = "VENDORBANKACCOUNT_CURRENCYID_MISSING_COUNT",
+            SummaryType = "NullOrEmptyCount",
+            FieldValue = x.CurrencyId.ToString(),
+            Message = "VendorBankAccount.CurrencyId missing values",
+            RecordSnapshotJson = JsonSerializer.Serialize(new { x.Id, x.VendorId, x.CurrencyId }),
+            CreatedOn = DateTimeOffset.UtcNow
+        }).ToList();
+
+        _dbContext.DataProfilingDrilldowns.AddRange(affectedRecords);
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    private async Task ProfileVendorTaxRecordsTotalRecordsAsync(Guid runId, CancellationToken cancellationToken)
+    {
+        var totalRecords = await _dbContext.VendorTaxs.CountAsync(cancellationToken);
+        var affectedSourceRecords = await _dbContext.VendorTaxs
+            .Where(x => true)
+            .ToListAsync(cancellationToken);
+
+        var summary = new DataProfilingSummary
+        {
+            SummaryId = Guid.NewGuid(),
+            RunId = runId,
+            BusinessObjectName = "Vendor",
+            EntityName = "VendorTax",
+            ColumnName = "",
+            SummaryCode = "VENDORTAX_TOTAL_RECORD_COUNT",
+            SummaryType = "TotalRecords",
+            Label = "Total records in VendorTax",
+            Severity = "",
+            MetricValue = affectedSourceRecords.Count,
+            AffectedCount = affectedSourceRecords.Count,
+            HasDrilldown = false,
+            DrilldownKey = "VENDORTAX_TOTAL_RECORD_COUNT",
+            CreatedOn = DateTimeOffset.UtcNow
+        };
+
+        _dbContext.DataProfilingSummaries.Add(summary);
+
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    private async Task ProfileVendorTaxVendorIdNullOrEmptyCountAsync(Guid runId, CancellationToken cancellationToken)
+    {
+        var totalRecords = await _dbContext.VendorTaxs.CountAsync(cancellationToken);
+        var affectedSourceRecords = await _dbContext.VendorTaxs
+            .Where(x => false)
+            .ToListAsync(cancellationToken);
+
+        var summary = new DataProfilingSummary
+        {
+            SummaryId = Guid.NewGuid(),
+            RunId = runId,
+            BusinessObjectName = "Vendor",
+            EntityName = "VendorTax",
+            ColumnName = "VendorId",
+            SummaryCode = "VENDORTAX_VENDORID_MISSING_COUNT",
+            SummaryType = "NullOrEmptyCount",
+            Label = "VendorTax.VendorId missing values",
+            Severity = "High",
+            MetricValue = affectedSourceRecords.Count,
+            AffectedCount = affectedSourceRecords.Count,
+            HasDrilldown = true,
+            DrilldownKey = "VENDORTAX_VENDORID_MISSING_COUNT",
+            CreatedOn = DateTimeOffset.UtcNow
+        };
+
+        _dbContext.DataProfilingSummaries.Add(summary);
+
+        var affectedRecords = affectedSourceRecords.Select(x => new DataProfilingDrilldown
+        {
+            DrilldownId = Guid.NewGuid(),
+            RunId = runId,
+            SummaryId = summary.SummaryId,
+            BusinessObjectName = "Vendor",
+            EntityName = "VendorTax",
+            RootRecordId = x.VendorId.ToString(),
+            RecordId = x.Id.ToString(),
+            ColumnName = "VendorId",
+            SummaryCode = "VENDORTAX_VENDORID_MISSING_COUNT",
+            SummaryType = "NullOrEmptyCount",
+            FieldValue = x.VendorId.ToString(),
+            Message = "VendorTax.VendorId missing values",
+            RecordSnapshotJson = JsonSerializer.Serialize(new { x.Id, x.VendorId }),
+            CreatedOn = DateTimeOffset.UtcNow
+        }).ToList();
+
+        _dbContext.DataProfilingDrilldowns.AddRange(affectedRecords);
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    private async Task ProfileVendorTaxTaxTypeNullOrEmptyCountAsync(Guid runId, CancellationToken cancellationToken)
     {
         var totalRecords = await _dbContext.VendorTaxs.CountAsync(cancellationToken);
         var affectedSourceRecords = await _dbContext.VendorTaxs
@@ -628,46 +1303,43 @@ public sealed class VendorProfiler(IAnalysisDbContext dbContext)
             BusinessObjectName = "Vendor",
             EntityName = "VendorTax",
             ColumnName = "TaxType",
-            SummaryCode = "VENDOR_VENDORTAX_TAXTYPE_NULL_COUNT",
-            SummaryType = "NullCount",
-            Label = "VendorTax TaxType missing count",
-            Severity = "Medium",
+            SummaryCode = "VENDORTAX_TAXTYPE_MISSING_COUNT",
+            SummaryType = "NullOrEmptyCount",
+            Label = "VendorTax.TaxType missing values",
+            Severity = "High",
             MetricValue = affectedSourceRecords.Count,
             AffectedCount = affectedSourceRecords.Count,
             HasDrilldown = true,
-            DrilldownKey = "VENDOR_VENDORTAX_TAXTYPE_NULL_COUNT",
+            DrilldownKey = "VENDORTAX_TAXTYPE_MISSING_COUNT",
             CreatedOn = DateTimeOffset.UtcNow
         };
 
         _dbContext.DataProfilingSummaries.Add(summary);
 
-        if (true)
+        var affectedRecords = affectedSourceRecords.Select(x => new DataProfilingDrilldown
         {
-            var affectedRecords = affectedSourceRecords.Select(x => new DataProfilingDrilldown
-            {
-                DrilldownId = Guid.NewGuid(),
-                RunId = runId,
-                SummaryId = summary.SummaryId,
-                BusinessObjectName = "Vendor",
-                EntityName = "VendorTax",
-                RootRecordId = x.VendorId.ToString(),
-                RecordId = x.Id.ToString(),
-                ColumnName = "TaxType",
-                SummaryCode = "VENDOR_VENDORTAX_TAXTYPE_NULL_COUNT",
-                SummaryType = "NullCount",
-                FieldValue = x.TaxType,
-                Message = "VendorTax TaxType missing count",
-                RecordSnapshotJson = JsonSerializer.Serialize(new { x.Id, x.VendorId, x.TaxType }),
-                CreatedOn = DateTimeOffset.UtcNow
-            }).ToList();
+            DrilldownId = Guid.NewGuid(),
+            RunId = runId,
+            SummaryId = summary.SummaryId,
+            BusinessObjectName = "Vendor",
+            EntityName = "VendorTax",
+            RootRecordId = x.VendorId.ToString(),
+            RecordId = x.Id.ToString(),
+            ColumnName = "TaxType",
+            SummaryCode = "VENDORTAX_TAXTYPE_MISSING_COUNT",
+            SummaryType = "NullOrEmptyCount",
+            FieldValue = x.TaxType,
+            Message = "VendorTax.TaxType missing values",
+            RecordSnapshotJson = JsonSerializer.Serialize(new { x.Id, x.VendorId, x.TaxType }),
+            CreatedOn = DateTimeOffset.UtcNow
+        }).ToList();
 
-            _dbContext.DataProfilingDrilldowns.AddRange(affectedRecords);
-        }
+        _dbContext.DataProfilingDrilldowns.AddRange(affectedRecords);
 
         await _dbContext.SaveChangesAsync(cancellationToken);
     }
 
-    private async Task ProfileVendorTaxTaxNumberNullCountAsync(Guid runId, CancellationToken cancellationToken)
+    private async Task ProfileVendorTaxTaxNumberNullOrEmptyCountAsync(Guid runId, CancellationToken cancellationToken)
     {
         var totalRecords = await _dbContext.VendorTaxs.CountAsync(cancellationToken);
         var affectedSourceRecords = await _dbContext.VendorTaxs
@@ -681,46 +1353,305 @@ public sealed class VendorProfiler(IAnalysisDbContext dbContext)
             BusinessObjectName = "Vendor",
             EntityName = "VendorTax",
             ColumnName = "TaxNumber",
-            SummaryCode = "VENDOR_VENDORTAX_TAXNUMBER_NULL_COUNT",
-            SummaryType = "NullCount",
-            Label = "VendorTax TaxNumber missing count",
-            Severity = "Medium",
+            SummaryCode = "VENDORTAX_TAXNUMBER_MISSING_COUNT",
+            SummaryType = "NullOrEmptyCount",
+            Label = "VendorTax.TaxNumber missing values",
+            Severity = "High",
             MetricValue = affectedSourceRecords.Count,
             AffectedCount = affectedSourceRecords.Count,
             HasDrilldown = true,
-            DrilldownKey = "VENDOR_VENDORTAX_TAXNUMBER_NULL_COUNT",
+            DrilldownKey = "VENDORTAX_TAXNUMBER_MISSING_COUNT",
             CreatedOn = DateTimeOffset.UtcNow
         };
 
         _dbContext.DataProfilingSummaries.Add(summary);
 
-        if (true)
+        var affectedRecords = affectedSourceRecords.Select(x => new DataProfilingDrilldown
         {
-            var affectedRecords = affectedSourceRecords.Select(x => new DataProfilingDrilldown
-            {
-                DrilldownId = Guid.NewGuid(),
-                RunId = runId,
-                SummaryId = summary.SummaryId,
-                BusinessObjectName = "Vendor",
-                EntityName = "VendorTax",
-                RootRecordId = x.VendorId.ToString(),
-                RecordId = x.Id.ToString(),
-                ColumnName = "TaxNumber",
-                SummaryCode = "VENDOR_VENDORTAX_TAXNUMBER_NULL_COUNT",
-                SummaryType = "NullCount",
-                FieldValue = x.TaxNumber,
-                Message = "VendorTax TaxNumber missing count",
-                RecordSnapshotJson = JsonSerializer.Serialize(new { x.Id, x.VendorId, x.TaxNumber }),
-                CreatedOn = DateTimeOffset.UtcNow
-            }).ToList();
+            DrilldownId = Guid.NewGuid(),
+            RunId = runId,
+            SummaryId = summary.SummaryId,
+            BusinessObjectName = "Vendor",
+            EntityName = "VendorTax",
+            RootRecordId = x.VendorId.ToString(),
+            RecordId = x.Id.ToString(),
+            ColumnName = "TaxNumber",
+            SummaryCode = "VENDORTAX_TAXNUMBER_MISSING_COUNT",
+            SummaryType = "NullOrEmptyCount",
+            FieldValue = x.TaxNumber,
+            Message = "VendorTax.TaxNumber missing values",
+            RecordSnapshotJson = JsonSerializer.Serialize(new { x.Id, x.VendorId, x.TaxNumber }),
+            CreatedOn = DateTimeOffset.UtcNow
+        }).ToList();
 
-            _dbContext.DataProfilingDrilldowns.AddRange(affectedRecords);
-        }
+        _dbContext.DataProfilingDrilldowns.AddRange(affectedRecords);
 
         await _dbContext.SaveChangesAsync(cancellationToken);
     }
 
-    private async Task ProfileVendorComplianceComplianceTypeNullCountAsync(Guid runId, CancellationToken cancellationToken)
+    private async Task ProfileVendorTaxCountryIdNullOrEmptyCountAsync(Guid runId, CancellationToken cancellationToken)
+    {
+        var totalRecords = await _dbContext.VendorTaxs.CountAsync(cancellationToken);
+        var affectedSourceRecords = await _dbContext.VendorTaxs
+            .Where(x => false)
+            .ToListAsync(cancellationToken);
+
+        var summary = new DataProfilingSummary
+        {
+            SummaryId = Guid.NewGuid(),
+            RunId = runId,
+            BusinessObjectName = "Vendor",
+            EntityName = "VendorTax",
+            ColumnName = "CountryId",
+            SummaryCode = "VENDORTAX_COUNTRYID_MISSING_COUNT",
+            SummaryType = "NullOrEmptyCount",
+            Label = "VendorTax.CountryId missing values",
+            Severity = "High",
+            MetricValue = affectedSourceRecords.Count,
+            AffectedCount = affectedSourceRecords.Count,
+            HasDrilldown = true,
+            DrilldownKey = "VENDORTAX_COUNTRYID_MISSING_COUNT",
+            CreatedOn = DateTimeOffset.UtcNow
+        };
+
+        _dbContext.DataProfilingSummaries.Add(summary);
+
+        var affectedRecords = affectedSourceRecords.Select(x => new DataProfilingDrilldown
+        {
+            DrilldownId = Guid.NewGuid(),
+            RunId = runId,
+            SummaryId = summary.SummaryId,
+            BusinessObjectName = "Vendor",
+            EntityName = "VendorTax",
+            RootRecordId = x.VendorId.ToString(),
+            RecordId = x.Id.ToString(),
+            ColumnName = "CountryId",
+            SummaryCode = "VENDORTAX_COUNTRYID_MISSING_COUNT",
+            SummaryType = "NullOrEmptyCount",
+            FieldValue = x.CountryId.ToString(),
+            Message = "VendorTax.CountryId missing values",
+            RecordSnapshotJson = JsonSerializer.Serialize(new { x.Id, x.VendorId, x.CountryId }),
+            CreatedOn = DateTimeOffset.UtcNow
+        }).ToList();
+
+        _dbContext.DataProfilingDrilldowns.AddRange(affectedRecords);
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    private async Task ProfileVendorPurchasingOrganizationRecordsTotalRecordsAsync(Guid runId, CancellationToken cancellationToken)
+    {
+        var totalRecords = await _dbContext.VendorPurchasingOrganizations.CountAsync(cancellationToken);
+        var affectedSourceRecords = await _dbContext.VendorPurchasingOrganizations
+            .Where(x => true)
+            .ToListAsync(cancellationToken);
+
+        var summary = new DataProfilingSummary
+        {
+            SummaryId = Guid.NewGuid(),
+            RunId = runId,
+            BusinessObjectName = "Vendor",
+            EntityName = "VendorPurchasingOrganization",
+            ColumnName = "",
+            SummaryCode = "VENDORPURCHASINGORGANIZATION_TOTAL_RECORD_COUNT",
+            SummaryType = "TotalRecords",
+            Label = "Total records in VendorPurchasingOrganization",
+            Severity = "",
+            MetricValue = affectedSourceRecords.Count,
+            AffectedCount = affectedSourceRecords.Count,
+            HasDrilldown = false,
+            DrilldownKey = "VENDORPURCHASINGORGANIZATION_TOTAL_RECORD_COUNT",
+            CreatedOn = DateTimeOffset.UtcNow
+        };
+
+        _dbContext.DataProfilingSummaries.Add(summary);
+
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    private async Task ProfileVendorPurchasingOrganizationVendorIdNullOrEmptyCountAsync(Guid runId, CancellationToken cancellationToken)
+    {
+        var totalRecords = await _dbContext.VendorPurchasingOrganizations.CountAsync(cancellationToken);
+        var affectedSourceRecords = await _dbContext.VendorPurchasingOrganizations
+            .Where(x => false)
+            .ToListAsync(cancellationToken);
+
+        var summary = new DataProfilingSummary
+        {
+            SummaryId = Guid.NewGuid(),
+            RunId = runId,
+            BusinessObjectName = "Vendor",
+            EntityName = "VendorPurchasingOrganization",
+            ColumnName = "VendorId",
+            SummaryCode = "VENDORPURCHASINGORGANIZATION_VENDORID_MISSING_COUNT",
+            SummaryType = "NullOrEmptyCount",
+            Label = "VendorPurchasingOrganization.VendorId missing values",
+            Severity = "High",
+            MetricValue = affectedSourceRecords.Count,
+            AffectedCount = affectedSourceRecords.Count,
+            HasDrilldown = true,
+            DrilldownKey = "VENDORPURCHASINGORGANIZATION_VENDORID_MISSING_COUNT",
+            CreatedOn = DateTimeOffset.UtcNow
+        };
+
+        _dbContext.DataProfilingSummaries.Add(summary);
+
+        var affectedRecords = affectedSourceRecords.Select(x => new DataProfilingDrilldown
+        {
+            DrilldownId = Guid.NewGuid(),
+            RunId = runId,
+            SummaryId = summary.SummaryId,
+            BusinessObjectName = "Vendor",
+            EntityName = "VendorPurchasingOrganization",
+            RootRecordId = x.VendorId.ToString(),
+            RecordId = x.Id.ToString(),
+            ColumnName = "VendorId",
+            SummaryCode = "VENDORPURCHASINGORGANIZATION_VENDORID_MISSING_COUNT",
+            SummaryType = "NullOrEmptyCount",
+            FieldValue = x.VendorId.ToString(),
+            Message = "VendorPurchasingOrganization.VendorId missing values",
+            RecordSnapshotJson = JsonSerializer.Serialize(new { x.Id, x.VendorId }),
+            CreatedOn = DateTimeOffset.UtcNow
+        }).ToList();
+
+        _dbContext.DataProfilingDrilldowns.AddRange(affectedRecords);
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    private async Task ProfileVendorPurchasingOrganizationPurchasingOrganizationIdNullOrEmptyCountAsync(Guid runId, CancellationToken cancellationToken)
+    {
+        var totalRecords = await _dbContext.VendorPurchasingOrganizations.CountAsync(cancellationToken);
+        var affectedSourceRecords = await _dbContext.VendorPurchasingOrganizations
+            .Where(x => false)
+            .ToListAsync(cancellationToken);
+
+        var summary = new DataProfilingSummary
+        {
+            SummaryId = Guid.NewGuid(),
+            RunId = runId,
+            BusinessObjectName = "Vendor",
+            EntityName = "VendorPurchasingOrganization",
+            ColumnName = "PurchasingOrganizationId",
+            SummaryCode = "VENDORPURCHASINGORGANIZATION_PURCHASINGORGANIZATIONID_MISSING_COUNT",
+            SummaryType = "NullOrEmptyCount",
+            Label = "VendorPurchasingOrganization.PurchasingOrganizationId missing values",
+            Severity = "High",
+            MetricValue = affectedSourceRecords.Count,
+            AffectedCount = affectedSourceRecords.Count,
+            HasDrilldown = true,
+            DrilldownKey = "VENDORPURCHASINGORGANIZATION_PURCHASINGORGANIZATIONID_MISSING_COUNT",
+            CreatedOn = DateTimeOffset.UtcNow
+        };
+
+        _dbContext.DataProfilingSummaries.Add(summary);
+
+        var affectedRecords = affectedSourceRecords.Select(x => new DataProfilingDrilldown
+        {
+            DrilldownId = Guid.NewGuid(),
+            RunId = runId,
+            SummaryId = summary.SummaryId,
+            BusinessObjectName = "Vendor",
+            EntityName = "VendorPurchasingOrganization",
+            RootRecordId = x.VendorId.ToString(),
+            RecordId = x.Id.ToString(),
+            ColumnName = "PurchasingOrganizationId",
+            SummaryCode = "VENDORPURCHASINGORGANIZATION_PURCHASINGORGANIZATIONID_MISSING_COUNT",
+            SummaryType = "NullOrEmptyCount",
+            FieldValue = x.PurchasingOrganizationId.ToString(),
+            Message = "VendorPurchasingOrganization.PurchasingOrganizationId missing values",
+            RecordSnapshotJson = JsonSerializer.Serialize(new { x.Id, x.VendorId, x.PurchasingOrganizationId }),
+            CreatedOn = DateTimeOffset.UtcNow
+        }).ToList();
+
+        _dbContext.DataProfilingDrilldowns.AddRange(affectedRecords);
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    private async Task ProfileVendorComplianceRecordsTotalRecordsAsync(Guid runId, CancellationToken cancellationToken)
+    {
+        var totalRecords = await _dbContext.VendorCompliances.CountAsync(cancellationToken);
+        var affectedSourceRecords = await _dbContext.VendorCompliances
+            .Where(x => true)
+            .ToListAsync(cancellationToken);
+
+        var summary = new DataProfilingSummary
+        {
+            SummaryId = Guid.NewGuid(),
+            RunId = runId,
+            BusinessObjectName = "Vendor",
+            EntityName = "VendorCompliance",
+            ColumnName = "",
+            SummaryCode = "VENDORCOMPLIANCE_TOTAL_RECORD_COUNT",
+            SummaryType = "TotalRecords",
+            Label = "Total records in VendorCompliance",
+            Severity = "",
+            MetricValue = affectedSourceRecords.Count,
+            AffectedCount = affectedSourceRecords.Count,
+            HasDrilldown = false,
+            DrilldownKey = "VENDORCOMPLIANCE_TOTAL_RECORD_COUNT",
+            CreatedOn = DateTimeOffset.UtcNow
+        };
+
+        _dbContext.DataProfilingSummaries.Add(summary);
+
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    private async Task ProfileVendorComplianceVendorIdNullOrEmptyCountAsync(Guid runId, CancellationToken cancellationToken)
+    {
+        var totalRecords = await _dbContext.VendorCompliances.CountAsync(cancellationToken);
+        var affectedSourceRecords = await _dbContext.VendorCompliances
+            .Where(x => false)
+            .ToListAsync(cancellationToken);
+
+        var summary = new DataProfilingSummary
+        {
+            SummaryId = Guid.NewGuid(),
+            RunId = runId,
+            BusinessObjectName = "Vendor",
+            EntityName = "VendorCompliance",
+            ColumnName = "VendorId",
+            SummaryCode = "VENDORCOMPLIANCE_VENDORID_MISSING_COUNT",
+            SummaryType = "NullOrEmptyCount",
+            Label = "VendorCompliance.VendorId missing values",
+            Severity = "High",
+            MetricValue = affectedSourceRecords.Count,
+            AffectedCount = affectedSourceRecords.Count,
+            HasDrilldown = true,
+            DrilldownKey = "VENDORCOMPLIANCE_VENDORID_MISSING_COUNT",
+            CreatedOn = DateTimeOffset.UtcNow
+        };
+
+        _dbContext.DataProfilingSummaries.Add(summary);
+
+        var affectedRecords = affectedSourceRecords.Select(x => new DataProfilingDrilldown
+        {
+            DrilldownId = Guid.NewGuid(),
+            RunId = runId,
+            SummaryId = summary.SummaryId,
+            BusinessObjectName = "Vendor",
+            EntityName = "VendorCompliance",
+            RootRecordId = x.VendorId.ToString(),
+            RecordId = x.Id.ToString(),
+            ColumnName = "VendorId",
+            SummaryCode = "VENDORCOMPLIANCE_VENDORID_MISSING_COUNT",
+            SummaryType = "NullOrEmptyCount",
+            FieldValue = x.VendorId.ToString(),
+            Message = "VendorCompliance.VendorId missing values",
+            RecordSnapshotJson = JsonSerializer.Serialize(new { x.Id, x.VendorId }),
+            CreatedOn = DateTimeOffset.UtcNow
+        }).ToList();
+
+        _dbContext.DataProfilingDrilldowns.AddRange(affectedRecords);
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    private async Task ProfileVendorComplianceComplianceTypeNullOrEmptyCountAsync(Guid runId, CancellationToken cancellationToken)
     {
         var totalRecords = await _dbContext.VendorCompliances.CountAsync(cancellationToken);
         var affectedSourceRecords = await _dbContext.VendorCompliances
@@ -734,103 +1665,47 @@ public sealed class VendorProfiler(IAnalysisDbContext dbContext)
             BusinessObjectName = "Vendor",
             EntityName = "VendorCompliance",
             ColumnName = "ComplianceType",
-            SummaryCode = "VENDOR_VENDORCOMPLIANCE_COMPLIANCETYPE_NULL_COUNT",
-            SummaryType = "NullCount",
-            Label = "VendorCompliance ComplianceType missing count",
-            Severity = "Medium",
+            SummaryCode = "VENDORCOMPLIANCE_COMPLIANCETYPE_MISSING_COUNT",
+            SummaryType = "NullOrEmptyCount",
+            Label = "VendorCompliance.ComplianceType missing values",
+            Severity = "High",
             MetricValue = affectedSourceRecords.Count,
             AffectedCount = affectedSourceRecords.Count,
             HasDrilldown = true,
-            DrilldownKey = "VENDOR_VENDORCOMPLIANCE_COMPLIANCETYPE_NULL_COUNT",
+            DrilldownKey = "VENDORCOMPLIANCE_COMPLIANCETYPE_MISSING_COUNT",
             CreatedOn = DateTimeOffset.UtcNow
         };
 
         _dbContext.DataProfilingSummaries.Add(summary);
 
-        if (true)
+        var affectedRecords = affectedSourceRecords.Select(x => new DataProfilingDrilldown
         {
-            var affectedRecords = affectedSourceRecords.Select(x => new DataProfilingDrilldown
-            {
-                DrilldownId = Guid.NewGuid(),
-                RunId = runId,
-                SummaryId = summary.SummaryId,
-                BusinessObjectName = "Vendor",
-                EntityName = "VendorCompliance",
-                RootRecordId = x.VendorId.ToString(),
-                RecordId = x.Id.ToString(),
-                ColumnName = "ComplianceType",
-                SummaryCode = "VENDOR_VENDORCOMPLIANCE_COMPLIANCETYPE_NULL_COUNT",
-                SummaryType = "NullCount",
-                FieldValue = x.ComplianceType,
-                Message = "VendorCompliance ComplianceType missing count",
-                RecordSnapshotJson = JsonSerializer.Serialize(new { x.Id, x.VendorId, x.ComplianceType }),
-                CreatedOn = DateTimeOffset.UtcNow
-            }).ToList();
-
-            _dbContext.DataProfilingDrilldowns.AddRange(affectedRecords);
-        }
-
-        await _dbContext.SaveChangesAsync(cancellationToken);
-    }
-
-    private async Task ProfileVendorComplianceComplianceStatusNullCountAsync(Guid runId, CancellationToken cancellationToken)
-    {
-        var totalRecords = await _dbContext.VendorCompliances.CountAsync(cancellationToken);
-        var affectedSourceRecords = await _dbContext.VendorCompliances
-            .Where(x => string.IsNullOrEmpty(x.ComplianceStatus))
-            .ToListAsync(cancellationToken);
-
-        var summary = new DataProfilingSummary
-        {
-            SummaryId = Guid.NewGuid(),
+            DrilldownId = Guid.NewGuid(),
             RunId = runId,
+            SummaryId = summary.SummaryId,
             BusinessObjectName = "Vendor",
             EntityName = "VendorCompliance",
-            ColumnName = "ComplianceStatus",
-            SummaryCode = "VENDOR_VENDORCOMPLIANCE_COMPLIANCESTATUS_NULL_COUNT",
-            SummaryType = "NullCount",
-            Label = "VendorCompliance ComplianceStatus missing count",
-            Severity = "Medium",
-            MetricValue = affectedSourceRecords.Count,
-            AffectedCount = affectedSourceRecords.Count,
-            HasDrilldown = true,
-            DrilldownKey = "VENDOR_VENDORCOMPLIANCE_COMPLIANCESTATUS_NULL_COUNT",
+            RootRecordId = x.VendorId.ToString(),
+            RecordId = x.Id.ToString(),
+            ColumnName = "ComplianceType",
+            SummaryCode = "VENDORCOMPLIANCE_COMPLIANCETYPE_MISSING_COUNT",
+            SummaryType = "NullOrEmptyCount",
+            FieldValue = x.ComplianceType,
+            Message = "VendorCompliance.ComplianceType missing values",
+            RecordSnapshotJson = JsonSerializer.Serialize(new { x.Id, x.VendorId, x.ComplianceType }),
             CreatedOn = DateTimeOffset.UtcNow
-        };
+        }).ToList();
 
-        _dbContext.DataProfilingSummaries.Add(summary);
-
-        if (true)
-        {
-            var affectedRecords = affectedSourceRecords.Select(x => new DataProfilingDrilldown
-            {
-                DrilldownId = Guid.NewGuid(),
-                RunId = runId,
-                SummaryId = summary.SummaryId,
-                BusinessObjectName = "Vendor",
-                EntityName = "VendorCompliance",
-                RootRecordId = x.VendorId.ToString(),
-                RecordId = x.Id.ToString(),
-                ColumnName = "ComplianceStatus",
-                SummaryCode = "VENDOR_VENDORCOMPLIANCE_COMPLIANCESTATUS_NULL_COUNT",
-                SummaryType = "NullCount",
-                FieldValue = x.ComplianceStatus,
-                Message = "VendorCompliance ComplianceStatus missing count",
-                RecordSnapshotJson = JsonSerializer.Serialize(new { x.Id, x.VendorId, x.ComplianceStatus }),
-                CreatedOn = DateTimeOffset.UtcNow
-            }).ToList();
-
-            _dbContext.DataProfilingDrilldowns.AddRange(affectedRecords);
-        }
+        _dbContext.DataProfilingDrilldowns.AddRange(affectedRecords);
 
         await _dbContext.SaveChangesAsync(cancellationToken);
     }
 
-    private async Task ProfileVendorEvaluationEvaluationPeriodNullCountAsync(Guid runId, CancellationToken cancellationToken)
+    private async Task ProfileVendorEvaluationRecordsTotalRecordsAsync(Guid runId, CancellationToken cancellationToken)
     {
         var totalRecords = await _dbContext.VendorEvaluations.CountAsync(cancellationToken);
         var affectedSourceRecords = await _dbContext.VendorEvaluations
-            .Where(x => string.IsNullOrEmpty(x.EvaluationPeriod))
+            .Where(x => true)
             .ToListAsync(cancellationToken);
 
         var summary = new DataProfilingSummary
@@ -839,51 +1714,79 @@ public sealed class VendorProfiler(IAnalysisDbContext dbContext)
             RunId = runId,
             BusinessObjectName = "Vendor",
             EntityName = "VendorEvaluation",
-            ColumnName = "EvaluationPeriod",
-            SummaryCode = "VENDOR_VENDOREVALUATION_EVALUATIONPERIOD_NULL_COUNT",
-            SummaryType = "NullCount",
-            Label = "VendorEvaluation EvaluationPeriod missing count",
-            Severity = "Medium",
+            ColumnName = "",
+            SummaryCode = "VENDOREVALUATION_TOTAL_RECORD_COUNT",
+            SummaryType = "TotalRecords",
+            Label = "Total records in VendorEvaluation",
+            Severity = "",
             MetricValue = affectedSourceRecords.Count,
             AffectedCount = affectedSourceRecords.Count,
-            HasDrilldown = true,
-            DrilldownKey = "VENDOR_VENDOREVALUATION_EVALUATIONPERIOD_NULL_COUNT",
+            HasDrilldown = false,
+            DrilldownKey = "VENDOREVALUATION_TOTAL_RECORD_COUNT",
             CreatedOn = DateTimeOffset.UtcNow
         };
 
         _dbContext.DataProfilingSummaries.Add(summary);
 
-        if (true)
-        {
-            var affectedRecords = affectedSourceRecords.Select(x => new DataProfilingDrilldown
-            {
-                DrilldownId = Guid.NewGuid(),
-                RunId = runId,
-                SummaryId = summary.SummaryId,
-                BusinessObjectName = "Vendor",
-                EntityName = "VendorEvaluation",
-                RootRecordId = x.VendorId.ToString(),
-                RecordId = x.Id.ToString(),
-                ColumnName = "EvaluationPeriod",
-                SummaryCode = "VENDOR_VENDOREVALUATION_EVALUATIONPERIOD_NULL_COUNT",
-                SummaryType = "NullCount",
-                FieldValue = x.EvaluationPeriod,
-                Message = "VendorEvaluation EvaluationPeriod missing count",
-                RecordSnapshotJson = JsonSerializer.Serialize(new { x.Id, x.VendorId, x.EvaluationPeriod }),
-                CreatedOn = DateTimeOffset.UtcNow
-            }).ToList();
-
-            _dbContext.DataProfilingDrilldowns.AddRange(affectedRecords);
-        }
 
         await _dbContext.SaveChangesAsync(cancellationToken);
     }
 
-    private async Task ProfileVendorCertificateCertificateTypeNullCountAsync(Guid runId, CancellationToken cancellationToken)
+    private async Task ProfileVendorEvaluationVendorIdNullOrEmptyCountAsync(Guid runId, CancellationToken cancellationToken)
+    {
+        var totalRecords = await _dbContext.VendorEvaluations.CountAsync(cancellationToken);
+        var affectedSourceRecords = await _dbContext.VendorEvaluations
+            .Where(x => false)
+            .ToListAsync(cancellationToken);
+
+        var summary = new DataProfilingSummary
+        {
+            SummaryId = Guid.NewGuid(),
+            RunId = runId,
+            BusinessObjectName = "Vendor",
+            EntityName = "VendorEvaluation",
+            ColumnName = "VendorId",
+            SummaryCode = "VENDOREVALUATION_VENDORID_MISSING_COUNT",
+            SummaryType = "NullOrEmptyCount",
+            Label = "VendorEvaluation.VendorId missing values",
+            Severity = "High",
+            MetricValue = affectedSourceRecords.Count,
+            AffectedCount = affectedSourceRecords.Count,
+            HasDrilldown = true,
+            DrilldownKey = "VENDOREVALUATION_VENDORID_MISSING_COUNT",
+            CreatedOn = DateTimeOffset.UtcNow
+        };
+
+        _dbContext.DataProfilingSummaries.Add(summary);
+
+        var affectedRecords = affectedSourceRecords.Select(x => new DataProfilingDrilldown
+        {
+            DrilldownId = Guid.NewGuid(),
+            RunId = runId,
+            SummaryId = summary.SummaryId,
+            BusinessObjectName = "Vendor",
+            EntityName = "VendorEvaluation",
+            RootRecordId = x.VendorId.ToString(),
+            RecordId = x.Id.ToString(),
+            ColumnName = "VendorId",
+            SummaryCode = "VENDOREVALUATION_VENDORID_MISSING_COUNT",
+            SummaryType = "NullOrEmptyCount",
+            FieldValue = x.VendorId.ToString(),
+            Message = "VendorEvaluation.VendorId missing values",
+            RecordSnapshotJson = JsonSerializer.Serialize(new { x.Id, x.VendorId }),
+            CreatedOn = DateTimeOffset.UtcNow
+        }).ToList();
+
+        _dbContext.DataProfilingDrilldowns.AddRange(affectedRecords);
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    private async Task ProfileVendorCertificateRecordsTotalRecordsAsync(Guid runId, CancellationToken cancellationToken)
     {
         var totalRecords = await _dbContext.VendorCertificates.CountAsync(cancellationToken);
         var affectedSourceRecords = await _dbContext.VendorCertificates
-            .Where(x => string.IsNullOrEmpty(x.CertificateType))
+            .Where(x => true)
             .ToListAsync(cancellationToken);
 
         var summary = new DataProfilingSummary
@@ -892,51 +1795,29 @@ public sealed class VendorProfiler(IAnalysisDbContext dbContext)
             RunId = runId,
             BusinessObjectName = "Vendor",
             EntityName = "VendorCertificate",
-            ColumnName = "CertificateType",
-            SummaryCode = "VENDOR_VENDORCERTIFICATE_CERTIFICATETYPE_NULL_COUNT",
-            SummaryType = "NullCount",
-            Label = "VendorCertificate CertificateType missing count",
-            Severity = "Medium",
+            ColumnName = "",
+            SummaryCode = "VENDORCERTIFICATE_TOTAL_RECORD_COUNT",
+            SummaryType = "TotalRecords",
+            Label = "Total records in VendorCertificate",
+            Severity = "",
             MetricValue = affectedSourceRecords.Count,
             AffectedCount = affectedSourceRecords.Count,
-            HasDrilldown = true,
-            DrilldownKey = "VENDOR_VENDORCERTIFICATE_CERTIFICATETYPE_NULL_COUNT",
+            HasDrilldown = false,
+            DrilldownKey = "VENDORCERTIFICATE_TOTAL_RECORD_COUNT",
             CreatedOn = DateTimeOffset.UtcNow
         };
 
         _dbContext.DataProfilingSummaries.Add(summary);
 
-        if (true)
-        {
-            var affectedRecords = affectedSourceRecords.Select(x => new DataProfilingDrilldown
-            {
-                DrilldownId = Guid.NewGuid(),
-                RunId = runId,
-                SummaryId = summary.SummaryId,
-                BusinessObjectName = "Vendor",
-                EntityName = "VendorCertificate",
-                RootRecordId = x.VendorId.ToString(),
-                RecordId = x.Id.ToString(),
-                ColumnName = "CertificateType",
-                SummaryCode = "VENDOR_VENDORCERTIFICATE_CERTIFICATETYPE_NULL_COUNT",
-                SummaryType = "NullCount",
-                FieldValue = x.CertificateType,
-                Message = "VendorCertificate CertificateType missing count",
-                RecordSnapshotJson = JsonSerializer.Serialize(new { x.Id, x.VendorId, x.CertificateType }),
-                CreatedOn = DateTimeOffset.UtcNow
-            }).ToList();
-
-            _dbContext.DataProfilingDrilldowns.AddRange(affectedRecords);
-        }
 
         await _dbContext.SaveChangesAsync(cancellationToken);
     }
 
-    private async Task ProfileVendorCertificateCertificateNameNullCountAsync(Guid runId, CancellationToken cancellationToken)
+    private async Task ProfileVendorCertificateVendorIdNullOrEmptyCountAsync(Guid runId, CancellationToken cancellationToken)
     {
         var totalRecords = await _dbContext.VendorCertificates.CountAsync(cancellationToken);
         var affectedSourceRecords = await _dbContext.VendorCertificates
-            .Where(x => string.IsNullOrEmpty(x.CertificateName))
+            .Where(x => false)
             .ToListAsync(cancellationToken);
 
         var summary = new DataProfilingSummary
@@ -945,42 +1826,39 @@ public sealed class VendorProfiler(IAnalysisDbContext dbContext)
             RunId = runId,
             BusinessObjectName = "Vendor",
             EntityName = "VendorCertificate",
-            ColumnName = "CertificateName",
-            SummaryCode = "VENDOR_VENDORCERTIFICATE_CERTIFICATENAME_NULL_COUNT",
-            SummaryType = "NullCount",
-            Label = "VendorCertificate CertificateName missing count",
-            Severity = "Medium",
+            ColumnName = "VendorId",
+            SummaryCode = "VENDORCERTIFICATE_VENDORID_MISSING_COUNT",
+            SummaryType = "NullOrEmptyCount",
+            Label = "VendorCertificate.VendorId missing values",
+            Severity = "High",
             MetricValue = affectedSourceRecords.Count,
             AffectedCount = affectedSourceRecords.Count,
             HasDrilldown = true,
-            DrilldownKey = "VENDOR_VENDORCERTIFICATE_CERTIFICATENAME_NULL_COUNT",
+            DrilldownKey = "VENDORCERTIFICATE_VENDORID_MISSING_COUNT",
             CreatedOn = DateTimeOffset.UtcNow
         };
 
         _dbContext.DataProfilingSummaries.Add(summary);
 
-        if (true)
+        var affectedRecords = affectedSourceRecords.Select(x => new DataProfilingDrilldown
         {
-            var affectedRecords = affectedSourceRecords.Select(x => new DataProfilingDrilldown
-            {
-                DrilldownId = Guid.NewGuid(),
-                RunId = runId,
-                SummaryId = summary.SummaryId,
-                BusinessObjectName = "Vendor",
-                EntityName = "VendorCertificate",
-                RootRecordId = x.VendorId.ToString(),
-                RecordId = x.Id.ToString(),
-                ColumnName = "CertificateName",
-                SummaryCode = "VENDOR_VENDORCERTIFICATE_CERTIFICATENAME_NULL_COUNT",
-                SummaryType = "NullCount",
-                FieldValue = x.CertificateName,
-                Message = "VendorCertificate CertificateName missing count",
-                RecordSnapshotJson = JsonSerializer.Serialize(new { x.Id, x.VendorId, x.CertificateName }),
-                CreatedOn = DateTimeOffset.UtcNow
-            }).ToList();
+            DrilldownId = Guid.NewGuid(),
+            RunId = runId,
+            SummaryId = summary.SummaryId,
+            BusinessObjectName = "Vendor",
+            EntityName = "VendorCertificate",
+            RootRecordId = x.VendorId.ToString(),
+            RecordId = x.Id.ToString(),
+            ColumnName = "VendorId",
+            SummaryCode = "VENDORCERTIFICATE_VENDORID_MISSING_COUNT",
+            SummaryType = "NullOrEmptyCount",
+            FieldValue = x.VendorId.ToString(),
+            Message = "VendorCertificate.VendorId missing values",
+            RecordSnapshotJson = JsonSerializer.Serialize(new { x.Id, x.VendorId }),
+            CreatedOn = DateTimeOffset.UtcNow
+        }).ToList();
 
-            _dbContext.DataProfilingDrilldowns.AddRange(affectedRecords);
-        }
+        _dbContext.DataProfilingDrilldowns.AddRange(affectedRecords);
 
         await _dbContext.SaveChangesAsync(cancellationToken);
     }

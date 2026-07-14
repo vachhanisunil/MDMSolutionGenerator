@@ -11,4 +11,6 @@ public sealed class UpdateCustomerSalesAreaDto
     public string? CustomerGroup { get; init; }
     public string? SalesOffice { get; init; }
     public string? SalesDistrict { get; init; }
+
+    public int Id { get; init; }
 }

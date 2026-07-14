@@ -11,6 +11,7 @@ public sealed class MaterialProfile : Profile
         CreateMap<Entity, MaterialDto>();
         CreateMap<CreateMaterialDto, Entity>();
         CreateMap<UpdateMaterialDto, Entity>()
+            .ForMember(x => x.Id, options => options.Ignore())
             .ForMember(x => x.MaterialPlants, options => options.Ignore())
             .ForMember(x => x.MaterialPrices, options => options.Ignore())
             .ForMember(x => x.MaterialStorages, options => options.Ignore())

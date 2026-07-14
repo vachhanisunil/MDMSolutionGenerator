@@ -87,6 +87,18 @@ public sealed class MdmSolutionGeneratorService(GeneratorOptions options) : IMdm
             return generatedContent;
         }
 
+        if (normalizedPath.Contains(".Application/Modules/", StringComparison.OrdinalIgnoreCase)
+            && normalizedPath.Contains("/Mappings/", StringComparison.OrdinalIgnoreCase))
+        {
+            return generatedContent;
+        }
+
+        if (normalizedPath.Contains("/Handlers/Update", StringComparison.OrdinalIgnoreCase)
+            && normalizedPath.EndsWith("Handler.cs", StringComparison.OrdinalIgnoreCase))
+        {
+            return generatedContent;
+        }
+
         if (normalizedPath.Contains(".Core/Entities/", StringComparison.OrdinalIgnoreCase)
             || normalizedPath.Contains(".Core/DataQuality/", StringComparison.OrdinalIgnoreCase)
             || normalizedPath.Contains(".Application/Modules/", StringComparison.OrdinalIgnoreCase) && normalizedPath.Contains("/DTOs/", StringComparison.OrdinalIgnoreCase))
@@ -102,12 +114,6 @@ public sealed class MdmSolutionGeneratorService(GeneratorOptions options) : IMdm
         if (normalizedPath.Contains(".Infrastructure/Persistence/Configurations/", StringComparison.OrdinalIgnoreCase))
         {
             return MergeConfiguration(existingContent, generatedContent);
-        }
-
-        if (normalizedPath.Contains("/Handlers/Update", StringComparison.OrdinalIgnoreCase)
-            && normalizedPath.EndsWith("Handler.cs", StringComparison.OrdinalIgnoreCase))
-        {
-            return MergeUpdateHandler(existingContent, generatedContent);
         }
 
         if (normalizedPath.Contains("/Handlers/Get", StringComparison.OrdinalIgnoreCase)

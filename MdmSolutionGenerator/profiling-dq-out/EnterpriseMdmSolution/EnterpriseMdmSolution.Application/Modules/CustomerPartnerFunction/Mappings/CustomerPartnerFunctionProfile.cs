@@ -10,6 +10,7 @@ public sealed class CustomerPartnerFunctionProfile : Profile
     {
         CreateMap<Entity, CustomerPartnerFunctionDto>();
         CreateMap<CreateCustomerPartnerFunctionDto, Entity>();
-        CreateMap<UpdateCustomerPartnerFunctionDto, Entity>();
+        CreateMap<UpdateCustomerPartnerFunctionDto, Entity>()
+            .ForMember(x => x.Id, options => options.Ignore());
     }
 }

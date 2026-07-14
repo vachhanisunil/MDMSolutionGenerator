@@ -12,4 +12,6 @@ public sealed class UpdateCustomerContactDto
     public string? Department { get; init; }
     public string? PreferredLanguage { get; init; }
     public bool IsPrimary { get; init; }
+
+    public int Id { get; init; }
 }

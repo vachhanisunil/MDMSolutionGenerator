@@ -10,6 +10,7 @@ public sealed class PaymentTermProfile : Profile
     {
         CreateMap<Entity, PaymentTermDto>();
         CreateMap<CreatePaymentTermDto, Entity>();
-        CreateMap<UpdatePaymentTermDto, Entity>();
+        CreateMap<UpdatePaymentTermDto, Entity>()
+            .ForMember(x => x.Id, options => options.Ignore());
     }
 }

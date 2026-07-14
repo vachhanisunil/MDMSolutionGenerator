@@ -6,6 +6,7 @@ namespace MdmSolutionGenerator.Generation;
 public sealed class MetadataDocument
 {
     public ApplicationInfo Application { get; init; } = new();
+    public string AnalysisGenerationMode { get; init; } = "RequiredFieldsOnly";
     public List<EntityDefinition> Entities { get; init; } = [];
     public List<BusinessObjectDefinition> BusinessObjects { get; init; } = [];
     public List<RelationshipDefinition> Relationships { get; init; } = [];
@@ -47,6 +48,7 @@ public sealed class ProfilingDefinition
 {
     public bool Enabled { get; init; }
     public List<ProfilingMeasurementDefinition> Measurements { get; init; } = [];
+    public List<ProfilingMeasurementDefinition> Summaries { get; init; } = [];
     public List<ProfilingObservationDefinition> Observations { get; init; } = [];
 }
 
@@ -106,6 +108,7 @@ public sealed class ConditionDefinition
     public string? Value { get; init; }
     public decimal? NumericValue { get; init; }
     public List<string> Values { get; init; } = [];
+    public List<string> AllowedValues { get; init; } = [];
     public string? LookupEntity { get; init; }
     public string? LookupField { get; init; }
     public string? ChildEntity { get; init; }

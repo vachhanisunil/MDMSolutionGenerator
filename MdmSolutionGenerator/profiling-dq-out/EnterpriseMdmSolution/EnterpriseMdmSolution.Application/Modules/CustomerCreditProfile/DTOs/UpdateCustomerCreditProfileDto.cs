@@ -9,4 +9,6 @@ public sealed class UpdateCustomerCreditProfileDto
     public string? CreditRiskClass { get; init; }
     public DateTime? ReviewDate { get; init; }
     public bool IsBlocked { get; init; }
+
+    public int Id { get; init; }
 }

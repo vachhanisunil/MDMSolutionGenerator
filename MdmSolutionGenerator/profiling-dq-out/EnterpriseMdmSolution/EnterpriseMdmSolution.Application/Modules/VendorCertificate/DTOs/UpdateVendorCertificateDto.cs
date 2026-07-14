@@ -9,4 +9,6 @@ public sealed class UpdateVendorCertificateDto
     public string? IssuingAuthority { get; init; }
     public DateTime? ExpiryDate { get; init; }
     public string? StoragePath { get; init; }
+
+    public int Id { get; init; }
 }

@@ -5,6 +5,7 @@ internal sealed class MetadataIntentInterpreter(MetadataDocument metadata)
     public IReadOnlyList<ProfilingIntent> GetProfilingIntents(BusinessObjectDefinition businessObject)
     {
         var configured = businessObject.Profiling.Measurements
+            .Concat(businessObject.Profiling.Summaries)
             .Where(measurement => !string.IsNullOrWhiteSpace(measurement.Entity))
             .Select(measurement => ToProfilingIntent(businessObject, measurement))
             .Where(intent => intent is not null)
@@ -14,6 +15,11 @@ internal sealed class MetadataIntentInterpreter(MetadataDocument metadata)
         if (configured.Count > 0)
         {
             return configured;
+        }
+
+        if (IsExplicitOnly())
+        {
+            return [];
         }
 
         return BusinessObjectEntities(businessObject)
@@ -46,6 +52,11 @@ internal sealed class MetadataIntentInterpreter(MetadataDocument metadata)
             return configured;
         }
 
+        if (IsExplicitOnly())
+        {
+            return [];
+        }
+
         return BusinessObjectEntities(businessObject)
             .SelectMany(entity => entity.Properties
                 .Where(property => property.Required && IsString(property) && !IsKey(entity, property))
@@ -67,6 +78,7 @@ internal sealed class MetadataIntentInterpreter(MetadataDocument metadata)
     {
         var entity = FindEntity(measurement.Entity);
         var field = measurement.Condition.Field ?? measurement.Field ?? measurement.Column;
+        var conditionType = NormalizeConditionType(Coalesce(measurement.Condition.Type, measurement.Type, "IsNullOrEmpty"));
         return entity is null
             ? null
             : BuildProfilingIntent(
@@ -75,7 +87,7 @@ internal sealed class MetadataIntentInterpreter(MetadataDocument metadata)
                 Coalesce(measurement.SummaryCode, measurement.Code, $"{businessObject.Name}_{entity.Name}_{field}_{measurement.SummaryType}").ToUpperInvariant(),
                 Coalesce(measurement.SummaryType, measurement.Type, "NullCount"),
                 field,
-                Coalesce(measurement.Condition.Type, measurement.Type, "IsNullOrEmpty"),
+                conditionType,
                 Coalesce(measurement.Label, measurement.Name, $"{entity.Name} {field} {measurement.SummaryType}"),
                 measurement.Severity,
                 measurement.StoreDrilldown);
@@ -90,6 +102,7 @@ internal sealed class MetadataIntentInterpreter(MetadataDocument metadata)
         }
 
         var field = rule.Condition.Field ?? rule.Field ?? rule.Column;
+        var conditionType = NormalizeConditionType(Coalesce(rule.Condition.Type, rule.Type, "IsNullOrEmpty"));
         var intent = BuildRuleIntent(
             businessObject,
             entity,
@@ -99,7 +112,7 @@ internal sealed class MetadataIntentInterpreter(MetadataDocument metadata)
             Coalesce(rule.Category, "Completeness"),
             Coalesce(rule.Severity, "Medium"),
             field,
-            Coalesce(rule.Condition.Type, rule.Type, "IsNullOrEmpty"),
+            conditionType,
             Coalesce(rule.Message, $"{entity.Name} {field} failed {rule.Type}."));
 
         intent.LookupEntityName = rule.Condition.LookupEntity ?? rule.LookupEntity;
@@ -107,10 +120,24 @@ internal sealed class MetadataIntentInterpreter(MetadataDocument metadata)
         intent.LookupKey = rule.Condition.LookupField ?? "Id";
         intent.FromField = rule.Condition.FromField ?? rule.Condition.RightField;
         intent.ToField = rule.Condition.ToField ?? rule.Condition.LeftField;
-        intent.AllowedValues = rule.Condition.Values.Count > 0 ? rule.Condition.Values : entity.Properties.FirstOrDefault(p => Matches(p.Name, field ?? ""))?.AllowedValues ?? [];
+        intent.AllowedValues = rule.Condition.Values.Count > 0
+            ? rule.Condition.Values
+            : rule.Condition.AllowedValues.Count > 0
+                ? rule.Condition.AllowedValues
+                : entity.Properties.FirstOrDefault(p => Matches(p.Name, field ?? ""))?.AllowedValues ?? [];
         intent.ComparisonValue = rule.Condition.Value ?? rule.Condition.NumericValue?.ToString(System.Globalization.CultureInfo.InvariantCulture);
         return intent;
     }
+
+    private bool IsExplicitOnly()
+        => metadata.AnalysisGenerationMode.Equals("ExplicitOnly", StringComparison.OrdinalIgnoreCase);
+
+    private static string NormalizeConditionType(string conditionType)
+        => conditionType switch
+        {
+            "NotInAllowedValues" => "AllowedValues",
+            _ => conditionType
+        };
 
     private ProfilingIntent BuildProfilingIntent(
         BusinessObjectDefinition businessObject,

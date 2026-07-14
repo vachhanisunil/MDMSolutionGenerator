@@ -11,4 +11,6 @@ public sealed class UpdateCustomerBankAccountDto
     public string? AccountHolderName { get; init; }
     public int? BankCountryId { get; init; }
     public bool IsDefault { get; init; }
+
+    public int Id { get; init; }
 }

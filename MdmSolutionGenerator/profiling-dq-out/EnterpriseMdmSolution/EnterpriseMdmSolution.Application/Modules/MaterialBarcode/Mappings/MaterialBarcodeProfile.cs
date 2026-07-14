@@ -10,6 +10,7 @@ public sealed class MaterialBarcodeProfile : Profile
     {
         CreateMap<Entity, MaterialBarcodeDto>();
         CreateMap<CreateMaterialBarcodeDto, Entity>();
-        CreateMap<UpdateMaterialBarcodeDto, Entity>();
+        CreateMap<UpdateMaterialBarcodeDto, Entity>()
+            .ForMember(x => x.Id, options => options.Ignore());
     }
 }

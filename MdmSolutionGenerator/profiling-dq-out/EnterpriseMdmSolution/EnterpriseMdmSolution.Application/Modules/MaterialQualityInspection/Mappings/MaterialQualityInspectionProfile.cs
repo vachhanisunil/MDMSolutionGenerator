@@ -10,6 +10,7 @@ public sealed class MaterialQualityInspectionProfile : Profile
     {
         CreateMap<Entity, MaterialQualityInspectionDto>();
         CreateMap<CreateMaterialQualityInspectionDto, Entity>();
-        CreateMap<UpdateMaterialQualityInspectionDto, Entity>();
+        CreateMap<UpdateMaterialQualityInspectionDto, Entity>()
+            .ForMember(x => x.Id, options => options.Ignore());
     }
 }

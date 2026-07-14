@@ -117,6 +117,13 @@ internal sealed class DataQualityRuleCodeTemplateBuilder(string rootNamespace)
                 : $".Where(x => x.{intent.ToField} < x.{intent.FromField})";
         }
 
+        if (intent.ConditionType.Equals("LookupExists", StringComparison.OrdinalIgnoreCase))
+        {
+            return string.IsNullOrWhiteSpace(intent.FieldName) || string.IsNullOrWhiteSpace(intent.LookupDbSetName)
+                ? ".Where(x => false)"
+                : $".Where(x => !_dbContext.{intent.LookupDbSetName}.Any(l => l.{intent.LookupKey} == x.{intent.FieldName}))";
+        }
+
         return _linq.BuildWhereClause(intent);
     }
 

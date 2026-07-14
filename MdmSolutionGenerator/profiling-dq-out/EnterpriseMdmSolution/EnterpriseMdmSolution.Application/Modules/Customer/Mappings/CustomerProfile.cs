@@ -11,6 +11,7 @@ public sealed class CustomerProfile : Profile
         CreateMap<Entity, CustomerDto>();
         CreateMap<CreateCustomerDto, Entity>();
         CreateMap<UpdateCustomerDto, Entity>()
+            .ForMember(x => x.Id, options => options.Ignore())
             .ForMember(x => x.CustomerAddresses, options => options.Ignore())
             .ForMember(x => x.CustomerContacts, options => options.Ignore())
             .ForMember(x => x.CustomerBankAccounts, options => options.Ignore())

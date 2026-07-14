@@ -11,4 +11,6 @@ public sealed class UpdateVendorContactDto
     public string? Designation { get; init; }
     public string? Department { get; init; }
     public bool IsPrimary { get; init; }
+
+    public int Id { get; init; }
 }

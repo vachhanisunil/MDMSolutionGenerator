@@ -6,4 +6,6 @@ public sealed class UpdateCustomerClassificationDto
     public string ClassificationType { get; init; } = string.Empty;
     public string ClassificationValue { get; init; } = string.Empty;
     public string? ClassificationGroup { get; init; }
+
+    public int Id { get; init; }
 }

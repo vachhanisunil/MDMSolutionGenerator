@@ -9,4 +9,6 @@ public sealed class UpdateMaterialStorageDto
     public decimal? MaximumStock { get; init; }
     public string? TemperatureZone { get; init; }
     public bool? HazardousStorageRequired { get; init; }
+
+    public int Id { get; init; }
 }

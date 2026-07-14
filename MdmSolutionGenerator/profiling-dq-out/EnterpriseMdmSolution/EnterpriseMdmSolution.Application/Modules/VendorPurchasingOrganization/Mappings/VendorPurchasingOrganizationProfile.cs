@@ -10,6 +10,7 @@ public sealed class VendorPurchasingOrganizationProfile : Profile
     {
         CreateMap<Entity, VendorPurchasingOrganizationDto>();
         CreateMap<CreateVendorPurchasingOrganizationDto, Entity>();
-        CreateMap<UpdateVendorPurchasingOrganizationDto, Entity>();
+        CreateMap<UpdateVendorPurchasingOrganizationDto, Entity>()
+            .ForMember(x => x.Id, options => options.Ignore());
     }
 }
