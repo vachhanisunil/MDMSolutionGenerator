@@ -81,22 +81,57 @@ public sealed class ProfilingObservationDefinition
 
 public sealed class DataQualityRuleDefinition
 {
+    public string RuleId { get; init; } = "";
     public string RuleCode { get; init; } = "";
     public string RuleName { get; init; } = "";
     public string Label { get; init; } = "";
     public string Category { get; init; } = "Field";
     public string Severity { get; init; } = "Medium";
+    public bool Enabled { get; init; } = true;
+    public string BusinessObject { get; init; } = "";
     public string Entity { get; init; } = "";
     public string? Field { get; init; }
     public string? Column { get; init; }
     public string Type { get; init; } = "Required";
     public string RuleType { get; init; } = "";
+    public string ExecutionType { get; init; } = "";
     public ConditionDefinition Condition { get; init; } = new();
+    public FilterDefinition Filter { get; init; } = new();
+    public MatchingCriteriaDefinition MatchingCriteria { get; init; } = new();
     public string Message { get; init; } = "";
     public string? LookupEntity { get; init; }
     public string? Relationship { get; init; }
     public string? Expression { get; init; }
     public string? Sql { get; init; }
+    public decimal Weight { get; init; } = 1;
+}
+
+public sealed class FilterDefinition
+{
+    public string LogicalOperator { get; init; } = "AND";
+    public List<FilterConditionDefinition> Conditions { get; init; } = [];
+}
+
+public sealed class FilterConditionDefinition
+{
+    public string PropertyPath { get; init; } = "";
+    public string Operator { get; init; } = "Equals";
+    [JsonConverter(typeof(FlexibleStringJsonConverter))]
+    public string? Value { get; init; }
+}
+
+public sealed class MatchingCriteriaDefinition
+{
+    public string MatchType { get; init; } = "";
+    public decimal MinimumMatchScore { get; init; }
+    public List<MatchingPropertyDefinition> Properties { get; init; } = [];
+}
+
+public sealed class MatchingPropertyDefinition
+{
+    public string PropertyPath { get; init; } = "";
+    public string Comparison { get; init; } = "Exact";
+    public decimal MinimumPropertyScore { get; init; }
     public decimal Weight { get; init; } = 1;
 }
 

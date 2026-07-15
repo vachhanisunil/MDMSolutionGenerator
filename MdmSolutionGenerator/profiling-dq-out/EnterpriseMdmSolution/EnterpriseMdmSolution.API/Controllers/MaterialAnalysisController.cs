@@ -40,15 +40,19 @@ public sealed class MaterialAnalysisController(IMediator mediator, IServiceScope
     public async Task<ActionResult<IReadOnlyList<MaterialProfilingSummaryDto>>> GetProfilingSummary(Guid runId, CancellationToken cancellationToken)
         => Ok(await mediator.Send(new GetMaterialProfilingSummaryQuery(runId), cancellationToken));
 
-    [HttpGet("runs/{runId:guid}/profiling-drilldown")]
-    public async Task<ActionResult<IReadOnlyList<MaterialProfilingDrilldownDto>>> GetProfilingDrilldown(Guid runId, CancellationToken cancellationToken)
-        => Ok(await mediator.Send(new GetMaterialProfilingDrilldownQuery(runId), cancellationToken));
+    [HttpGet("runs/{runId:guid}/profiling-drilldown/{summaryId:guid}")]
+    public async Task<ActionResult<IReadOnlyList<MaterialProfilingDrilldownDto>>> GetProfilingDrilldown(Guid runId, Guid summaryId, CancellationToken cancellationToken)
+        => Ok(await mediator.Send(new GetMaterialProfilingDrilldownQuery(runId, summaryId), cancellationToken));
 
     [HttpGet("runs/{runId:guid}/rule-summary")]
     public async Task<ActionResult<IReadOnlyList<MaterialRuleSummaryDto>>> GetRuleSummary(Guid runId, CancellationToken cancellationToken)
         => Ok(await mediator.Send(new GetMaterialRuleSummaryQuery(runId), cancellationToken));
 
-    [HttpGet("runs/{runId:guid}/rule-drilldown")]
-    public async Task<ActionResult<IReadOnlyList<MaterialRuleDrilldownDto>>> GetRuleDrilldown(Guid runId, CancellationToken cancellationToken)
-        => Ok(await mediator.Send(new GetMaterialRuleDrilldownQuery(runId), cancellationToken));
+    [HttpGet("runs/{runId:guid}/rule-drilldown/{resultId:guid}")]
+    public async Task<ActionResult<IReadOnlyList<MaterialRuleDrilldownDto>>> GetRuleDrilldown(Guid runId, Guid resultId, CancellationToken cancellationToken)
+        => Ok(await mediator.Send(new GetMaterialRuleDrilldownQuery(runId, resultId), cancellationToken));
+
+    [HttpGet("runs/{runId:guid}/duplicate-drilldown/{resultId:guid}")]
+    public async Task<ActionResult<IReadOnlyList<MaterialDuplicateDrilldownDto>>> GetDuplicateDrilldown(Guid runId, Guid resultId, CancellationToken cancellationToken)
+        => Ok(await mediator.Send(new GetMaterialDuplicateDrilldownQuery(runId, resultId), cancellationToken));
 }

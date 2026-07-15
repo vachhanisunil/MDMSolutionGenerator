@@ -3,4 +3,4 @@ using EnterpriseMdmSolution.Application.Modules.Vendor.DTOs;
 
 namespace EnterpriseMdmSolution.Application.Modules.Vendor.Queries;
 
-public sealed record GetVendorProfilingDrilldownQuery(Guid RunId, Guid SummaryId) : IRequest<IReadOnlyList<VendorProfilingDrilldownDto>>;
+public sealed record GetVendorDuplicateDrilldownQuery(Guid RunId, Guid ResultId) : IRequest<IReadOnlyList<VendorDuplicateDrilldownDto>>;

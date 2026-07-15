@@ -82,6 +82,7 @@ public sealed class MaterialDataQualityRuleExecutor(IAnalysisDbContext dbContext
         {
             DrilldownId = Guid.NewGuid(),
             RunId = runId,
+            RuleSummaryId = result.ResultId,
             ResultId = result.ResultId,
             BusinessObjectName = "Material",
             EntityName = "Material",
@@ -131,6 +132,7 @@ public sealed class MaterialDataQualityRuleExecutor(IAnalysisDbContext dbContext
         {
             DrilldownId = Guid.NewGuid(),
             RunId = runId,
+            RuleSummaryId = result.ResultId,
             ResultId = result.ResultId,
             BusinessObjectName = "Material",
             EntityName = "Material",
@@ -180,6 +182,7 @@ public sealed class MaterialDataQualityRuleExecutor(IAnalysisDbContext dbContext
         {
             DrilldownId = Guid.NewGuid(),
             RunId = runId,
+            RuleSummaryId = result.ResultId,
             ResultId = result.ResultId,
             BusinessObjectName = "Material",
             EntityName = "Material",
@@ -229,6 +232,7 @@ public sealed class MaterialDataQualityRuleExecutor(IAnalysisDbContext dbContext
         {
             DrilldownId = Guid.NewGuid(),
             RunId = runId,
+            RuleSummaryId = result.ResultId,
             ResultId = result.ResultId,
             BusinessObjectName = "Material",
             EntityName = "Material",
@@ -278,6 +282,7 @@ public sealed class MaterialDataQualityRuleExecutor(IAnalysisDbContext dbContext
         {
             DrilldownId = Guid.NewGuid(),
             RunId = runId,
+            RuleSummaryId = result.ResultId,
             ResultId = result.ResultId,
             BusinessObjectName = "Material",
             EntityName = "Material",
@@ -327,6 +332,7 @@ public sealed class MaterialDataQualityRuleExecutor(IAnalysisDbContext dbContext
         {
             DrilldownId = Guid.NewGuid(),
             RunId = runId,
+            RuleSummaryId = result.ResultId,
             ResultId = result.ResultId,
             BusinessObjectName = "Material",
             EntityName = "MaterialPlant",
@@ -376,6 +382,7 @@ public sealed class MaterialDataQualityRuleExecutor(IAnalysisDbContext dbContext
         {
             DrilldownId = Guid.NewGuid(),
             RunId = runId,
+            RuleSummaryId = result.ResultId,
             ResultId = result.ResultId,
             BusinessObjectName = "Material",
             EntityName = "MaterialPlant",
@@ -425,6 +432,7 @@ public sealed class MaterialDataQualityRuleExecutor(IAnalysisDbContext dbContext
         {
             DrilldownId = Guid.NewGuid(),
             RunId = runId,
+            RuleSummaryId = result.ResultId,
             ResultId = result.ResultId,
             BusinessObjectName = "Material",
             EntityName = "MaterialPrice",
@@ -474,6 +482,7 @@ public sealed class MaterialDataQualityRuleExecutor(IAnalysisDbContext dbContext
         {
             DrilldownId = Guid.NewGuid(),
             RunId = runId,
+            RuleSummaryId = result.ResultId,
             ResultId = result.ResultId,
             BusinessObjectName = "Material",
             EntityName = "MaterialPrice",
@@ -523,6 +532,7 @@ public sealed class MaterialDataQualityRuleExecutor(IAnalysisDbContext dbContext
         {
             DrilldownId = Guid.NewGuid(),
             RunId = runId,
+            RuleSummaryId = result.ResultId,
             ResultId = result.ResultId,
             BusinessObjectName = "Material",
             EntityName = "MaterialPrice",
@@ -572,6 +582,7 @@ public sealed class MaterialDataQualityRuleExecutor(IAnalysisDbContext dbContext
         {
             DrilldownId = Guid.NewGuid(),
             RunId = runId,
+            RuleSummaryId = result.ResultId,
             ResultId = result.ResultId,
             BusinessObjectName = "Material",
             EntityName = "MaterialPrice",
@@ -621,6 +632,7 @@ public sealed class MaterialDataQualityRuleExecutor(IAnalysisDbContext dbContext
         {
             DrilldownId = Guid.NewGuid(),
             RunId = runId,
+            RuleSummaryId = result.ResultId,
             ResultId = result.ResultId,
             BusinessObjectName = "Material",
             EntityName = "MaterialStorage",
@@ -670,6 +682,7 @@ public sealed class MaterialDataQualityRuleExecutor(IAnalysisDbContext dbContext
         {
             DrilldownId = Guid.NewGuid(),
             RunId = runId,
+            RuleSummaryId = result.ResultId,
             ResultId = result.ResultId,
             BusinessObjectName = "Material",
             EntityName = "MaterialVendor",
@@ -719,6 +732,7 @@ public sealed class MaterialDataQualityRuleExecutor(IAnalysisDbContext dbContext
         {
             DrilldownId = Guid.NewGuid(),
             RunId = runId,
+            RuleSummaryId = result.ResultId,
             ResultId = result.ResultId,
             BusinessObjectName = "Material",
             EntityName = "MaterialUOM",
@@ -768,6 +782,7 @@ public sealed class MaterialDataQualityRuleExecutor(IAnalysisDbContext dbContext
         {
             DrilldownId = Guid.NewGuid(),
             RunId = runId,
+            RuleSummaryId = result.ResultId,
             ResultId = result.ResultId,
             BusinessObjectName = "Material",
             EntityName = "MaterialForecast",
@@ -817,6 +832,7 @@ public sealed class MaterialDataQualityRuleExecutor(IAnalysisDbContext dbContext
         {
             DrilldownId = Guid.NewGuid(),
             RunId = runId,
+            RuleSummaryId = result.ResultId,
             ResultId = result.ResultId,
             BusinessObjectName = "Material",
             EntityName = "MaterialForecast",
@@ -866,6 +882,7 @@ public sealed class MaterialDataQualityRuleExecutor(IAnalysisDbContext dbContext
         {
             DrilldownId = Guid.NewGuid(),
             RunId = runId,
+            RuleSummaryId = result.ResultId,
             ResultId = result.ResultId,
             BusinessObjectName = "Material",
             EntityName = "MaterialForecast",
@@ -915,6 +932,7 @@ public sealed class MaterialDataQualityRuleExecutor(IAnalysisDbContext dbContext
         {
             DrilldownId = Guid.NewGuid(),
             RunId = runId,
+            RuleSummaryId = result.ResultId,
             ResultId = result.ResultId,
             BusinessObjectName = "Material",
             EntityName = "MaterialBarcode",
@@ -964,6 +982,7 @@ public sealed class MaterialDataQualityRuleExecutor(IAnalysisDbContext dbContext
         {
             DrilldownId = Guid.NewGuid(),
             RunId = runId,
+            RuleSummaryId = result.ResultId,
             ResultId = result.ResultId,
             BusinessObjectName = "Material",
             EntityName = "Material",
@@ -1013,6 +1032,7 @@ public sealed class MaterialDataQualityRuleExecutor(IAnalysisDbContext dbContext
         {
             DrilldownId = Guid.NewGuid(),
             RunId = runId,
+            RuleSummaryId = result.ResultId,
             ResultId = result.ResultId,
             BusinessObjectName = "Material",
             EntityName = "Material",
@@ -1062,6 +1082,7 @@ public sealed class MaterialDataQualityRuleExecutor(IAnalysisDbContext dbContext
         {
             DrilldownId = Guid.NewGuid(),
             RunId = runId,
+            RuleSummaryId = result.ResultId,
             ResultId = result.ResultId,
             BusinessObjectName = "Material",
             EntityName = "MaterialPlant",
@@ -1111,6 +1132,7 @@ public sealed class MaterialDataQualityRuleExecutor(IAnalysisDbContext dbContext
         {
             DrilldownId = Guid.NewGuid(),
             RunId = runId,
+            RuleSummaryId = result.ResultId,
             ResultId = result.ResultId,
             BusinessObjectName = "Material",
             EntityName = "MaterialPlant",
@@ -1160,6 +1182,7 @@ public sealed class MaterialDataQualityRuleExecutor(IAnalysisDbContext dbContext
         {
             DrilldownId = Guid.NewGuid(),
             RunId = runId,
+            RuleSummaryId = result.ResultId,
             ResultId = result.ResultId,
             BusinessObjectName = "Material",
             EntityName = "MaterialPrice",
@@ -1209,6 +1232,7 @@ public sealed class MaterialDataQualityRuleExecutor(IAnalysisDbContext dbContext
         {
             DrilldownId = Guid.NewGuid(),
             RunId = runId,
+            RuleSummaryId = result.ResultId,
             ResultId = result.ResultId,
             BusinessObjectName = "Material",
             EntityName = "MaterialPrice",
@@ -1258,6 +1282,7 @@ public sealed class MaterialDataQualityRuleExecutor(IAnalysisDbContext dbContext
         {
             DrilldownId = Guid.NewGuid(),
             RunId = runId,
+            RuleSummaryId = result.ResultId,
             ResultId = result.ResultId,
             BusinessObjectName = "Material",
             EntityName = "MaterialStorage",
@@ -1307,6 +1332,7 @@ public sealed class MaterialDataQualityRuleExecutor(IAnalysisDbContext dbContext
         {
             DrilldownId = Guid.NewGuid(),
             RunId = runId,
+            RuleSummaryId = result.ResultId,
             ResultId = result.ResultId,
             BusinessObjectName = "Material",
             EntityName = "MaterialStorage",
@@ -1356,6 +1382,7 @@ public sealed class MaterialDataQualityRuleExecutor(IAnalysisDbContext dbContext
         {
             DrilldownId = Guid.NewGuid(),
             RunId = runId,
+            RuleSummaryId = result.ResultId,
             ResultId = result.ResultId,
             BusinessObjectName = "Material",
             EntityName = "MaterialClassification",
@@ -1405,6 +1432,7 @@ public sealed class MaterialDataQualityRuleExecutor(IAnalysisDbContext dbContext
         {
             DrilldownId = Guid.NewGuid(),
             RunId = runId,
+            RuleSummaryId = result.ResultId,
             ResultId = result.ResultId,
             BusinessObjectName = "Material",
             EntityName = "MaterialVendor",
@@ -1454,6 +1482,7 @@ public sealed class MaterialDataQualityRuleExecutor(IAnalysisDbContext dbContext
         {
             DrilldownId = Guid.NewGuid(),
             RunId = runId,
+            RuleSummaryId = result.ResultId,
             ResultId = result.ResultId,
             BusinessObjectName = "Material",
             EntityName = "MaterialVendor",
@@ -1503,6 +1532,7 @@ public sealed class MaterialDataQualityRuleExecutor(IAnalysisDbContext dbContext
         {
             DrilldownId = Guid.NewGuid(),
             RunId = runId,
+            RuleSummaryId = result.ResultId,
             ResultId = result.ResultId,
             BusinessObjectName = "Material",
             EntityName = "MaterialVendor",
@@ -1552,6 +1582,7 @@ public sealed class MaterialDataQualityRuleExecutor(IAnalysisDbContext dbContext
         {
             DrilldownId = Guid.NewGuid(),
             RunId = runId,
+            RuleSummaryId = result.ResultId,
             ResultId = result.ResultId,
             BusinessObjectName = "Material",
             EntityName = "MaterialUOM",
@@ -1601,6 +1632,7 @@ public sealed class MaterialDataQualityRuleExecutor(IAnalysisDbContext dbContext
         {
             DrilldownId = Guid.NewGuid(),
             RunId = runId,
+            RuleSummaryId = result.ResultId,
             ResultId = result.ResultId,
             BusinessObjectName = "Material",
             EntityName = "MaterialUOM",
@@ -1650,6 +1682,7 @@ public sealed class MaterialDataQualityRuleExecutor(IAnalysisDbContext dbContext
         {
             DrilldownId = Guid.NewGuid(),
             RunId = runId,
+            RuleSummaryId = result.ResultId,
             ResultId = result.ResultId,
             BusinessObjectName = "Material",
             EntityName = "MaterialQualityInspection",
@@ -1699,6 +1732,7 @@ public sealed class MaterialDataQualityRuleExecutor(IAnalysisDbContext dbContext
         {
             DrilldownId = Guid.NewGuid(),
             RunId = runId,
+            RuleSummaryId = result.ResultId,
             ResultId = result.ResultId,
             BusinessObjectName = "Material",
             EntityName = "MaterialForecast",
@@ -1748,6 +1782,7 @@ public sealed class MaterialDataQualityRuleExecutor(IAnalysisDbContext dbContext
         {
             DrilldownId = Guid.NewGuid(),
             RunId = runId,
+            RuleSummaryId = result.ResultId,
             ResultId = result.ResultId,
             BusinessObjectName = "Material",
             EntityName = "MaterialForecast",
@@ -1797,6 +1832,7 @@ public sealed class MaterialDataQualityRuleExecutor(IAnalysisDbContext dbContext
         {
             DrilldownId = Guid.NewGuid(),
             RunId = runId,
+            RuleSummaryId = result.ResultId,
             ResultId = result.ResultId,
             BusinessObjectName = "Material",
             EntityName = "MaterialForecast",
@@ -1846,6 +1882,7 @@ public sealed class MaterialDataQualityRuleExecutor(IAnalysisDbContext dbContext
         {
             DrilldownId = Guid.NewGuid(),
             RunId = runId,
+            RuleSummaryId = result.ResultId,
             ResultId = result.ResultId,
             BusinessObjectName = "Material",
             EntityName = "MaterialBarcode",
@@ -1895,6 +1932,7 @@ public sealed class MaterialDataQualityRuleExecutor(IAnalysisDbContext dbContext
         {
             DrilldownId = Guid.NewGuid(),
             RunId = runId,
+            RuleSummaryId = result.ResultId,
             ResultId = result.ResultId,
             BusinessObjectName = "Material",
             EntityName = "MaterialBarcode",
@@ -1944,6 +1982,7 @@ public sealed class MaterialDataQualityRuleExecutor(IAnalysisDbContext dbContext
         {
             DrilldownId = Guid.NewGuid(),
             RunId = runId,
+            RuleSummaryId = result.ResultId,
             ResultId = result.ResultId,
             BusinessObjectName = "Material",
             EntityName = "Material",

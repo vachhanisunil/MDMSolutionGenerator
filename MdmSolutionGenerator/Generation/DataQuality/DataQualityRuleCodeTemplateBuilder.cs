@@ -32,10 +32,74 @@ internal sealed class DataQualityRuleCodeTemplateBuilder(string rootNamespace)
         {
             builder.AppendLine(intent.RuleType.Equals("CustomCodeRule", StringComparison.OrdinalIgnoreCase)
                 ? BuildCustomRuleMethod(intent)
+                : intent.IsDuplicateMatchingRule
+                    ? BuildDuplicateMatchingRuleMethod(intent)
                 : BuildRuleMethod(intent));
         }
         builder.AppendLine("}");
         return builder.ToString();
+    }
+
+    private string BuildDuplicateMatchingRuleMethod(DataQualityRuleIntent intent)
+    {
+        var method = RuleMethodName(intent);
+        var sql = BuildDuplicateMatchingSql(intent);
+
+        return $$"""
+    private async Task {{method}}Async(Guid runId, CancellationToken cancellationToken)
+    {
+        var duplicateRows = await _dbContext.DuplicateCandidateRows
+            .FromSqlRaw({{VerbatimString(sql)}})
+            .ToListAsync(cancellationToken);
+
+        var result = new DataQualityRuleResult
+        {
+            ResultId = Guid.NewGuid(),
+            RunId = runId,
+            BusinessObjectName = "{{Escape(intent.BusinessObjectName)}}",
+            RuleCode = "{{Escape(intent.RuleCode)}}",
+            RuleName = "{{Escape(intent.RuleName)}}",
+            EntityName = "{{Escape(intent.EntityName)}}",
+            Category = "{{Escape(intent.Category)}}",
+            Severity = "{{Escape(intent.Severity)}}",
+            Status = duplicateRows.Any() ? "Failed" : "Passed",
+            AffectedCount = duplicateRows.Count,
+            Score = duplicateRows.Count == 0 ? 100m : 0m,
+            CreatedOn = DateTimeOffset.UtcNow
+        };
+
+        _dbContext.DataQualityRuleResults.Add(result);
+
+        var duplicateDrilldowns = duplicateRows.Select(row => new DataQualityDuplicateDrilldown
+        {
+            DuplicateDrilldownId = Guid.NewGuid(),
+            RunId = runId,
+            ResultId = result.ResultId,
+            BusinessObjectName = "{{Escape(intent.BusinessObjectName)}}",
+            RuleCode = "{{Escape(intent.RuleCode)}}",
+            RuleName = "{{Escape(intent.RuleName)}}",
+            EntityName = "{{Escape(intent.EntityName)}}",
+            SourceRootRecordId = row.SourceRootRecordId,
+            SourceRecordId = row.SourceRecordId,
+            SourceDisplayValue = row.SourceDisplayValue,
+            DuplicateRootRecordId = row.DuplicateRootRecordId,
+            DuplicateRecordId = row.DuplicateRecordId,
+            DuplicateDisplayValue = row.DuplicateDisplayValue,
+            MatchScore = row.MatchScore,
+            MatchStatus = "PotentialDuplicate",
+            Severity = "{{Escape(intent.Severity)}}",
+            Message = $"Potential duplicate {{Escape(intent.BusinessObjectName)}} found. Match score: {row.MatchScore:0.##}",
+            MatchedFieldJson = row.MatchedFieldJson,
+            SourceRecordSnapshotJson = row.SourceRecordSnapshotJson,
+            DuplicateRecordSnapshotJson = row.DuplicateRecordSnapshotJson,
+            CreatedOn = DateTimeOffset.UtcNow
+        }).ToList();
+
+        _dbContext.DataQualityDuplicateDrilldowns.AddRange(duplicateDrilldowns);
+        await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+""";
     }
 
     private string BuildRuleMethod(DataQualityRuleIntent intent)
@@ -76,6 +140,7 @@ internal sealed class DataQualityRuleCodeTemplateBuilder(string rootNamespace)
         {
             DrilldownId = Guid.NewGuid(),
             RunId = runId,
+            RuleSummaryId = result.ResultId,
             ResultId = result.ResultId,
             BusinessObjectName = "{{Escape(intent.BusinessObjectName)}}",
             EntityName = "{{Escape(intent.EntityName)}}",
@@ -107,6 +172,152 @@ internal sealed class DataQualityRuleCodeTemplateBuilder(string rootNamespace)
     }
 
 """;
+
+    private static string BuildDuplicateMatchingSql(DataQualityRuleIntent intent)
+    {
+        var rootTable = QuoteIdentifier(Naming.Plural(intent.RootEntityName));
+        const string sourceRootAlias = "source_root";
+        const string duplicateRootAlias = "duplicate_root";
+        var childEntities = intent.DuplicateMatchProperties
+            .Where(property => !property.EntityName.Equals(intent.RootEntityName, StringComparison.OrdinalIgnoreCase))
+            .Select(property => property.EntityName)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
+
+        var joins = new StringBuilder();
+        foreach (var childEntity in childEntities)
+        {
+            var sourceAlias = Alias(childEntity, "source");
+            var duplicateAlias = Alias(childEntity, "duplicate");
+            var childTable = QuoteIdentifier(Naming.Plural(childEntity));
+            var parentForeignKey = QuoteIdentifier($"{intent.RootEntityName}Id");
+            joins.AppendLine($"JOIN {childTable} {sourceAlias} ON {sourceAlias}.{parentForeignKey} = {sourceRootAlias}.\"{intent.RootKey}\"");
+            joins.AppendLine($"JOIN {childTable} {duplicateAlias} ON {duplicateAlias}.{parentForeignKey} = {duplicateRootAlias}.\"{intent.RootKey}\"");
+        }
+
+        var totalWeight = intent.DuplicateMatchProperties.Sum(property => property.Weight);
+        if (totalWeight <= 0)
+        {
+            totalWeight = 1;
+        }
+
+        var scoreTerms = intent.DuplicateMatchProperties
+            .Select(property => $"({ScoreExpression(intent, property)} * {SqlDecimal(property.Weight)})")
+            .ToList();
+        var scoreExpression = $"(({string.Join(" + ", scoreTerms)}) / {SqlDecimal(totalWeight)})";
+        var matchConditions = intent.DuplicateMatchProperties
+            .Where(property => property.MinimumPropertyScore > 0)
+            .Select(property => $"{ScoreExpression(intent, property)} >= {SqlDecimal(property.MinimumPropertyScore)}")
+            .ToList();
+        matchConditions.Add($"{scoreExpression} >= {SqlDecimal(intent.MinimumMatchScore)}");
+
+        foreach (var filter in intent.DuplicateFilters)
+        {
+            var sourceFilter = FilterExpression(intent, filter, source: true);
+            var duplicateFilter = FilterExpression(intent, filter, source: false);
+            if (!string.IsNullOrWhiteSpace(sourceFilter) && !string.IsNullOrWhiteSpace(duplicateFilter))
+            {
+                matchConditions.Add(sourceFilter);
+                matchConditions.Add(duplicateFilter);
+            }
+        }
+
+        var matchedFieldJson = $"jsonb_build_array({string.Join(", ", intent.DuplicateMatchProperties.Select(property => MatchedFieldJsonExpression(intent, property)))})::text";
+        var sourceSnapshot = SnapshotJsonExpression(intent, source: true);
+        var duplicateSnapshot = SnapshotJsonExpression(intent, source: false);
+        var displayField = intent.DuplicateMatchProperties.FirstOrDefault(property => property.EntityName.Equals(intent.RootEntityName, StringComparison.OrdinalIgnoreCase))?.FieldName ?? intent.RootKey;
+
+        return $$"""
+SELECT
+    {{sourceRootAlias}}."{{intent.RootKey}}"::text AS "SourceRootRecordId",
+    {{sourceRootAlias}}."{{intent.RootKey}}"::text AS "SourceRecordId",
+    COALESCE({{sourceRootAlias}}.{{QuoteIdentifier(displayField)}}::text, {{sourceRootAlias}}."{{intent.RootKey}}"::text) AS "SourceDisplayValue",
+    {{duplicateRootAlias}}."{{intent.RootKey}}"::text AS "DuplicateRootRecordId",
+    {{duplicateRootAlias}}."{{intent.RootKey}}"::text AS "DuplicateRecordId",
+    COALESCE({{duplicateRootAlias}}.{{QuoteIdentifier(displayField)}}::text, {{duplicateRootAlias}}."{{intent.RootKey}}"::text) AS "DuplicateDisplayValue",
+    ROUND({{scoreExpression}}, 2) AS "MatchScore",
+    {{matchedFieldJson}} AS "MatchedFieldJson",
+    {{sourceSnapshot}} AS "SourceRecordSnapshotJson",
+    {{duplicateSnapshot}} AS "DuplicateRecordSnapshotJson"
+FROM {{rootTable}} {{sourceRootAlias}}
+JOIN {{rootTable}} {{duplicateRootAlias}} ON {{sourceRootAlias}}."{{intent.RootKey}}" < {{duplicateRootAlias}}."{{intent.RootKey}}"
+{{joins.ToString().TrimEnd()}}
+WHERE {{string.Join($"{Environment.NewLine}  AND ", matchConditions)}}
+""";
+    }
+
+    private static string ScoreExpression(DataQualityRuleIntent intent, DuplicateMatchPropertyIntent property)
+    {
+        var sourceField = FieldReference(intent, property, source: true);
+        var duplicateField = FieldReference(intent, property, source: false);
+        return property.Comparison.Equals("Fuzzy", StringComparison.OrdinalIgnoreCase)
+            ? $"(similarity(COALESCE({sourceField}::text, ''), COALESCE({duplicateField}::text, '')) * 100)"
+            : $"(CASE WHEN COALESCE({sourceField}::text, '') = COALESCE({duplicateField}::text, '') THEN 100 ELSE 0 END)";
+    }
+
+    private static string MatchedFieldJsonExpression(DataQualityRuleIntent intent, DuplicateMatchPropertyIntent property)
+    {
+        var score = ScoreExpression(intent, property);
+        var sourceField = FieldReference(intent, property, source: true);
+        var duplicateField = FieldReference(intent, property, source: false);
+        return $"jsonb_build_object('propertyPath', '{SqlString(property.PropertyPath)}', 'comparison', '{SqlString(property.Comparison)}', 'sourceValue', {sourceField}::text, 'duplicateValue', {duplicateField}::text, 'score', ROUND({score}, 2), 'weight', {SqlDecimal(property.Weight)})";
+    }
+
+    private static string SnapshotJsonExpression(DataQualityRuleIntent intent, bool source)
+    {
+        const string sourceRootAlias = "source_root";
+        const string duplicateRootAlias = "duplicate_root";
+        var rootAlias = source ? sourceRootAlias : duplicateRootAlias;
+        var values = new List<string>
+        {
+            $"'Id', {rootAlias}.\"{intent.RootKey}\""
+        };
+
+        foreach (var property in intent.DuplicateMatchProperties)
+        {
+            values.Add($"'{SqlString(property.PropertyPath)}'");
+            values.Add(FieldReference(intent, property, source));
+        }
+
+        return $"jsonb_build_object({string.Join(", ", values)})::text";
+    }
+
+    private static string FieldReference(DataQualityRuleIntent intent, DuplicateMatchPropertyIntent property, bool source)
+    {
+        var alias = property.EntityName.Equals(intent.RootEntityName, StringComparison.OrdinalIgnoreCase)
+            ? source ? "source_root" : "duplicate_root"
+            : Alias(property.EntityName, source ? "source" : "duplicate");
+        return $"{alias}.{QuoteIdentifier(property.FieldName)}";
+    }
+
+    private static string FilterExpression(DataQualityRuleIntent intent, DuplicateFilterIntent filter, bool source)
+    {
+        var field = filter.EntityName.Equals(intent.RootEntityName, StringComparison.OrdinalIgnoreCase)
+            ? $"{(source ? "source_root" : "duplicate_root")}.{QuoteIdentifier(filter.FieldName)}"
+            : $"{Alias(filter.EntityName, source ? "source" : "duplicate")}.{QuoteIdentifier(filter.FieldName)}";
+        var value = $"'{SqlString(filter.Value ?? "")}'";
+        return filter.Operator switch
+        {
+            "NotEquals" => $"{field}::text <> {value}",
+            "Equals" => $"{field}::text = {value}",
+            _ => ""
+        };
+    }
+
+    private static string Alias(string entityName, string prefix)
+        => $"{prefix}_{entityName.ToLowerInvariant()}";
+
+    private static string QuoteIdentifier(string identifier)
+        => $"\"{identifier.Replace("\"", "\"\"", StringComparison.Ordinal)}\"";
+
+    private static string SqlString(string value)
+        => value.Replace("'", "''", StringComparison.Ordinal);
+
+    private static string SqlDecimal(decimal value)
+        => value.ToString(System.Globalization.CultureInfo.InvariantCulture);
+
+    private static string VerbatimString(string value)
+        => "@\"" + value.Replace("\"", "\"\"", StringComparison.Ordinal) + "\"";
 
     private string BuildWhereClause(DataQualityRuleIntent intent)
     {

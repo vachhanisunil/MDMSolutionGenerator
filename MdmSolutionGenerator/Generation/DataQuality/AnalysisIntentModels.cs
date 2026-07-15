@@ -48,4 +48,26 @@ internal sealed class DataQualityRuleIntent
     public string? ToField { get; set; }
     public IReadOnlyList<string> AllowedValues { get; set; } = [];
     public string? ComparisonValue { get; set; }
+    public bool IsDuplicateMatchingRule { get; set; }
+    public decimal MinimumMatchScore { get; set; }
+    public IReadOnlyList<DuplicateMatchPropertyIntent> DuplicateMatchProperties { get; set; } = [];
+    public IReadOnlyList<DuplicateFilterIntent> DuplicateFilters { get; set; } = [];
+}
+
+internal sealed class DuplicateMatchPropertyIntent
+{
+    public string EntityName { get; set; } = "";
+    public string FieldName { get; set; } = "";
+    public string PropertyPath { get; set; } = "";
+    public string Comparison { get; set; } = "Exact";
+    public decimal MinimumPropertyScore { get; set; }
+    public decimal Weight { get; set; } = 1;
+}
+
+internal sealed class DuplicateFilterIntent
+{
+    public string EntityName { get; set; } = "";
+    public string FieldName { get; set; } = "";
+    public string Operator { get; set; } = "Equals";
+    public string? Value { get; set; }
 }

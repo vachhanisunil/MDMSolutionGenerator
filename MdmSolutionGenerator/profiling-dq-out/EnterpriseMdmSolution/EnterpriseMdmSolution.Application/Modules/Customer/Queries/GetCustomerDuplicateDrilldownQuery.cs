@@ -3,4 +3,4 @@ using EnterpriseMdmSolution.Application.Modules.Customer.DTOs;
 
 namespace EnterpriseMdmSolution.Application.Modules.Customer.Queries;
 
-public sealed record GetCustomerProfilingDrilldownQuery(Guid RunId, Guid SummaryId) : IRequest<IReadOnlyList<CustomerProfilingDrilldownDto>>;
+public sealed record GetCustomerDuplicateDrilldownQuery(Guid RunId, Guid ResultId) : IRequest<IReadOnlyList<CustomerDuplicateDrilldownDto>>;

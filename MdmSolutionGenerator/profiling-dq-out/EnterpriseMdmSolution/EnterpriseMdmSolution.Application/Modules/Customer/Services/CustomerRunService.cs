@@ -9,8 +9,9 @@ public sealed class CustomerRunService(
     IRepository<BusinessObjectRun> runRepository,
     IRepository<DataProfilingSummary> profilingSummaryRepository,
     IRepository<DataProfilingDrilldown> profilingDrilldownRepository,
-    IRepository<DataQualityRuleSummary> ruleSummaryRepository,
+    IRepository<DataQualityRuleResult> ruleResultRepository,
     IRepository<DataQualityDrilldown> ruleDrilldownRepository,
+    IRepository<DataQualityDuplicateDrilldown> duplicateDrilldownRepository,
     IRepository<EnterpriseMdmSolution.Core.Entities.Customer> customerRepository,
     IRepository<EnterpriseMdmSolution.Core.Entities.CustomerAddress> customerAddressRepository,
     IRepository<EnterpriseMdmSolution.Core.Entities.CustomerContact> customerContactRepository,
@@ -28,8 +29,9 @@ public sealed class CustomerRunService(
     private readonly IRepository<BusinessObjectRun> _runRepository = runRepository;
     private readonly IRepository<DataProfilingSummary> _profilingSummaryRepository = profilingSummaryRepository;
     private readonly IRepository<DataProfilingDrilldown> _profilingDrilldownRepository = profilingDrilldownRepository;
-    private readonly IRepository<DataQualityRuleSummary> _ruleSummaryRepository = ruleSummaryRepository;
+    private readonly IRepository<DataQualityRuleResult> _ruleResultRepository = ruleResultRepository;
     private readonly IRepository<DataQualityDrilldown> _ruleDrilldownRepository = ruleDrilldownRepository;
+    private readonly IRepository<DataQualityDuplicateDrilldown> _duplicateDrilldownRepository = duplicateDrilldownRepository;
     private readonly IRepository<EnterpriseMdmSolution.Core.Entities.Customer> _customerRepository = customerRepository;
     private readonly IRepository<EnterpriseMdmSolution.Core.Entities.CustomerAddress> _customerAddressRepository = customerAddressRepository;
     private readonly IRepository<EnterpriseMdmSolution.Core.Entities.CustomerContact> _customerContactRepository = customerContactRepository;
@@ -79,9 +81,9 @@ public sealed class CustomerRunService(
             await ExecuteDataQualityAsync(runId, cancellationToken);
 
             var rootRecords = await _customerRepository.ListAsync(cancellationToken);
-            var ruleSummaries = (await _ruleSummaryRepository.ListAsync(cancellationToken)).Where(x => x.RunId == runId && x.RuleCode.StartsWith("Customer.", StringComparison.Ordinal)).ToList();
+            var ruleResults = (await _ruleResultRepository.ListAsync(cancellationToken)).Where(x => x.RunId == runId && x.BusinessObjectName == "Customer").ToList();
             run.TotalRootRecords = rootRecords.Count;
-            run.OverallScore = ruleSummaries.Count == 0 ? 100m : Math.Round(ruleSummaries.Average(x => x.Score), 2);
+            run.OverallScore = ruleResults.Count == 0 ? 100m : Math.Round(ruleResults.Average(x => x.Score), 2);
             run.Status = "Completed";
             run.CompletedOn = DateTimeOffset.UtcNow;
             _runRepository.Update(run);
@@ -123,18 +125,18 @@ public sealed class CustomerRunService(
                 SummaryId = x.SummaryId,
                 RunId = x.RunId,
                 EntityName = x.EntityName,
-                FieldName = x.FieldName,
-                MetricName = x.MetricName,
-                MetricType = x.MetricType,
-                NumericValue = x.NumericValue,
+                FieldName = x.FieldName ?? x.ColumnName,
+                MetricName = string.IsNullOrWhiteSpace(x.MetricName) ? x.Label : x.MetricName,
+                MetricType = string.IsNullOrWhiteSpace(x.MetricType) ? x.SummaryType : x.MetricType,
+                NumericValue = x.NumericValue ?? x.MetricValue,
                 TextValue = x.TextValue,
                 Score = x.Score
             })
             .ToList();
 
-    public async Task<IReadOnlyList<CustomerProfilingDrilldownDto>> GetProfilingDrilldownAsync(Guid runId, CancellationToken cancellationToken = default)
+    public async Task<IReadOnlyList<CustomerProfilingDrilldownDto>> GetProfilingDrilldownAsync(Guid runId, Guid summaryId, CancellationToken cancellationToken = default)
         => (await _profilingDrilldownRepository.ListAsync(cancellationToken))
-            .Where(x => x.RunId == runId && x.BusinessObjectName == "Customer")
+            .Where(x => x.RunId == runId && x.BusinessObjectName == "Customer" && x.SummaryId == summaryId)
             .Select(x => new CustomerProfilingDrilldownDto
             {
                 DrilldownId = x.DrilldownId,
@@ -143,16 +145,16 @@ public sealed class CustomerRunService(
                 EntityName = x.EntityName,
                 RootRecordId = x.RootRecordId,
                 RecordId = x.RecordId,
-                SnapshotJson = x.SnapshotJson
+                SnapshotJson = string.IsNullOrWhiteSpace(x.SnapshotJson) ? x.RecordSnapshotJson : x.SnapshotJson
             })
             .ToList();
 
     public async Task<IReadOnlyList<CustomerRuleSummaryDto>> GetRuleSummaryAsync(Guid runId, CancellationToken cancellationToken = default)
-        => (await _ruleSummaryRepository.ListAsync(cancellationToken))
-            .Where(x => x.RunId == runId && x.RuleCode.StartsWith("Customer.", StringComparison.Ordinal))
+        => (await _ruleResultRepository.ListAsync(cancellationToken))
+            .Where(x => x.RunId == runId && x.BusinessObjectName == "Customer")
             .Select(x => new CustomerRuleSummaryDto
             {
-                RuleSummaryId = x.RuleSummaryId,
+                RuleSummaryId = x.ResultId,
                 RunId = x.RunId,
                 RuleCode = x.RuleCode,
                 RuleName = x.RuleName,
@@ -164,14 +166,14 @@ public sealed class CustomerRunService(
             })
             .ToList();
 
-    public async Task<IReadOnlyList<CustomerRuleDrilldownDto>> GetRuleDrilldownAsync(Guid runId, CancellationToken cancellationToken = default)
+    public async Task<IReadOnlyList<CustomerRuleDrilldownDto>> GetRuleDrilldownAsync(Guid runId, Guid resultId, CancellationToken cancellationToken = default)
         => (await _ruleDrilldownRepository.ListAsync(cancellationToken))
-            .Where(x => x.RunId == runId && x.BusinessObjectName == "Customer")
+            .Where(x => x.RunId == runId && x.BusinessObjectName == "Customer" && (x.ResultId == resultId || x.RuleSummaryId == resultId))
             .Select(x => new CustomerRuleDrilldownDto
             {
                 DrilldownId = x.DrilldownId,
                 RunId = x.RunId,
-                RuleSummaryId = x.RuleSummaryId,
+                RuleSummaryId = x.ResultId ?? x.RuleSummaryId,
                 EntityName = x.EntityName,
                 RootRecordId = x.RootRecordId,
                 RecordId = x.RecordId,
@@ -179,7 +181,34 @@ public sealed class CustomerRunService(
                 Message = x.Message,
                 Severity = x.Severity,
                 Status = x.Status,
-                SnapshotJson = x.SnapshotJson
+                SnapshotJson = string.IsNullOrWhiteSpace(x.SnapshotJson) ? x.RecordSnapshotJson : x.SnapshotJson
+            })
+            .ToList();
+
+    public async Task<IReadOnlyList<CustomerDuplicateDrilldownDto>> GetDuplicateDrilldownAsync(Guid runId, Guid resultId, CancellationToken cancellationToken = default)
+        => (await _duplicateDrilldownRepository.ListAsync(cancellationToken))
+            .Where(x => x.RunId == runId && x.BusinessObjectName == "Customer" && x.ResultId == resultId)
+            .Select(x => new CustomerDuplicateDrilldownDto
+            {
+                DuplicateDrilldownId = x.DuplicateDrilldownId,
+                RunId = x.RunId,
+                ResultId = x.ResultId,
+                RuleCode = x.RuleCode,
+                RuleName = x.RuleName,
+                EntityName = x.EntityName,
+                SourceRootRecordId = x.SourceRootRecordId,
+                SourceRecordId = x.SourceRecordId,
+                SourceDisplayValue = x.SourceDisplayValue,
+                DuplicateRootRecordId = x.DuplicateRootRecordId,
+                DuplicateRecordId = x.DuplicateRecordId,
+                DuplicateDisplayValue = x.DuplicateDisplayValue,
+                MatchScore = x.MatchScore,
+                MatchStatus = x.MatchStatus,
+                Severity = x.Severity,
+                Message = x.Message,
+                MatchedFieldJson = x.MatchedFieldJson,
+                SourceRecordSnapshotJson = x.SourceRecordSnapshotJson,
+                DuplicateRecordSnapshotJson = x.DuplicateRecordSnapshotJson
             })
             .ToList();
 

@@ -81,8 +81,29 @@ public sealed class MdmSolutionGeneratorService(GeneratorOptions options) : IMdm
             return existingContent;
         }
 
+        if (normalizedPath.EndsWith(".Application.csproj", StringComparison.OrdinalIgnoreCase))
+        {
+            return generatedContent;
+        }
+
+        if (normalizedPath.EndsWith(".Application/Common/IAnalysisDbContext.cs", StringComparison.OrdinalIgnoreCase)
+            || normalizedPath.Contains(".API/Controllers/", StringComparison.OrdinalIgnoreCase) && normalizedPath.EndsWith("AnalysisController.cs", StringComparison.OrdinalIgnoreCase)
+            || normalizedPath.Contains(".Application/Modules/", StringComparison.OrdinalIgnoreCase) && normalizedPath.EndsWith("AnalysisDtos.cs", StringComparison.OrdinalIgnoreCase)
+            || IsAnalysisQueryOrHandler(normalizedPath)
+            || normalizedPath.Contains(".Application/Modules/", StringComparison.OrdinalIgnoreCase) && normalizedPath.Contains("/Interfaces/", StringComparison.OrdinalIgnoreCase) && normalizedPath.EndsWith("RunService.cs", StringComparison.OrdinalIgnoreCase))
+        {
+            return generatedContent;
+        }
+
         if (normalizedPath.Contains(".Application/Modules/", StringComparison.OrdinalIgnoreCase)
             && normalizedPath.Contains("/DataQuality/Services/", StringComparison.OrdinalIgnoreCase))
+        {
+            return generatedContent;
+        }
+
+        if (normalizedPath.Contains(".Application/Modules/", StringComparison.OrdinalIgnoreCase)
+            && normalizedPath.Contains("/Services/", StringComparison.OrdinalIgnoreCase)
+            && normalizedPath.EndsWith("RunService.cs", StringComparison.OrdinalIgnoreCase))
         {
             return generatedContent;
         }
@@ -128,6 +149,24 @@ public sealed class MdmSolutionGeneratorService(GeneratorOptions options) : IMdm
         }
 
         return existingContent;
+    }
+
+    private static bool IsAnalysisQueryOrHandler(string normalizedPath)
+    {
+        if (!normalizedPath.Contains(".Application/Modules/", StringComparison.OrdinalIgnoreCase)
+            || (!normalizedPath.Contains("/Queries/", StringComparison.OrdinalIgnoreCase)
+                && !normalizedPath.Contains("/Handlers/", StringComparison.OrdinalIgnoreCase)))
+        {
+            return false;
+        }
+
+        var fileName = Path.GetFileName(normalizedPath);
+        return fileName.Contains("Analysis", StringComparison.OrdinalIgnoreCase)
+            || fileName.Contains("Run", StringComparison.OrdinalIgnoreCase)
+            || fileName.Contains("Profiling", StringComparison.OrdinalIgnoreCase)
+            || fileName.Contains("RuleSummary", StringComparison.OrdinalIgnoreCase)
+            || fileName.Contains("RuleDrilldown", StringComparison.OrdinalIgnoreCase)
+            || fileName.Contains("DuplicateDrilldown", StringComparison.OrdinalIgnoreCase);
     }
 
     private static string MergeClassProperties(string existingContent, string generatedContent)

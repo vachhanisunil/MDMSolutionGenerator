@@ -91,6 +91,7 @@ public sealed class VendorDataQualityRuleExecutor(IAnalysisDbContext dbContext)
         {
             DrilldownId = Guid.NewGuid(),
             RunId = runId,
+            RuleSummaryId = result.ResultId,
             ResultId = result.ResultId,
             BusinessObjectName = "Vendor",
             EntityName = "Vendor",
@@ -140,6 +141,7 @@ public sealed class VendorDataQualityRuleExecutor(IAnalysisDbContext dbContext)
         {
             DrilldownId = Guid.NewGuid(),
             RunId = runId,
+            RuleSummaryId = result.ResultId,
             ResultId = result.ResultId,
             BusinessObjectName = "Vendor",
             EntityName = "Vendor",
@@ -189,6 +191,7 @@ public sealed class VendorDataQualityRuleExecutor(IAnalysisDbContext dbContext)
         {
             DrilldownId = Guid.NewGuid(),
             RunId = runId,
+            RuleSummaryId = result.ResultId,
             ResultId = result.ResultId,
             BusinessObjectName = "Vendor",
             EntityName = "Vendor",
@@ -238,6 +241,7 @@ public sealed class VendorDataQualityRuleExecutor(IAnalysisDbContext dbContext)
         {
             DrilldownId = Guid.NewGuid(),
             RunId = runId,
+            RuleSummaryId = result.ResultId,
             ResultId = result.ResultId,
             BusinessObjectName = "Vendor",
             EntityName = "Vendor",
@@ -287,6 +291,7 @@ public sealed class VendorDataQualityRuleExecutor(IAnalysisDbContext dbContext)
         {
             DrilldownId = Guid.NewGuid(),
             RunId = runId,
+            RuleSummaryId = result.ResultId,
             ResultId = result.ResultId,
             BusinessObjectName = "Vendor",
             EntityName = "Vendor",
@@ -336,6 +341,7 @@ public sealed class VendorDataQualityRuleExecutor(IAnalysisDbContext dbContext)
         {
             DrilldownId = Guid.NewGuid(),
             RunId = runId,
+            RuleSummaryId = result.ResultId,
             ResultId = result.ResultId,
             BusinessObjectName = "Vendor",
             EntityName = "VendorAddress",
@@ -385,6 +391,7 @@ public sealed class VendorDataQualityRuleExecutor(IAnalysisDbContext dbContext)
         {
             DrilldownId = Guid.NewGuid(),
             RunId = runId,
+            RuleSummaryId = result.ResultId,
             ResultId = result.ResultId,
             BusinessObjectName = "Vendor",
             EntityName = "VendorAddress",
@@ -434,6 +441,7 @@ public sealed class VendorDataQualityRuleExecutor(IAnalysisDbContext dbContext)
         {
             DrilldownId = Guid.NewGuid(),
             RunId = runId,
+            RuleSummaryId = result.ResultId,
             ResultId = result.ResultId,
             BusinessObjectName = "Vendor",
             EntityName = "VendorAddress",
@@ -483,6 +491,7 @@ public sealed class VendorDataQualityRuleExecutor(IAnalysisDbContext dbContext)
         {
             DrilldownId = Guid.NewGuid(),
             RunId = runId,
+            RuleSummaryId = result.ResultId,
             ResultId = result.ResultId,
             BusinessObjectName = "Vendor",
             EntityName = "VendorAddress",
@@ -532,6 +541,7 @@ public sealed class VendorDataQualityRuleExecutor(IAnalysisDbContext dbContext)
         {
             DrilldownId = Guid.NewGuid(),
             RunId = runId,
+            RuleSummaryId = result.ResultId,
             ResultId = result.ResultId,
             BusinessObjectName = "Vendor",
             EntityName = "VendorAddress",
@@ -581,6 +591,7 @@ public sealed class VendorDataQualityRuleExecutor(IAnalysisDbContext dbContext)
         {
             DrilldownId = Guid.NewGuid(),
             RunId = runId,
+            RuleSummaryId = result.ResultId,
             ResultId = result.ResultId,
             BusinessObjectName = "Vendor",
             EntityName = "VendorAddress",
@@ -630,6 +641,7 @@ public sealed class VendorDataQualityRuleExecutor(IAnalysisDbContext dbContext)
         {
             DrilldownId = Guid.NewGuid(),
             RunId = runId,
+            RuleSummaryId = result.ResultId,
             ResultId = result.ResultId,
             BusinessObjectName = "Vendor",
             EntityName = "VendorContact",
@@ -679,6 +691,7 @@ public sealed class VendorDataQualityRuleExecutor(IAnalysisDbContext dbContext)
         {
             DrilldownId = Guid.NewGuid(),
             RunId = runId,
+            RuleSummaryId = result.ResultId,
             ResultId = result.ResultId,
             BusinessObjectName = "Vendor",
             EntityName = "VendorContact",
@@ -728,6 +741,7 @@ public sealed class VendorDataQualityRuleExecutor(IAnalysisDbContext dbContext)
         {
             DrilldownId = Guid.NewGuid(),
             RunId = runId,
+            RuleSummaryId = result.ResultId,
             ResultId = result.ResultId,
             BusinessObjectName = "Vendor",
             EntityName = "VendorContact",
@@ -777,6 +791,7 @@ public sealed class VendorDataQualityRuleExecutor(IAnalysisDbContext dbContext)
         {
             DrilldownId = Guid.NewGuid(),
             RunId = runId,
+            RuleSummaryId = result.ResultId,
             ResultId = result.ResultId,
             BusinessObjectName = "Vendor",
             EntityName = "VendorBankAccount",
@@ -826,6 +841,7 @@ public sealed class VendorDataQualityRuleExecutor(IAnalysisDbContext dbContext)
         {
             DrilldownId = Guid.NewGuid(),
             RunId = runId,
+            RuleSummaryId = result.ResultId,
             ResultId = result.ResultId,
             BusinessObjectName = "Vendor",
             EntityName = "VendorBankAccount",
@@ -875,6 +891,7 @@ public sealed class VendorDataQualityRuleExecutor(IAnalysisDbContext dbContext)
         {
             DrilldownId = Guid.NewGuid(),
             RunId = runId,
+            RuleSummaryId = result.ResultId,
             ResultId = result.ResultId,
             BusinessObjectName = "Vendor",
             EntityName = "VendorBankAccount",
@@ -924,6 +941,7 @@ public sealed class VendorDataQualityRuleExecutor(IAnalysisDbContext dbContext)
         {
             DrilldownId = Guid.NewGuid(),
             RunId = runId,
+            RuleSummaryId = result.ResultId,
             ResultId = result.ResultId,
             BusinessObjectName = "Vendor",
             EntityName = "VendorBankAccount",
@@ -973,6 +991,7 @@ public sealed class VendorDataQualityRuleExecutor(IAnalysisDbContext dbContext)
         {
             DrilldownId = Guid.NewGuid(),
             RunId = runId,
+            RuleSummaryId = result.ResultId,
             ResultId = result.ResultId,
             BusinessObjectName = "Vendor",
             EntityName = "VendorTax",
@@ -1022,6 +1041,7 @@ public sealed class VendorDataQualityRuleExecutor(IAnalysisDbContext dbContext)
         {
             DrilldownId = Guid.NewGuid(),
             RunId = runId,
+            RuleSummaryId = result.ResultId,
             ResultId = result.ResultId,
             BusinessObjectName = "Vendor",
             EntityName = "VendorTax",
@@ -1071,6 +1091,7 @@ public sealed class VendorDataQualityRuleExecutor(IAnalysisDbContext dbContext)
         {
             DrilldownId = Guid.NewGuid(),
             RunId = runId,
+            RuleSummaryId = result.ResultId,
             ResultId = result.ResultId,
             BusinessObjectName = "Vendor",
             EntityName = "VendorTax",
@@ -1120,6 +1141,7 @@ public sealed class VendorDataQualityRuleExecutor(IAnalysisDbContext dbContext)
         {
             DrilldownId = Guid.NewGuid(),
             RunId = runId,
+            RuleSummaryId = result.ResultId,
             ResultId = result.ResultId,
             BusinessObjectName = "Vendor",
             EntityName = "VendorTax",
@@ -1169,6 +1191,7 @@ public sealed class VendorDataQualityRuleExecutor(IAnalysisDbContext dbContext)
         {
             DrilldownId = Guid.NewGuid(),
             RunId = runId,
+            RuleSummaryId = result.ResultId,
             ResultId = result.ResultId,
             BusinessObjectName = "Vendor",
             EntityName = "VendorTax",
@@ -1218,6 +1241,7 @@ public sealed class VendorDataQualityRuleExecutor(IAnalysisDbContext dbContext)
         {
             DrilldownId = Guid.NewGuid(),
             RunId = runId,
+            RuleSummaryId = result.ResultId,
             ResultId = result.ResultId,
             BusinessObjectName = "Vendor",
             EntityName = "VendorPurchasingOrganization",
@@ -1267,6 +1291,7 @@ public sealed class VendorDataQualityRuleExecutor(IAnalysisDbContext dbContext)
         {
             DrilldownId = Guid.NewGuid(),
             RunId = runId,
+            RuleSummaryId = result.ResultId,
             ResultId = result.ResultId,
             BusinessObjectName = "Vendor",
             EntityName = "VendorPurchasingOrganization",
@@ -1316,6 +1341,7 @@ public sealed class VendorDataQualityRuleExecutor(IAnalysisDbContext dbContext)
         {
             DrilldownId = Guid.NewGuid(),
             RunId = runId,
+            RuleSummaryId = result.ResultId,
             ResultId = result.ResultId,
             BusinessObjectName = "Vendor",
             EntityName = "VendorCompliance",
@@ -1365,6 +1391,7 @@ public sealed class VendorDataQualityRuleExecutor(IAnalysisDbContext dbContext)
         {
             DrilldownId = Guid.NewGuid(),
             RunId = runId,
+            RuleSummaryId = result.ResultId,
             ResultId = result.ResultId,
             BusinessObjectName = "Vendor",
             EntityName = "VendorCompliance",
@@ -1414,6 +1441,7 @@ public sealed class VendorDataQualityRuleExecutor(IAnalysisDbContext dbContext)
         {
             DrilldownId = Guid.NewGuid(),
             RunId = runId,
+            RuleSummaryId = result.ResultId,
             ResultId = result.ResultId,
             BusinessObjectName = "Vendor",
             EntityName = "VendorCompliance",
@@ -1463,6 +1491,7 @@ public sealed class VendorDataQualityRuleExecutor(IAnalysisDbContext dbContext)
         {
             DrilldownId = Guid.NewGuid(),
             RunId = runId,
+            RuleSummaryId = result.ResultId,
             ResultId = result.ResultId,
             BusinessObjectName = "Vendor",
             EntityName = "VendorEvaluation",
@@ -1512,6 +1541,7 @@ public sealed class VendorDataQualityRuleExecutor(IAnalysisDbContext dbContext)
         {
             DrilldownId = Guid.NewGuid(),
             RunId = runId,
+            RuleSummaryId = result.ResultId,
             ResultId = result.ResultId,
             BusinessObjectName = "Vendor",
             EntityName = "VendorCertificate",
@@ -1561,6 +1591,7 @@ public sealed class VendorDataQualityRuleExecutor(IAnalysisDbContext dbContext)
         {
             DrilldownId = Guid.NewGuid(),
             RunId = runId,
+            RuleSummaryId = result.ResultId,
             ResultId = result.ResultId,
             BusinessObjectName = "Vendor",
             EntityName = "Vendor",
@@ -1610,6 +1641,7 @@ public sealed class VendorDataQualityRuleExecutor(IAnalysisDbContext dbContext)
         {
             DrilldownId = Guid.NewGuid(),
             RunId = runId,
+            RuleSummaryId = result.ResultId,
             ResultId = result.ResultId,
             BusinessObjectName = "Vendor",
             EntityName = "Vendor",
@@ -1659,6 +1691,7 @@ public sealed class VendorDataQualityRuleExecutor(IAnalysisDbContext dbContext)
         {
             DrilldownId = Guid.NewGuid(),
             RunId = runId,
+            RuleSummaryId = result.ResultId,
             ResultId = result.ResultId,
             BusinessObjectName = "Vendor",
             EntityName = "Vendor",
@@ -1708,6 +1741,7 @@ public sealed class VendorDataQualityRuleExecutor(IAnalysisDbContext dbContext)
         {
             DrilldownId = Guid.NewGuid(),
             RunId = runId,
+            RuleSummaryId = result.ResultId,
             ResultId = result.ResultId,
             BusinessObjectName = "Vendor",
             EntityName = "VendorAddress",
@@ -1757,6 +1791,7 @@ public sealed class VendorDataQualityRuleExecutor(IAnalysisDbContext dbContext)
         {
             DrilldownId = Guid.NewGuid(),
             RunId = runId,
+            RuleSummaryId = result.ResultId,
             ResultId = result.ResultId,
             BusinessObjectName = "Vendor",
             EntityName = "VendorAddress",
@@ -1806,6 +1841,7 @@ public sealed class VendorDataQualityRuleExecutor(IAnalysisDbContext dbContext)
         {
             DrilldownId = Guid.NewGuid(),
             RunId = runId,
+            RuleSummaryId = result.ResultId,
             ResultId = result.ResultId,
             BusinessObjectName = "Vendor",
             EntityName = "VendorContact",
@@ -1855,6 +1891,7 @@ public sealed class VendorDataQualityRuleExecutor(IAnalysisDbContext dbContext)
         {
             DrilldownId = Guid.NewGuid(),
             RunId = runId,
+            RuleSummaryId = result.ResultId,
             ResultId = result.ResultId,
             BusinessObjectName = "Vendor",
             EntityName = "VendorBankAccount",
@@ -1904,6 +1941,7 @@ public sealed class VendorDataQualityRuleExecutor(IAnalysisDbContext dbContext)
         {
             DrilldownId = Guid.NewGuid(),
             RunId = runId,
+            RuleSummaryId = result.ResultId,
             ResultId = result.ResultId,
             BusinessObjectName = "Vendor",
             EntityName = "VendorBankAccount",
@@ -1953,6 +1991,7 @@ public sealed class VendorDataQualityRuleExecutor(IAnalysisDbContext dbContext)
         {
             DrilldownId = Guid.NewGuid(),
             RunId = runId,
+            RuleSummaryId = result.ResultId,
             ResultId = result.ResultId,
             BusinessObjectName = "Vendor",
             EntityName = "VendorBankAccount",
@@ -2002,6 +2041,7 @@ public sealed class VendorDataQualityRuleExecutor(IAnalysisDbContext dbContext)
         {
             DrilldownId = Guid.NewGuid(),
             RunId = runId,
+            RuleSummaryId = result.ResultId,
             ResultId = result.ResultId,
             BusinessObjectName = "Vendor",
             EntityName = "VendorTax",
@@ -2051,6 +2091,7 @@ public sealed class VendorDataQualityRuleExecutor(IAnalysisDbContext dbContext)
         {
             DrilldownId = Guid.NewGuid(),
             RunId = runId,
+            RuleSummaryId = result.ResultId,
             ResultId = result.ResultId,
             BusinessObjectName = "Vendor",
             EntityName = "VendorTax",
@@ -2100,6 +2141,7 @@ public sealed class VendorDataQualityRuleExecutor(IAnalysisDbContext dbContext)
         {
             DrilldownId = Guid.NewGuid(),
             RunId = runId,
+            RuleSummaryId = result.ResultId,
             ResultId = result.ResultId,
             BusinessObjectName = "Vendor",
             EntityName = "VendorPurchasingOrganization",
@@ -2149,6 +2191,7 @@ public sealed class VendorDataQualityRuleExecutor(IAnalysisDbContext dbContext)
         {
             DrilldownId = Guid.NewGuid(),
             RunId = runId,
+            RuleSummaryId = result.ResultId,
             ResultId = result.ResultId,
             BusinessObjectName = "Vendor",
             EntityName = "VendorPurchasingOrganization",
@@ -2198,6 +2241,7 @@ public sealed class VendorDataQualityRuleExecutor(IAnalysisDbContext dbContext)
         {
             DrilldownId = Guid.NewGuid(),
             RunId = runId,
+            RuleSummaryId = result.ResultId,
             ResultId = result.ResultId,
             BusinessObjectName = "Vendor",
             EntityName = "VendorPurchasingOrganization",
@@ -2247,6 +2291,7 @@ public sealed class VendorDataQualityRuleExecutor(IAnalysisDbContext dbContext)
         {
             DrilldownId = Guid.NewGuid(),
             RunId = runId,
+            RuleSummaryId = result.ResultId,
             ResultId = result.ResultId,
             BusinessObjectName = "Vendor",
             EntityName = "VendorPurchasingOrganization",
@@ -2296,6 +2341,7 @@ public sealed class VendorDataQualityRuleExecutor(IAnalysisDbContext dbContext)
         {
             DrilldownId = Guid.NewGuid(),
             RunId = runId,
+            RuleSummaryId = result.ResultId,
             ResultId = result.ResultId,
             BusinessObjectName = "Vendor",
             EntityName = "VendorCompliance",
@@ -2345,6 +2391,7 @@ public sealed class VendorDataQualityRuleExecutor(IAnalysisDbContext dbContext)
         {
             DrilldownId = Guid.NewGuid(),
             RunId = runId,
+            RuleSummaryId = result.ResultId,
             ResultId = result.ResultId,
             BusinessObjectName = "Vendor",
             EntityName = "VendorEvaluation",
@@ -2394,6 +2441,7 @@ public sealed class VendorDataQualityRuleExecutor(IAnalysisDbContext dbContext)
         {
             DrilldownId = Guid.NewGuid(),
             RunId = runId,
+            RuleSummaryId = result.ResultId,
             ResultId = result.ResultId,
             BusinessObjectName = "Vendor",
             EntityName = "VendorCertificate",

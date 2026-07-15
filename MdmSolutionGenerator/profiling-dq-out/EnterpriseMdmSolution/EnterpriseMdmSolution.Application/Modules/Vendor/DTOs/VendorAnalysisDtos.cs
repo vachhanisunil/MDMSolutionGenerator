@@ -78,3 +78,26 @@ public sealed class VendorRuleDrilldownDto
     public string Status { get; init; } = string.Empty;
     public string SnapshotJson { get; init; } = string.Empty;
 }
+
+public sealed class VendorDuplicateDrilldownDto
+{
+    public Guid DuplicateDrilldownId { get; init; }
+    public Guid RunId { get; init; }
+    public Guid ResultId { get; init; }
+    public string RuleCode { get; init; } = string.Empty;
+    public string RuleName { get; init; } = string.Empty;
+    public string EntityName { get; init; } = string.Empty;
+    public string SourceRootRecordId { get; init; } = string.Empty;
+    public string SourceRecordId { get; init; } = string.Empty;
+    public string SourceDisplayValue { get; init; } = string.Empty;
+    public string DuplicateRootRecordId { get; init; } = string.Empty;
+    public string DuplicateRecordId { get; init; } = string.Empty;
+    public string DuplicateDisplayValue { get; init; } = string.Empty;
+    public decimal MatchScore { get; init; }
+    public string MatchStatus { get; init; } = string.Empty;
+    public string Severity { get; init; } = string.Empty;
+    public string Message { get; init; } = string.Empty;
+    public string MatchedFieldJson { get; init; } = string.Empty;
+    public string SourceRecordSnapshotJson { get; init; } = string.Empty;
+    public string DuplicateRecordSnapshotJson { get; init; } = string.Empty;
+}

@@ -41,7 +41,7 @@ internal sealed class MetadataIntentInterpreter(MetadataDocument metadata)
     public IReadOnlyList<DataQualityRuleIntent> GetRuleIntents(BusinessObjectDefinition businessObject)
     {
         var configured = businessObject.DataQualityRules
-            .Where(rule => !string.IsNullOrWhiteSpace(rule.Entity))
+            .Where(rule => rule.Enabled)
             .Select(rule => ToRuleIntent(businessObject, rule))
             .Where(intent => intent is not null)
             .Cast<DataQualityRuleIntent>()
@@ -95,6 +95,12 @@ internal sealed class MetadataIntentInterpreter(MetadataDocument metadata)
 
     private DataQualityRuleIntent? ToRuleIntent(BusinessObjectDefinition businessObject, DataQualityRuleDefinition rule)
     {
+        var ruleType = Coalesce(rule.RuleType, rule.Type, "FieldRule");
+        if (IsDuplicateMatchingRule(rule, ruleType))
+        {
+            return ToDuplicateRuleIntent(businessObject, rule, ruleType);
+        }
+
         var entity = FindEntity(rule.Entity);
         if (entity is null)
         {
@@ -106,9 +112,9 @@ internal sealed class MetadataIntentInterpreter(MetadataDocument metadata)
         var intent = BuildRuleIntent(
             businessObject,
             entity,
-            Coalesce(rule.RuleCode, $"{businessObject.Name}_{entity.Name}_{field}_{rule.Type}").ToUpperInvariant(),
+            Coalesce(rule.RuleCode, rule.RuleId, $"{businessObject.Name}_{entity.Name}_{field}_{rule.Type}").ToUpperInvariant(),
             Coalesce(rule.RuleName, rule.Label, $"{entity.Name} {field} {rule.Type}"),
-            Coalesce(rule.RuleType, rule.Type, "FieldRule"),
+            ruleType,
             Coalesce(rule.Category, "Completeness"),
             Coalesce(rule.Severity, "Medium"),
             field,
@@ -129,8 +135,105 @@ internal sealed class MetadataIntentInterpreter(MetadataDocument metadata)
         return intent;
     }
 
+    private DataQualityRuleIntent? ToDuplicateRuleIntent(BusinessObjectDefinition businessObject, DataQualityRuleDefinition rule, string ruleType)
+    {
+        var root = RootEntity(businessObject) ?? FindEntity(rule.Entity) ?? FindEntity(businessObject.Name);
+        if (root is null)
+        {
+            return null;
+        }
+
+        var properties = rule.MatchingCriteria.Properties
+            .Select(ToDuplicateMatchPropertyIntent)
+            .Where(property => property is not null)
+            .Cast<DuplicateMatchPropertyIntent>()
+            .ToList();
+
+        if (properties.Count == 0)
+        {
+            return null;
+        }
+
+        var filters = rule.Filter.Conditions
+            .Select(ToDuplicateFilterIntent)
+            .Where(filter => filter is not null)
+            .Cast<DuplicateFilterIntent>()
+            .ToList();
+
+        var intent = BuildRuleIntent(
+            businessObject,
+            root,
+            Coalesce(rule.RuleCode, rule.RuleId, $"{businessObject.Name}_DUPLICATE_MATCH").ToUpperInvariant(),
+            Coalesce(rule.RuleName, rule.Label, $"{businessObject.Name} potential duplicate match"),
+            ruleType,
+            Coalesce(rule.Category, "Duplication"),
+            Coalesce(rule.Severity, "Medium"),
+            null,
+            "WeightedFuzzyDuplicate",
+            Coalesce(rule.Message, rule.Label, "Potential duplicate record found."));
+
+        intent.IsDuplicateMatchingRule = true;
+        intent.MinimumMatchScore = rule.MatchingCriteria.MinimumMatchScore <= 0 ? 85 : rule.MatchingCriteria.MinimumMatchScore;
+        intent.DuplicateMatchProperties = properties;
+        intent.DuplicateFilters = filters;
+        return intent;
+    }
+
+    private DuplicateMatchPropertyIntent? ToDuplicateMatchPropertyIntent(MatchingPropertyDefinition property)
+    {
+        var path = ParsePropertyPath(property.PropertyPath);
+        if (path is null || FindEntity(path.Value.EntityName) is null)
+        {
+            return null;
+        }
+
+        var entity = FindEntity(path.Value.EntityName)!;
+        if (FieldProperty(entity, path.Value.FieldName) is null)
+        {
+            return null;
+        }
+
+        return new DuplicateMatchPropertyIntent
+        {
+            EntityName = entity.Name,
+            FieldName = path.Value.FieldName,
+            PropertyPath = $"{entity.Name}.{path.Value.FieldName}",
+            Comparison = string.IsNullOrWhiteSpace(property.Comparison) ? "Exact" : property.Comparison,
+            MinimumPropertyScore = property.MinimumPropertyScore,
+            Weight = property.Weight <= 0 ? 1 : property.Weight
+        };
+    }
+
+    private DuplicateFilterIntent? ToDuplicateFilterIntent(FilterConditionDefinition condition)
+    {
+        var path = ParsePropertyPath(condition.PropertyPath);
+        if (path is null || FindEntity(path.Value.EntityName) is null)
+        {
+            return null;
+        }
+
+        var entity = FindEntity(path.Value.EntityName)!;
+        if (FieldProperty(entity, path.Value.FieldName) is null)
+        {
+            return null;
+        }
+
+        return new DuplicateFilterIntent
+        {
+            EntityName = entity.Name,
+            FieldName = path.Value.FieldName,
+            Operator = string.IsNullOrWhiteSpace(condition.Operator) ? "Equals" : condition.Operator,
+            Value = condition.Value
+        };
+    }
+
     private bool IsExplicitOnly()
         => metadata.AnalysisGenerationMode.Equals("ExplicitOnly", StringComparison.OrdinalIgnoreCase);
+
+    private static bool IsDuplicateMatchingRule(DataQualityRuleDefinition rule, string ruleType)
+        => rule.MatchingCriteria.Properties.Count > 0
+            || ruleType.Contains("Duplication", StringComparison.OrdinalIgnoreCase)
+            || ruleType.Contains("Duplicate", StringComparison.OrdinalIgnoreCase);
 
     private static string NormalizeConditionType(string conditionType)
         => conditionType switch
@@ -257,4 +360,15 @@ internal sealed class MetadataIntentInterpreter(MetadataDocument metadata)
 
     private static bool Matches(string left, string right)
         => Naming.Pascal(left).Equals(Naming.Pascal(right), StringComparison.OrdinalIgnoreCase);
+
+    private static (string EntityName, string FieldName)? ParsePropertyPath(string propertyPath)
+    {
+        if (string.IsNullOrWhiteSpace(propertyPath))
+        {
+            return null;
+        }
+
+        var parts = propertyPath.Split('.', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        return parts.Length == 2 ? (Naming.Pascal(parts[0]), Naming.Pascal(parts[1])) : null;
+    }
 }

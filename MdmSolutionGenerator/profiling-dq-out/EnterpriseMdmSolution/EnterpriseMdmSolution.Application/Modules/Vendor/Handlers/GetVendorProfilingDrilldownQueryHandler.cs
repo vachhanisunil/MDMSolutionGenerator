@@ -9,5 +9,5 @@ public sealed class GetVendorProfilingDrilldownQueryHandler(IVendorRunService ru
     : IRequestHandler<GetVendorProfilingDrilldownQuery, IReadOnlyList<VendorProfilingDrilldownDto>>
 {
     public async Task<IReadOnlyList<VendorProfilingDrilldownDto>> Handle(GetVendorProfilingDrilldownQuery request, CancellationToken cancellationToken)
-        => await runService.GetProfilingDrilldownAsync(request.RunId, cancellationToken);
+        => await runService.GetProfilingDrilldownAsync(request.RunId, request.SummaryId, cancellationToken);
 }

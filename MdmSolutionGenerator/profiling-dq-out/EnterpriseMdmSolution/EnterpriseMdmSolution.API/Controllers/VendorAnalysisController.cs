@@ -40,15 +40,19 @@ public sealed class VendorAnalysisController(IMediator mediator, IServiceScopeFa
     public async Task<ActionResult<IReadOnlyList<VendorProfilingSummaryDto>>> GetProfilingSummary(Guid runId, CancellationToken cancellationToken)
         => Ok(await mediator.Send(new GetVendorProfilingSummaryQuery(runId), cancellationToken));
 
-    [HttpGet("runs/{runId:guid}/profiling-drilldown")]
-    public async Task<ActionResult<IReadOnlyList<VendorProfilingDrilldownDto>>> GetProfilingDrilldown(Guid runId, CancellationToken cancellationToken)
-        => Ok(await mediator.Send(new GetVendorProfilingDrilldownQuery(runId), cancellationToken));
+    [HttpGet("runs/{runId:guid}/profiling-drilldown/{summaryId:guid}")]
+    public async Task<ActionResult<IReadOnlyList<VendorProfilingDrilldownDto>>> GetProfilingDrilldown(Guid runId, Guid summaryId, CancellationToken cancellationToken)
+        => Ok(await mediator.Send(new GetVendorProfilingDrilldownQuery(runId, summaryId), cancellationToken));
 
     [HttpGet("runs/{runId:guid}/rule-summary")]
     public async Task<ActionResult<IReadOnlyList<VendorRuleSummaryDto>>> GetRuleSummary(Guid runId, CancellationToken cancellationToken)
         => Ok(await mediator.Send(new GetVendorRuleSummaryQuery(runId), cancellationToken));
 
-    [HttpGet("runs/{runId:guid}/rule-drilldown")]
-    public async Task<ActionResult<IReadOnlyList<VendorRuleDrilldownDto>>> GetRuleDrilldown(Guid runId, CancellationToken cancellationToken)
-        => Ok(await mediator.Send(new GetVendorRuleDrilldownQuery(runId), cancellationToken));
+    [HttpGet("runs/{runId:guid}/rule-drilldown/{resultId:guid}")]
+    public async Task<ActionResult<IReadOnlyList<VendorRuleDrilldownDto>>> GetRuleDrilldown(Guid runId, Guid resultId, CancellationToken cancellationToken)
+        => Ok(await mediator.Send(new GetVendorRuleDrilldownQuery(runId, resultId), cancellationToken));
+
+    [HttpGet("runs/{runId:guid}/duplicate-drilldown/{resultId:guid}")]
+    public async Task<ActionResult<IReadOnlyList<VendorDuplicateDrilldownDto>>> GetDuplicateDrilldown(Guid runId, Guid resultId, CancellationToken cancellationToken)
+        => Ok(await mediator.Send(new GetVendorDuplicateDrilldownQuery(runId, resultId), cancellationToken));
 }

@@ -50,5 +50,7 @@ public interface IAnalysisDbContext
     DbSet<DataQualityRuleResult> DataQualityRuleResults { get; }
     DbSet<DataQualityRuleSummary> DataQualityRuleSummaries { get; }
     DbSet<DataQualityDrilldown> DataQualityDrilldowns { get; }
+    DbSet<DataQualityDuplicateDrilldown> DataQualityDuplicateDrilldowns { get; }
+    DbSet<DuplicateCandidateRow> DuplicateCandidateRows { get; }
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }

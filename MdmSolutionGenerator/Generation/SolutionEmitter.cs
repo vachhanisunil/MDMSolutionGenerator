@@ -58,6 +58,8 @@ internal sealed class SolutionEmitter(MetadataDocument metadata, string solution
         yield return File($"{solutionName}.Infrastructure/Persistence/Configurations/DataQualityRuleResultConfiguration.cs", EmitAnalysisConfiguration("DataQualityRuleResult", "ResultId", "DataQualityRuleResults"));
         yield return File($"{solutionName}.Infrastructure/Persistence/Configurations/DataQualityRuleSummaryConfiguration.cs", EmitAnalysisConfiguration("DataQualityRuleSummary", "RuleSummaryId", "DataQualityRuleSummaries"));
         yield return File($"{solutionName}.Infrastructure/Persistence/Configurations/DataQualityDrilldownConfiguration.cs", EmitAnalysisConfiguration("DataQualityDrilldown", "DrilldownId", "DataQualityDrilldowns"));
+        yield return File($"{solutionName}.Infrastructure/Persistence/Configurations/DataQualityDuplicateDrilldownConfiguration.cs", EmitAnalysisConfiguration("DataQualityDuplicateDrilldown", "DuplicateDrilldownId", "DataQualityDuplicateDrilldowns"));
+        yield return File($"{solutionName}.Infrastructure/Persistence/Configurations/DuplicateCandidateRowConfiguration.cs", EmitKeylessAnalysisConfiguration("DuplicateCandidateRow"));
         foreach (var entity in metadata.Entities)
         {
             yield return File($"{solutionName}.Infrastructure/Persistence/Configurations/{entity.Name}Configuration.cs", EmitEntityConfiguration(entity));
@@ -175,6 +177,7 @@ EndGlobal
     <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="11.11.0" />
     <PackageReference Include="MediatR" Version="12.4.1" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.1" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="9.0.1" />
   </ItemGroup>
 </Project>
 """;
@@ -387,6 +390,53 @@ public sealed class DataQualityDrilldown : {{_rootNamespace}}.Core.Entities.Base
     public new DateTimeOffset CreatedOn { get; set; }
 }
 """);
+
+        yield return File($"{solutionName}.Core/DataQuality/DataQualityDuplicateDrilldown.cs", $$"""
+namespace {{_rootNamespace}}.Core.DataQuality;
+
+public sealed class DataQualityDuplicateDrilldown : {{_rootNamespace}}.Core.Entities.BaseEntity
+{
+    public Guid DuplicateDrilldownId { get; set; }
+    public Guid RunId { get; set; }
+    public Guid ResultId { get; set; }
+    public string BusinessObjectName { get; set; } = string.Empty;
+    public string RuleCode { get; set; } = string.Empty;
+    public string RuleName { get; set; } = string.Empty;
+    public string EntityName { get; set; } = string.Empty;
+    public string SourceRootRecordId { get; set; } = string.Empty;
+    public string SourceRecordId { get; set; } = string.Empty;
+    public string SourceDisplayValue { get; set; } = string.Empty;
+    public string DuplicateRootRecordId { get; set; } = string.Empty;
+    public string DuplicateRecordId { get; set; } = string.Empty;
+    public string DuplicateDisplayValue { get; set; } = string.Empty;
+    public decimal MatchScore { get; set; }
+    public string MatchStatus { get; set; } = string.Empty;
+    public string Severity { get; set; } = string.Empty;
+    public string Message { get; set; } = string.Empty;
+    public string MatchedFieldJson { get; set; } = string.Empty;
+    public string SourceRecordSnapshotJson { get; set; } = string.Empty;
+    public string DuplicateRecordSnapshotJson { get; set; } = string.Empty;
+    public new DateTimeOffset CreatedOn { get; set; }
+}
+""");
+
+        yield return File($"{solutionName}.Core/DataQuality/DuplicateCandidateRow.cs", $$"""
+namespace {{_rootNamespace}}.Core.DataQuality;
+
+public sealed class DuplicateCandidateRow
+{
+    public string SourceRootRecordId { get; set; } = string.Empty;
+    public string SourceRecordId { get; set; } = string.Empty;
+    public string SourceDisplayValue { get; set; } = string.Empty;
+    public string DuplicateRootRecordId { get; set; } = string.Empty;
+    public string DuplicateRecordId { get; set; } = string.Empty;
+    public string DuplicateDisplayValue { get; set; } = string.Empty;
+    public decimal MatchScore { get; set; }
+    public string MatchedFieldJson { get; set; } = string.Empty;
+    public string SourceRecordSnapshotJson { get; set; } = string.Empty;
+    public string DuplicateRecordSnapshotJson { get; set; } = string.Empty;
+}
+""");
     }
 
     private string EmitEntity(EntityDefinition entity)
@@ -481,7 +531,9 @@ public sealed class ValidationBehavior<TRequest, TResponse>(IEnumerable<IValidat
             "    DbSet<DataProfilingDrilldown> DataProfilingDrilldowns { get; }",
             "    DbSet<DataQualityRuleResult> DataQualityRuleResults { get; }",
             "    DbSet<DataQualityRuleSummary> DataQualityRuleSummaries { get; }",
-            "    DbSet<DataQualityDrilldown> DataQualityDrilldowns { get; }"
+            "    DbSet<DataQualityDrilldown> DataQualityDrilldowns { get; }",
+            "    DbSet<DataQualityDuplicateDrilldown> DataQualityDuplicateDrilldowns { get; }",
+            "    DbSet<DuplicateCandidateRow> DuplicateCandidateRows { get; }"
         ]));
 
         return $$"""
@@ -577,6 +629,7 @@ public static class DependencyInjection
         yield return File($"{module}/Queries/Get{businessObject.Name}ProfilingDrilldownQuery.cs", EmitGetProfilingDrilldownQuery(businessObject));
         yield return File($"{module}/Queries/Get{businessObject.Name}RuleSummaryQuery.cs", EmitGetRuleSummaryQuery(businessObject));
         yield return File($"{module}/Queries/Get{businessObject.Name}RuleDrilldownQuery.cs", EmitGetRuleDrilldownQuery(businessObject));
+        yield return File($"{module}/Queries/Get{businessObject.Name}DuplicateDrilldownQuery.cs", EmitGetDuplicateDrilldownQuery(businessObject));
         yield return File($"{module}/Handlers/Run{businessObject.Name}AnalysisCommandHandler.cs", EmitRunAnalysisHandler(businessObject));
         yield return File($"{module}/Handlers/Execute{businessObject.Name}AnalysisRunCommandHandler.cs", EmitExecuteAnalysisRunHandler(businessObject));
         yield return File($"{module}/Handlers/Get{businessObject.Name}RunsQueryHandler.cs", EmitGetRunsHandler(businessObject));
@@ -585,6 +638,7 @@ public static class DependencyInjection
         yield return File($"{module}/Handlers/Get{businessObject.Name}ProfilingDrilldownQueryHandler.cs", EmitGetProfilingDrilldownHandler(businessObject));
         yield return File($"{module}/Handlers/Get{businessObject.Name}RuleSummaryQueryHandler.cs", EmitGetRuleSummaryHandler(businessObject));
         yield return File($"{module}/Handlers/Get{businessObject.Name}RuleDrilldownQueryHandler.cs", EmitGetRuleDrilldownHandler(businessObject));
+        yield return File($"{module}/Handlers/Get{businessObject.Name}DuplicateDrilldownQueryHandler.cs", EmitGetDuplicateDrilldownHandler(businessObject));
         yield return File($"{module}/Interfaces/I{businessObject.Name}RunService.cs", EmitRunServiceInterface(businessObject));
         yield return File($"{module}/Services/{businessObject.Name}RunService.cs", EmitRunService(businessObject, root));
         foreach (var generatedFile in new BusinessObjectDataQualityArtifactGenerator(metadata, solutionName, _rootNamespace).Emit(businessObject))
@@ -677,6 +731,29 @@ public sealed class {{businessObject.Name}}RuleDrilldownDto
     public string Status { get; init; } = string.Empty;
     public string SnapshotJson { get; init; } = string.Empty;
 }
+
+public sealed class {{businessObject.Name}}DuplicateDrilldownDto
+{
+    public Guid DuplicateDrilldownId { get; init; }
+    public Guid RunId { get; init; }
+    public Guid ResultId { get; init; }
+    public string RuleCode { get; init; } = string.Empty;
+    public string RuleName { get; init; } = string.Empty;
+    public string EntityName { get; init; } = string.Empty;
+    public string SourceRootRecordId { get; init; } = string.Empty;
+    public string SourceRecordId { get; init; } = string.Empty;
+    public string SourceDisplayValue { get; init; } = string.Empty;
+    public string DuplicateRootRecordId { get; init; } = string.Empty;
+    public string DuplicateRecordId { get; init; } = string.Empty;
+    public string DuplicateDisplayValue { get; init; } = string.Empty;
+    public decimal MatchScore { get; init; }
+    public string MatchStatus { get; init; } = string.Empty;
+    public string Severity { get; init; } = string.Empty;
+    public string Message { get; init; } = string.Empty;
+    public string MatchedFieldJson { get; init; } = string.Empty;
+    public string SourceRecordSnapshotJson { get; init; } = string.Empty;
+    public string DuplicateRecordSnapshotJson { get; init; } = string.Empty;
+}
 """;
 
     private string EmitRunAnalysisCommand(BusinessObjectDefinition businessObject) => $$"""
@@ -728,7 +805,7 @@ using {{_rootNamespace}}.Application.Modules.{{businessObject.Name}}.DTOs;
 
 namespace {{_rootNamespace}}.Application.Modules.{{businessObject.Name}}.Queries;
 
-public sealed record Get{{businessObject.Name}}ProfilingDrilldownQuery(Guid RunId) : IRequest<IReadOnlyList<{{businessObject.Name}}ProfilingDrilldownDto>>;
+public sealed record Get{{businessObject.Name}}ProfilingDrilldownQuery(Guid RunId, Guid SummaryId) : IRequest<IReadOnlyList<{{businessObject.Name}}ProfilingDrilldownDto>>;
 """;
 
     private string EmitGetRuleSummaryQuery(BusinessObjectDefinition businessObject) => $$"""
@@ -746,7 +823,16 @@ using {{_rootNamespace}}.Application.Modules.{{businessObject.Name}}.DTOs;
 
 namespace {{_rootNamespace}}.Application.Modules.{{businessObject.Name}}.Queries;
 
-public sealed record Get{{businessObject.Name}}RuleDrilldownQuery(Guid RunId) : IRequest<IReadOnlyList<{{businessObject.Name}}RuleDrilldownDto>>;
+public sealed record Get{{businessObject.Name}}RuleDrilldownQuery(Guid RunId, Guid ResultId) : IRequest<IReadOnlyList<{{businessObject.Name}}RuleDrilldownDto>>;
+""";
+
+    private string EmitGetDuplicateDrilldownQuery(BusinessObjectDefinition businessObject) => $$"""
+using MediatR;
+using {{_rootNamespace}}.Application.Modules.{{businessObject.Name}}.DTOs;
+
+namespace {{_rootNamespace}}.Application.Modules.{{businessObject.Name}}.Queries;
+
+public sealed record Get{{businessObject.Name}}DuplicateDrilldownQuery(Guid RunId, Guid ResultId) : IRequest<IReadOnlyList<{{businessObject.Name}}DuplicateDrilldownDto>>;
 """;
 
     private string EmitRunAnalysisHandler(BusinessObjectDefinition businessObject) => $$"""
@@ -812,9 +898,10 @@ public sealed class Get{{businessObject.Name}}RunQueryHandler(I{{businessObject.
 """;
 
     private string EmitGetProfilingSummaryHandler(BusinessObjectDefinition businessObject) => EmitQueryHandler(businessObject, "ProfilingSummary", $"{businessObject.Name}ProfilingSummaryDto", "GetProfilingSummaryAsync");
-    private string EmitGetProfilingDrilldownHandler(BusinessObjectDefinition businessObject) => EmitQueryHandler(businessObject, "ProfilingDrilldown", $"{businessObject.Name}ProfilingDrilldownDto", "GetProfilingDrilldownAsync");
+    private string EmitGetProfilingDrilldownHandler(BusinessObjectDefinition businessObject) => EmitDrilldownQueryHandler(businessObject, "ProfilingDrilldown", $"{businessObject.Name}ProfilingDrilldownDto", "GetProfilingDrilldownAsync", "SummaryId");
     private string EmitGetRuleSummaryHandler(BusinessObjectDefinition businessObject) => EmitQueryHandler(businessObject, "RuleSummary", $"{businessObject.Name}RuleSummaryDto", "GetRuleSummaryAsync");
-    private string EmitGetRuleDrilldownHandler(BusinessObjectDefinition businessObject) => EmitQueryHandler(businessObject, "RuleDrilldown", $"{businessObject.Name}RuleDrilldownDto", "GetRuleDrilldownAsync");
+    private string EmitGetRuleDrilldownHandler(BusinessObjectDefinition businessObject) => EmitDrilldownQueryHandler(businessObject, "RuleDrilldown", $"{businessObject.Name}RuleDrilldownDto", "GetRuleDrilldownAsync", "ResultId");
+    private string EmitGetDuplicateDrilldownHandler(BusinessObjectDefinition businessObject) => EmitDrilldownQueryHandler(businessObject, "DuplicateDrilldown", $"{businessObject.Name}DuplicateDrilldownDto", "GetDuplicateDrilldownAsync", "ResultId");
 
     private string EmitQueryHandler(BusinessObjectDefinition businessObject, string querySuffix, string dtoType, string serviceMethod) => $$"""
 using MediatR;
@@ -832,6 +919,22 @@ public sealed class Get{{businessObject.Name}}{{querySuffix}}QueryHandler(I{{bus
 }
 """;
 
+    private string EmitDrilldownQueryHandler(BusinessObjectDefinition businessObject, string querySuffix, string dtoType, string serviceMethod, string idProperty) => $$"""
+using MediatR;
+using {{_rootNamespace}}.Application.Modules.{{businessObject.Name}}.DTOs;
+using {{_rootNamespace}}.Application.Modules.{{businessObject.Name}}.Interfaces;
+using {{_rootNamespace}}.Application.Modules.{{businessObject.Name}}.Queries;
+
+namespace {{_rootNamespace}}.Application.Modules.{{businessObject.Name}}.Handlers;
+
+public sealed class Get{{businessObject.Name}}{{querySuffix}}QueryHandler(I{{businessObject.Name}}RunService runService)
+    : IRequestHandler<Get{{businessObject.Name}}{{querySuffix}}Query, IReadOnlyList<{{dtoType}}>>
+{
+    public async Task<IReadOnlyList<{{dtoType}}>> Handle(Get{{businessObject.Name}}{{querySuffix}}Query request, CancellationToken cancellationToken)
+        => await runService.{{serviceMethod}}(request.RunId, request.{{idProperty}}, cancellationToken);
+}
+""";
+
     private string EmitRunServiceInterface(BusinessObjectDefinition businessObject) => $$"""
 using {{_rootNamespace}}.Application.Modules.{{businessObject.Name}}.DTOs;
 
@@ -846,9 +949,10 @@ public interface I{{businessObject.Name}}RunService
     Task<IReadOnlyList<{{businessObject.Name}}RunDto>> GetRunsAsync(CancellationToken cancellationToken = default);
     Task<{{businessObject.Name}}RunDto?> GetRunAsync(Guid runId, CancellationToken cancellationToken = default);
     Task<IReadOnlyList<{{businessObject.Name}}ProfilingSummaryDto>> GetProfilingSummaryAsync(Guid runId, CancellationToken cancellationToken = default);
-    Task<IReadOnlyList<{{businessObject.Name}}ProfilingDrilldownDto>> GetProfilingDrilldownAsync(Guid runId, CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<{{businessObject.Name}}ProfilingDrilldownDto>> GetProfilingDrilldownAsync(Guid runId, Guid summaryId, CancellationToken cancellationToken = default);
     Task<IReadOnlyList<{{businessObject.Name}}RuleSummaryDto>> GetRuleSummaryAsync(Guid runId, CancellationToken cancellationToken = default);
-    Task<IReadOnlyList<{{businessObject.Name}}RuleDrilldownDto>> GetRuleDrilldownAsync(Guid runId, CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<{{businessObject.Name}}RuleDrilldownDto>> GetRuleDrilldownAsync(Guid runId, Guid resultId, CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<{{businessObject.Name}}DuplicateDrilldownDto>> GetDuplicateDrilldownAsync(Guid runId, Guid resultId, CancellationToken cancellationToken = default);
 }
 """;
 
@@ -870,8 +974,9 @@ public sealed class {{businessObject.Name}}RunService(
     IRepository<BusinessObjectRun> runRepository,
     IRepository<DataProfilingSummary> profilingSummaryRepository,
     IRepository<DataProfilingDrilldown> profilingDrilldownRepository,
-    IRepository<DataQualityRuleSummary> ruleSummaryRepository,
+    IRepository<DataQualityRuleResult> ruleResultRepository,
     IRepository<DataQualityDrilldown> ruleDrilldownRepository,
+    IRepository<DataQualityDuplicateDrilldown> duplicateDrilldownRepository,
 {{repositoryParameters}},
     {{_rootNamespace}}.Application.Modules.{{businessObject.Name}}.DataQuality.Services.{{businessObject.Name}}Profiler profiler,
     {{_rootNamespace}}.Application.Modules.{{businessObject.Name}}.DataQuality.Services.{{businessObject.Name}}DataQualityRuleExecutor ruleExecutor)
@@ -880,8 +985,9 @@ public sealed class {{businessObject.Name}}RunService(
     private readonly IRepository<BusinessObjectRun> _runRepository = runRepository;
     private readonly IRepository<DataProfilingSummary> _profilingSummaryRepository = profilingSummaryRepository;
     private readonly IRepository<DataProfilingDrilldown> _profilingDrilldownRepository = profilingDrilldownRepository;
-    private readonly IRepository<DataQualityRuleSummary> _ruleSummaryRepository = ruleSummaryRepository;
+    private readonly IRepository<DataQualityRuleResult> _ruleResultRepository = ruleResultRepository;
     private readonly IRepository<DataQualityDrilldown> _ruleDrilldownRepository = ruleDrilldownRepository;
+    private readonly IRepository<DataQualityDuplicateDrilldown> _duplicateDrilldownRepository = duplicateDrilldownRepository;
 {{repositoryFields}}
     private readonly {{_rootNamespace}}.Application.Modules.{{businessObject.Name}}.DataQuality.Services.{{businessObject.Name}}Profiler _profiler = profiler;
     private readonly {{_rootNamespace}}.Application.Modules.{{businessObject.Name}}.DataQuality.Services.{{businessObject.Name}}DataQualityRuleExecutor _ruleExecutor = ruleExecutor;
@@ -922,9 +1028,9 @@ public sealed class {{businessObject.Name}}RunService(
             await ExecuteDataQualityAsync(runId, cancellationToken);
 
             var rootRecords = await _{{Camel(root.Name)}}Repository.ListAsync(cancellationToken);
-            var ruleSummaries = (await _ruleSummaryRepository.ListAsync(cancellationToken)).Where(x => x.RunId == runId && x.RuleCode.StartsWith("{{businessObject.Name}}.", StringComparison.Ordinal)).ToList();
+            var ruleResults = (await _ruleResultRepository.ListAsync(cancellationToken)).Where(x => x.RunId == runId && x.BusinessObjectName == "{{businessObject.Name}}").ToList();
             run.TotalRootRecords = rootRecords.Count;
-            run.OverallScore = ruleSummaries.Count == 0 ? 100m : Math.Round(ruleSummaries.Average(x => x.Score), 2);
+            run.OverallScore = ruleResults.Count == 0 ? 100m : Math.Round(ruleResults.Average(x => x.Score), 2);
             run.Status = "Completed";
             run.CompletedOn = DateTimeOffset.UtcNow;
             _runRepository.Update(run);
@@ -972,18 +1078,18 @@ public sealed class {{businessObject.Name}}RunService(
                 SummaryId = x.SummaryId,
                 RunId = x.RunId,
                 EntityName = x.EntityName,
-                FieldName = x.FieldName,
-                MetricName = x.MetricName,
-                MetricType = x.MetricType,
-                NumericValue = x.NumericValue,
+                FieldName = x.FieldName ?? x.ColumnName,
+                MetricName = string.IsNullOrWhiteSpace(x.MetricName) ? x.Label : x.MetricName,
+                MetricType = string.IsNullOrWhiteSpace(x.MetricType) ? x.SummaryType : x.MetricType,
+                NumericValue = x.NumericValue ?? x.MetricValue,
                 TextValue = x.TextValue,
                 Score = x.Score
             })
             .ToList();
 
-    public async Task<IReadOnlyList<{{businessObject.Name}}ProfilingDrilldownDto>> GetProfilingDrilldownAsync(Guid runId, CancellationToken cancellationToken = default)
+    public async Task<IReadOnlyList<{{businessObject.Name}}ProfilingDrilldownDto>> GetProfilingDrilldownAsync(Guid runId, Guid summaryId, CancellationToken cancellationToken = default)
         => (await _profilingDrilldownRepository.ListAsync(cancellationToken))
-            .Where(x => x.RunId == runId && x.BusinessObjectName == "{{businessObject.Name}}")
+            .Where(x => x.RunId == runId && x.BusinessObjectName == "{{businessObject.Name}}" && x.SummaryId == summaryId)
             .Select(x => new {{businessObject.Name}}ProfilingDrilldownDto
             {
                 DrilldownId = x.DrilldownId,
@@ -992,16 +1098,16 @@ public sealed class {{businessObject.Name}}RunService(
                 EntityName = x.EntityName,
                 RootRecordId = x.RootRecordId,
                 RecordId = x.RecordId,
-                SnapshotJson = x.SnapshotJson
+                SnapshotJson = string.IsNullOrWhiteSpace(x.SnapshotJson) ? x.RecordSnapshotJson : x.SnapshotJson
             })
             .ToList();
 
     public async Task<IReadOnlyList<{{businessObject.Name}}RuleSummaryDto>> GetRuleSummaryAsync(Guid runId, CancellationToken cancellationToken = default)
-        => (await _ruleSummaryRepository.ListAsync(cancellationToken))
-            .Where(x => x.RunId == runId && x.RuleCode.StartsWith("{{businessObject.Name}}.", StringComparison.Ordinal))
+        => (await _ruleResultRepository.ListAsync(cancellationToken))
+            .Where(x => x.RunId == runId && x.BusinessObjectName == "{{businessObject.Name}}")
             .Select(x => new {{businessObject.Name}}RuleSummaryDto
             {
-                RuleSummaryId = x.RuleSummaryId,
+                RuleSummaryId = x.ResultId,
                 RunId = x.RunId,
                 RuleCode = x.RuleCode,
                 RuleName = x.RuleName,
@@ -1013,14 +1119,14 @@ public sealed class {{businessObject.Name}}RunService(
             })
             .ToList();
 
-    public async Task<IReadOnlyList<{{businessObject.Name}}RuleDrilldownDto>> GetRuleDrilldownAsync(Guid runId, CancellationToken cancellationToken = default)
+    public async Task<IReadOnlyList<{{businessObject.Name}}RuleDrilldownDto>> GetRuleDrilldownAsync(Guid runId, Guid resultId, CancellationToken cancellationToken = default)
         => (await _ruleDrilldownRepository.ListAsync(cancellationToken))
-            .Where(x => x.RunId == runId && x.BusinessObjectName == "{{businessObject.Name}}")
+            .Where(x => x.RunId == runId && x.BusinessObjectName == "{{businessObject.Name}}" && (x.ResultId == resultId || x.RuleSummaryId == resultId))
             .Select(x => new {{businessObject.Name}}RuleDrilldownDto
             {
                 DrilldownId = x.DrilldownId,
                 RunId = x.RunId,
-                RuleSummaryId = x.RuleSummaryId,
+                RuleSummaryId = x.ResultId ?? x.RuleSummaryId,
                 EntityName = x.EntityName,
                 RootRecordId = x.RootRecordId,
                 RecordId = x.RecordId,
@@ -1028,7 +1134,34 @@ public sealed class {{businessObject.Name}}RunService(
                 Message = x.Message,
                 Severity = x.Severity,
                 Status = x.Status,
-                SnapshotJson = x.SnapshotJson
+                SnapshotJson = string.IsNullOrWhiteSpace(x.SnapshotJson) ? x.RecordSnapshotJson : x.SnapshotJson
+            })
+            .ToList();
+
+    public async Task<IReadOnlyList<{{businessObject.Name}}DuplicateDrilldownDto>> GetDuplicateDrilldownAsync(Guid runId, Guid resultId, CancellationToken cancellationToken = default)
+        => (await _duplicateDrilldownRepository.ListAsync(cancellationToken))
+            .Where(x => x.RunId == runId && x.BusinessObjectName == "{{businessObject.Name}}" && x.ResultId == resultId)
+            .Select(x => new {{businessObject.Name}}DuplicateDrilldownDto
+            {
+                DuplicateDrilldownId = x.DuplicateDrilldownId,
+                RunId = x.RunId,
+                ResultId = x.ResultId,
+                RuleCode = x.RuleCode,
+                RuleName = x.RuleName,
+                EntityName = x.EntityName,
+                SourceRootRecordId = x.SourceRootRecordId,
+                SourceRecordId = x.SourceRecordId,
+                SourceDisplayValue = x.SourceDisplayValue,
+                DuplicateRootRecordId = x.DuplicateRootRecordId,
+                DuplicateRecordId = x.DuplicateRecordId,
+                DuplicateDisplayValue = x.DuplicateDisplayValue,
+                MatchScore = x.MatchScore,
+                MatchStatus = x.MatchStatus,
+                Severity = x.Severity,
+                Message = x.Message,
+                MatchedFieldJson = x.MatchedFieldJson,
+                SourceRecordSnapshotJson = x.SourceRecordSnapshotJson,
+                DuplicateRecordSnapshotJson = x.DuplicateRecordSnapshotJson
             })
             .ToList();
 
@@ -1453,7 +1586,9 @@ public sealed class Search{{Naming.Plural(entity.Name)}}Handler(IRepository<Enti
             "    public DbSet<DataProfilingDrilldown> DataProfilingDrilldowns => Set<DataProfilingDrilldown>();",
             "    public DbSet<DataQualityRuleResult> DataQualityRuleResults => Set<DataQualityRuleResult>();",
             "    public DbSet<DataQualityRuleSummary> DataQualityRuleSummaries => Set<DataQualityRuleSummary>();",
-            "    public DbSet<DataQualityDrilldown> DataQualityDrilldowns => Set<DataQualityDrilldown>();"
+            "    public DbSet<DataQualityDrilldown> DataQualityDrilldowns => Set<DataQualityDrilldown>();",
+            "    public DbSet<DataQualityDuplicateDrilldown> DataQualityDuplicateDrilldowns => Set<DataQualityDuplicateDrilldown>();",
+            "    public DbSet<DuplicateCandidateRow> DuplicateCandidateRows => Set<DuplicateCandidateRow>();"
         };
         var sets = string.Join(Environment.NewLine, entitySets.Concat(analysisSets));
         return $$"""
@@ -1516,6 +1651,23 @@ public sealed class {{entityName}}Configuration : IEntityTypeConfiguration<{{ent
         builder.ToTable("{{tableName}}");
         builder.HasKey(x => x.{{keyName}});
         builder.Property(x => x.{{keyName}}).ValueGeneratedNever();
+    }
+}
+""";
+
+    private string EmitKeylessAnalysisConfiguration(string entityName) => $$"""
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using {{_rootNamespace}}.Core.DataQuality;
+
+namespace {{_rootNamespace}}.Infrastructure.Persistence.Configurations;
+
+public sealed class {{entityName}}Configuration : IEntityTypeConfiguration<{{entityName}}>
+{
+    public void Configure(EntityTypeBuilder<{{entityName}}> builder)
+    {
+        builder.HasNoKey();
+        builder.ToView(null);
     }
 }
 """;
@@ -1947,17 +2099,21 @@ public sealed class {{businessObject.Name}}AnalysisController(IMediator mediator
     public async Task<ActionResult<IReadOnlyList<{{businessObject.Name}}ProfilingSummaryDto>>> GetProfilingSummary(Guid runId, CancellationToken cancellationToken)
         => Ok(await mediator.Send(new Get{{businessObject.Name}}ProfilingSummaryQuery(runId), cancellationToken));
 
-    [HttpGet("runs/{runId:guid}/profiling-drilldown")]
-    public async Task<ActionResult<IReadOnlyList<{{businessObject.Name}}ProfilingDrilldownDto>>> GetProfilingDrilldown(Guid runId, CancellationToken cancellationToken)
-        => Ok(await mediator.Send(new Get{{businessObject.Name}}ProfilingDrilldownQuery(runId), cancellationToken));
+    [HttpGet("runs/{runId:guid}/profiling-drilldown/{summaryId:guid}")]
+    public async Task<ActionResult<IReadOnlyList<{{businessObject.Name}}ProfilingDrilldownDto>>> GetProfilingDrilldown(Guid runId, Guid summaryId, CancellationToken cancellationToken)
+        => Ok(await mediator.Send(new Get{{businessObject.Name}}ProfilingDrilldownQuery(runId, summaryId), cancellationToken));
 
     [HttpGet("runs/{runId:guid}/rule-summary")]
     public async Task<ActionResult<IReadOnlyList<{{businessObject.Name}}RuleSummaryDto>>> GetRuleSummary(Guid runId, CancellationToken cancellationToken)
         => Ok(await mediator.Send(new Get{{businessObject.Name}}RuleSummaryQuery(runId), cancellationToken));
 
-    [HttpGet("runs/{runId:guid}/rule-drilldown")]
-    public async Task<ActionResult<IReadOnlyList<{{businessObject.Name}}RuleDrilldownDto>>> GetRuleDrilldown(Guid runId, CancellationToken cancellationToken)
-        => Ok(await mediator.Send(new Get{{businessObject.Name}}RuleDrilldownQuery(runId), cancellationToken));
+    [HttpGet("runs/{runId:guid}/rule-drilldown/{resultId:guid}")]
+    public async Task<ActionResult<IReadOnlyList<{{businessObject.Name}}RuleDrilldownDto>>> GetRuleDrilldown(Guid runId, Guid resultId, CancellationToken cancellationToken)
+        => Ok(await mediator.Send(new Get{{businessObject.Name}}RuleDrilldownQuery(runId, resultId), cancellationToken));
+
+    [HttpGet("runs/{runId:guid}/duplicate-drilldown/{resultId:guid}")]
+    public async Task<ActionResult<IReadOnlyList<{{businessObject.Name}}DuplicateDrilldownDto>>> GetDuplicateDrilldown(Guid runId, Guid resultId, CancellationToken cancellationToken)
+        => Ok(await mediator.Send(new Get{{businessObject.Name}}DuplicateDrilldownQuery(runId, resultId), cancellationToken));
 }
 """;
     }

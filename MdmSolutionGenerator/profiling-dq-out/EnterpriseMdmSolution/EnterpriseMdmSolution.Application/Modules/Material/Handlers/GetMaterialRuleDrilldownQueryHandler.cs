@@ -9,5 +9,5 @@ public sealed class GetMaterialRuleDrilldownQueryHandler(IMaterialRunService run
     : IRequestHandler<GetMaterialRuleDrilldownQuery, IReadOnlyList<MaterialRuleDrilldownDto>>
 {
     public async Task<IReadOnlyList<MaterialRuleDrilldownDto>> Handle(GetMaterialRuleDrilldownQuery request, CancellationToken cancellationToken)
-        => await runService.GetRuleDrilldownAsync(request.RunId, cancellationToken);
+        => await runService.GetRuleDrilldownAsync(request.RunId, request.ResultId, cancellationToken);
 }

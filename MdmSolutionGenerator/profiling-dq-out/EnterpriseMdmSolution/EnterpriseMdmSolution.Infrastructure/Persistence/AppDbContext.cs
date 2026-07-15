@@ -51,6 +51,10 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
     public DbSet<DataQualityRuleResult> DataQualityRuleResults => Set<DataQualityRuleResult>();
     public DbSet<DataQualityRuleSummary> DataQualityRuleSummaries => Set<DataQualityRuleSummary>();
     public DbSet<DataQualityDrilldown> DataQualityDrilldowns => Set<DataQualityDrilldown>();
+    public DbSet<DataQualityDuplicateDrilldown> DataQualityDuplicateDrilldowns => Set<DataQualityDuplicateDrilldown>();
+    public DbSet<DuplicateCandidateRow> DuplicateCandidateRows => Set<DuplicateCandidateRow>();
+
+
 
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {

@@ -11,7 +11,8 @@ public interface IMaterialRunService
     Task<IReadOnlyList<MaterialRunDto>> GetRunsAsync(CancellationToken cancellationToken = default);
     Task<MaterialRunDto?> GetRunAsync(Guid runId, CancellationToken cancellationToken = default);
     Task<IReadOnlyList<MaterialProfilingSummaryDto>> GetProfilingSummaryAsync(Guid runId, CancellationToken cancellationToken = default);
-    Task<IReadOnlyList<MaterialProfilingDrilldownDto>> GetProfilingDrilldownAsync(Guid runId, CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<MaterialProfilingDrilldownDto>> GetProfilingDrilldownAsync(Guid runId, Guid summaryId, CancellationToken cancellationToken = default);
     Task<IReadOnlyList<MaterialRuleSummaryDto>> GetRuleSummaryAsync(Guid runId, CancellationToken cancellationToken = default);
-    Task<IReadOnlyList<MaterialRuleDrilldownDto>> GetRuleDrilldownAsync(Guid runId, CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<MaterialRuleDrilldownDto>> GetRuleDrilldownAsync(Guid runId, Guid resultId, CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<MaterialDuplicateDrilldownDto>> GetDuplicateDrilldownAsync(Guid runId, Guid resultId, CancellationToken cancellationToken = default);
 }

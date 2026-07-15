@@ -57,6 +57,7 @@ public sealed class CustomerDataQualityRuleExecutor(IAnalysisDbContext dbContext
         await ExecuteCUSTOMERATTACHMENTCUSTOMERIDCUSTOMEREXISTSRuleAsync(runId, cancellationToken);
         await ExecuteCUSTOMERINDIAREQUIRESGSTTAXRuleAsync(runId, cancellationToken);
         await ExecuteCUSTOMERCREDITEXPOSUREWITHINLIMITRuleAsync(runId, cancellationToken);
+        await ExecuteCUSTOMERDUP002RuleAsync(runId, cancellationToken);
     }
 
     private async Task ExecuteCUSTOMERCUSTOMERNUMBERREQUIREDRuleAsync(Guid runId, CancellationToken cancellationToken)
@@ -89,6 +90,7 @@ public sealed class CustomerDataQualityRuleExecutor(IAnalysisDbContext dbContext
         {
             DrilldownId = Guid.NewGuid(),
             RunId = runId,
+            RuleSummaryId = result.ResultId,
             ResultId = result.ResultId,
             BusinessObjectName = "Customer",
             EntityName = "Customer",
@@ -138,6 +140,7 @@ public sealed class CustomerDataQualityRuleExecutor(IAnalysisDbContext dbContext
         {
             DrilldownId = Guid.NewGuid(),
             RunId = runId,
+            RuleSummaryId = result.ResultId,
             ResultId = result.ResultId,
             BusinessObjectName = "Customer",
             EntityName = "Customer",
@@ -187,6 +190,7 @@ public sealed class CustomerDataQualityRuleExecutor(IAnalysisDbContext dbContext
         {
             DrilldownId = Guid.NewGuid(),
             RunId = runId,
+            RuleSummaryId = result.ResultId,
             ResultId = result.ResultId,
             BusinessObjectName = "Customer",
             EntityName = "Customer",
@@ -236,6 +240,7 @@ public sealed class CustomerDataQualityRuleExecutor(IAnalysisDbContext dbContext
         {
             DrilldownId = Guid.NewGuid(),
             RunId = runId,
+            RuleSummaryId = result.ResultId,
             ResultId = result.ResultId,
             BusinessObjectName = "Customer",
             EntityName = "Customer",
@@ -285,6 +290,7 @@ public sealed class CustomerDataQualityRuleExecutor(IAnalysisDbContext dbContext
         {
             DrilldownId = Guid.NewGuid(),
             RunId = runId,
+            RuleSummaryId = result.ResultId,
             ResultId = result.ResultId,
             BusinessObjectName = "Customer",
             EntityName = "Customer",
@@ -334,6 +340,7 @@ public sealed class CustomerDataQualityRuleExecutor(IAnalysisDbContext dbContext
         {
             DrilldownId = Guid.NewGuid(),
             RunId = runId,
+            RuleSummaryId = result.ResultId,
             ResultId = result.ResultId,
             BusinessObjectName = "Customer",
             EntityName = "CustomerAddress",
@@ -383,6 +390,7 @@ public sealed class CustomerDataQualityRuleExecutor(IAnalysisDbContext dbContext
         {
             DrilldownId = Guid.NewGuid(),
             RunId = runId,
+            RuleSummaryId = result.ResultId,
             ResultId = result.ResultId,
             BusinessObjectName = "Customer",
             EntityName = "CustomerAddress",
@@ -432,6 +440,7 @@ public sealed class CustomerDataQualityRuleExecutor(IAnalysisDbContext dbContext
         {
             DrilldownId = Guid.NewGuid(),
             RunId = runId,
+            RuleSummaryId = result.ResultId,
             ResultId = result.ResultId,
             BusinessObjectName = "Customer",
             EntityName = "CustomerAddress",
@@ -481,6 +490,7 @@ public sealed class CustomerDataQualityRuleExecutor(IAnalysisDbContext dbContext
         {
             DrilldownId = Guid.NewGuid(),
             RunId = runId,
+            RuleSummaryId = result.ResultId,
             ResultId = result.ResultId,
             BusinessObjectName = "Customer",
             EntityName = "CustomerAddress",
@@ -530,6 +540,7 @@ public sealed class CustomerDataQualityRuleExecutor(IAnalysisDbContext dbContext
         {
             DrilldownId = Guid.NewGuid(),
             RunId = runId,
+            RuleSummaryId = result.ResultId,
             ResultId = result.ResultId,
             BusinessObjectName = "Customer",
             EntityName = "CustomerAddress",
@@ -579,6 +590,7 @@ public sealed class CustomerDataQualityRuleExecutor(IAnalysisDbContext dbContext
         {
             DrilldownId = Guid.NewGuid(),
             RunId = runId,
+            RuleSummaryId = result.ResultId,
             ResultId = result.ResultId,
             BusinessObjectName = "Customer",
             EntityName = "CustomerContact",
@@ -628,6 +640,7 @@ public sealed class CustomerDataQualityRuleExecutor(IAnalysisDbContext dbContext
         {
             DrilldownId = Guid.NewGuid(),
             RunId = runId,
+            RuleSummaryId = result.ResultId,
             ResultId = result.ResultId,
             BusinessObjectName = "Customer",
             EntityName = "CustomerContact",
@@ -677,6 +690,7 @@ public sealed class CustomerDataQualityRuleExecutor(IAnalysisDbContext dbContext
         {
             DrilldownId = Guid.NewGuid(),
             RunId = runId,
+            RuleSummaryId = result.ResultId,
             ResultId = result.ResultId,
             BusinessObjectName = "Customer",
             EntityName = "CustomerBankAccount",
@@ -726,6 +740,7 @@ public sealed class CustomerDataQualityRuleExecutor(IAnalysisDbContext dbContext
         {
             DrilldownId = Guid.NewGuid(),
             RunId = runId,
+            RuleSummaryId = result.ResultId,
             ResultId = result.ResultId,
             BusinessObjectName = "Customer",
             EntityName = "CustomerBankAccount",
@@ -775,6 +790,7 @@ public sealed class CustomerDataQualityRuleExecutor(IAnalysisDbContext dbContext
         {
             DrilldownId = Guid.NewGuid(),
             RunId = runId,
+            RuleSummaryId = result.ResultId,
             ResultId = result.ResultId,
             BusinessObjectName = "Customer",
             EntityName = "CustomerBankAccount",
@@ -824,6 +840,7 @@ public sealed class CustomerDataQualityRuleExecutor(IAnalysisDbContext dbContext
         {
             DrilldownId = Guid.NewGuid(),
             RunId = runId,
+            RuleSummaryId = result.ResultId,
             ResultId = result.ResultId,
             BusinessObjectName = "Customer",
             EntityName = "CustomerTax",
@@ -873,6 +890,7 @@ public sealed class CustomerDataQualityRuleExecutor(IAnalysisDbContext dbContext
         {
             DrilldownId = Guid.NewGuid(),
             RunId = runId,
+            RuleSummaryId = result.ResultId,
             ResultId = result.ResultId,
             BusinessObjectName = "Customer",
             EntityName = "CustomerTax",
@@ -922,6 +940,7 @@ public sealed class CustomerDataQualityRuleExecutor(IAnalysisDbContext dbContext
         {
             DrilldownId = Guid.NewGuid(),
             RunId = runId,
+            RuleSummaryId = result.ResultId,
             ResultId = result.ResultId,
             BusinessObjectName = "Customer",
             EntityName = "CustomerTax",
@@ -971,6 +990,7 @@ public sealed class CustomerDataQualityRuleExecutor(IAnalysisDbContext dbContext
         {
             DrilldownId = Guid.NewGuid(),
             RunId = runId,
+            RuleSummaryId = result.ResultId,
             ResultId = result.ResultId,
             BusinessObjectName = "Customer",
             EntityName = "CustomerTax",
@@ -1020,6 +1040,7 @@ public sealed class CustomerDataQualityRuleExecutor(IAnalysisDbContext dbContext
         {
             DrilldownId = Guid.NewGuid(),
             RunId = runId,
+            RuleSummaryId = result.ResultId,
             ResultId = result.ResultId,
             BusinessObjectName = "Customer",
             EntityName = "CustomerClassification",
@@ -1069,6 +1090,7 @@ public sealed class CustomerDataQualityRuleExecutor(IAnalysisDbContext dbContext
         {
             DrilldownId = Guid.NewGuid(),
             RunId = runId,
+            RuleSummaryId = result.ResultId,
             ResultId = result.ResultId,
             BusinessObjectName = "Customer",
             EntityName = "CustomerClassification",
@@ -1118,6 +1140,7 @@ public sealed class CustomerDataQualityRuleExecutor(IAnalysisDbContext dbContext
         {
             DrilldownId = Guid.NewGuid(),
             RunId = runId,
+            RuleSummaryId = result.ResultId,
             ResultId = result.ResultId,
             BusinessObjectName = "Customer",
             EntityName = "CustomerCreditProfile",
@@ -1167,6 +1190,7 @@ public sealed class CustomerDataQualityRuleExecutor(IAnalysisDbContext dbContext
         {
             DrilldownId = Guid.NewGuid(),
             RunId = runId,
+            RuleSummaryId = result.ResultId,
             ResultId = result.ResultId,
             BusinessObjectName = "Customer",
             EntityName = "CustomerCreditProfile",
@@ -1216,6 +1240,7 @@ public sealed class CustomerDataQualityRuleExecutor(IAnalysisDbContext dbContext
         {
             DrilldownId = Guid.NewGuid(),
             RunId = runId,
+            RuleSummaryId = result.ResultId,
             ResultId = result.ResultId,
             BusinessObjectName = "Customer",
             EntityName = "CustomerPartnerFunction",
@@ -1265,6 +1290,7 @@ public sealed class CustomerDataQualityRuleExecutor(IAnalysisDbContext dbContext
         {
             DrilldownId = Guid.NewGuid(),
             RunId = runId,
+            RuleSummaryId = result.ResultId,
             ResultId = result.ResultId,
             BusinessObjectName = "Customer",
             EntityName = "CustomerAttachment",
@@ -1314,6 +1340,7 @@ public sealed class CustomerDataQualityRuleExecutor(IAnalysisDbContext dbContext
         {
             DrilldownId = Guid.NewGuid(),
             RunId = runId,
+            RuleSummaryId = result.ResultId,
             ResultId = result.ResultId,
             BusinessObjectName = "Customer",
             EntityName = "CustomerAttachment",
@@ -1363,6 +1390,7 @@ public sealed class CustomerDataQualityRuleExecutor(IAnalysisDbContext dbContext
         {
             DrilldownId = Guid.NewGuid(),
             RunId = runId,
+            RuleSummaryId = result.ResultId,
             ResultId = result.ResultId,
             BusinessObjectName = "Customer",
             EntityName = "CustomerAttachment",
@@ -1412,6 +1440,7 @@ public sealed class CustomerDataQualityRuleExecutor(IAnalysisDbContext dbContext
         {
             DrilldownId = Guid.NewGuid(),
             RunId = runId,
+            RuleSummaryId = result.ResultId,
             ResultId = result.ResultId,
             BusinessObjectName = "Customer",
             EntityName = "Customer",
@@ -1461,6 +1490,7 @@ public sealed class CustomerDataQualityRuleExecutor(IAnalysisDbContext dbContext
         {
             DrilldownId = Guid.NewGuid(),
             RunId = runId,
+            RuleSummaryId = result.ResultId,
             ResultId = result.ResultId,
             BusinessObjectName = "Customer",
             EntityName = "Customer",
@@ -1510,6 +1540,7 @@ public sealed class CustomerDataQualityRuleExecutor(IAnalysisDbContext dbContext
         {
             DrilldownId = Guid.NewGuid(),
             RunId = runId,
+            RuleSummaryId = result.ResultId,
             ResultId = result.ResultId,
             BusinessObjectName = "Customer",
             EntityName = "CustomerAddress",
@@ -1559,6 +1590,7 @@ public sealed class CustomerDataQualityRuleExecutor(IAnalysisDbContext dbContext
         {
             DrilldownId = Guid.NewGuid(),
             RunId = runId,
+            RuleSummaryId = result.ResultId,
             ResultId = result.ResultId,
             BusinessObjectName = "Customer",
             EntityName = "CustomerAddress",
@@ -1608,6 +1640,7 @@ public sealed class CustomerDataQualityRuleExecutor(IAnalysisDbContext dbContext
         {
             DrilldownId = Guid.NewGuid(),
             RunId = runId,
+            RuleSummaryId = result.ResultId,
             ResultId = result.ResultId,
             BusinessObjectName = "Customer",
             EntityName = "CustomerContact",
@@ -1657,6 +1690,7 @@ public sealed class CustomerDataQualityRuleExecutor(IAnalysisDbContext dbContext
         {
             DrilldownId = Guid.NewGuid(),
             RunId = runId,
+            RuleSummaryId = result.ResultId,
             ResultId = result.ResultId,
             BusinessObjectName = "Customer",
             EntityName = "CustomerBankAccount",
@@ -1706,6 +1740,7 @@ public sealed class CustomerDataQualityRuleExecutor(IAnalysisDbContext dbContext
         {
             DrilldownId = Guid.NewGuid(),
             RunId = runId,
+            RuleSummaryId = result.ResultId,
             ResultId = result.ResultId,
             BusinessObjectName = "Customer",
             EntityName = "CustomerBankAccount",
@@ -1755,6 +1790,7 @@ public sealed class CustomerDataQualityRuleExecutor(IAnalysisDbContext dbContext
         {
             DrilldownId = Guid.NewGuid(),
             RunId = runId,
+            RuleSummaryId = result.ResultId,
             ResultId = result.ResultId,
             BusinessObjectName = "Customer",
             EntityName = "CustomerBankAccount",
@@ -1804,6 +1840,7 @@ public sealed class CustomerDataQualityRuleExecutor(IAnalysisDbContext dbContext
         {
             DrilldownId = Guid.NewGuid(),
             RunId = runId,
+            RuleSummaryId = result.ResultId,
             ResultId = result.ResultId,
             BusinessObjectName = "Customer",
             EntityName = "CustomerSalesArea",
@@ -1853,6 +1890,7 @@ public sealed class CustomerDataQualityRuleExecutor(IAnalysisDbContext dbContext
         {
             DrilldownId = Guid.NewGuid(),
             RunId = runId,
+            RuleSummaryId = result.ResultId,
             ResultId = result.ResultId,
             BusinessObjectName = "Customer",
             EntityName = "CustomerSalesArea",
@@ -1902,6 +1940,7 @@ public sealed class CustomerDataQualityRuleExecutor(IAnalysisDbContext dbContext
         {
             DrilldownId = Guid.NewGuid(),
             RunId = runId,
+            RuleSummaryId = result.ResultId,
             ResultId = result.ResultId,
             BusinessObjectName = "Customer",
             EntityName = "CustomerSalesArea",
@@ -1951,6 +1990,7 @@ public sealed class CustomerDataQualityRuleExecutor(IAnalysisDbContext dbContext
         {
             DrilldownId = Guid.NewGuid(),
             RunId = runId,
+            RuleSummaryId = result.ResultId,
             ResultId = result.ResultId,
             BusinessObjectName = "Customer",
             EntityName = "CustomerTax",
@@ -2000,6 +2040,7 @@ public sealed class CustomerDataQualityRuleExecutor(IAnalysisDbContext dbContext
         {
             DrilldownId = Guid.NewGuid(),
             RunId = runId,
+            RuleSummaryId = result.ResultId,
             ResultId = result.ResultId,
             BusinessObjectName = "Customer",
             EntityName = "CustomerTax",
@@ -2049,6 +2090,7 @@ public sealed class CustomerDataQualityRuleExecutor(IAnalysisDbContext dbContext
         {
             DrilldownId = Guid.NewGuid(),
             RunId = runId,
+            RuleSummaryId = result.ResultId,
             ResultId = result.ResultId,
             BusinessObjectName = "Customer",
             EntityName = "CustomerClassification",
@@ -2098,6 +2140,7 @@ public sealed class CustomerDataQualityRuleExecutor(IAnalysisDbContext dbContext
         {
             DrilldownId = Guid.NewGuid(),
             RunId = runId,
+            RuleSummaryId = result.ResultId,
             ResultId = result.ResultId,
             BusinessObjectName = "Customer",
             EntityName = "CustomerCreditProfile",
@@ -2147,6 +2190,7 @@ public sealed class CustomerDataQualityRuleExecutor(IAnalysisDbContext dbContext
         {
             DrilldownId = Guid.NewGuid(),
             RunId = runId,
+            RuleSummaryId = result.ResultId,
             ResultId = result.ResultId,
             BusinessObjectName = "Customer",
             EntityName = "CustomerPartnerFunction",
@@ -2196,6 +2240,7 @@ public sealed class CustomerDataQualityRuleExecutor(IAnalysisDbContext dbContext
         {
             DrilldownId = Guid.NewGuid(),
             RunId = runId,
+            RuleSummaryId = result.ResultId,
             ResultId = result.ResultId,
             BusinessObjectName = "Customer",
             EntityName = "CustomerAttachment",
@@ -2252,6 +2297,7 @@ public sealed class CustomerDataQualityRuleExecutor(IAnalysisDbContext dbContext
         {
             DrilldownId = Guid.NewGuid(),
             RunId = runId,
+            RuleSummaryId = result.ResultId,
             ResultId = result.ResultId,
             BusinessObjectName = "Customer",
             EntityName = "CustomerCreditProfile",
@@ -2268,6 +2314,78 @@ public sealed class CustomerDataQualityRuleExecutor(IAnalysisDbContext dbContext
         }).ToList();
 
         _dbContext.DataQualityDrilldowns.AddRange(failedRecords);
+        await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    private async Task ExecuteCUSTOMERDUP002RuleAsync(Guid runId, CancellationToken cancellationToken)
+    {
+        var duplicateRows = await _dbContext.DuplicateCandidateRows
+            .FromSqlRaw(@"SELECT
+    source_root.""Id""::text AS ""SourceRootRecordId"",
+    source_root.""Id""::text AS ""SourceRecordId"",
+    COALESCE(source_root.""CustomerName""::text, source_root.""Id""::text) AS ""SourceDisplayValue"",
+    duplicate_root.""Id""::text AS ""DuplicateRootRecordId"",
+    duplicate_root.""Id""::text AS ""DuplicateRecordId"",
+    COALESCE(duplicate_root.""CustomerName""::text, duplicate_root.""Id""::text) AS ""DuplicateDisplayValue"",
+    ROUND(((((similarity(COALESCE(source_root.""CustomerName""::text, ''), COALESCE(duplicate_root.""CustomerName""::text, '')) * 100) * 50) + ((similarity(COALESCE(source_customeraddress.""AddressLine1""::text, ''), COALESCE(duplicate_customeraddress.""AddressLine1""::text, '')) * 100) * 30) + ((CASE WHEN COALESCE(source_customeraddress.""PostalCode""::text, '') = COALESCE(duplicate_customeraddress.""PostalCode""::text, '') THEN 100 ELSE 0 END) * 20)) / 100), 2) AS ""MatchScore"",
+    jsonb_build_array(jsonb_build_object('propertyPath', 'Customer.CustomerName', 'comparison', 'Fuzzy', 'sourceValue', source_root.""CustomerName""::text, 'duplicateValue', duplicate_root.""CustomerName""::text, 'score', ROUND((similarity(COALESCE(source_root.""CustomerName""::text, ''), COALESCE(duplicate_root.""CustomerName""::text, '')) * 100), 2), 'weight', 50), jsonb_build_object('propertyPath', 'CustomerAddress.AddressLine1', 'comparison', 'Fuzzy', 'sourceValue', source_customeraddress.""AddressLine1""::text, 'duplicateValue', duplicate_customeraddress.""AddressLine1""::text, 'score', ROUND((similarity(COALESCE(source_customeraddress.""AddressLine1""::text, ''), COALESCE(duplicate_customeraddress.""AddressLine1""::text, '')) * 100), 2), 'weight', 30), jsonb_build_object('propertyPath', 'CustomerAddress.PostalCode', 'comparison', 'Exact', 'sourceValue', source_customeraddress.""PostalCode""::text, 'duplicateValue', duplicate_customeraddress.""PostalCode""::text, 'score', ROUND((CASE WHEN COALESCE(source_customeraddress.""PostalCode""::text, '') = COALESCE(duplicate_customeraddress.""PostalCode""::text, '') THEN 100 ELSE 0 END), 2), 'weight', 20))::text AS ""MatchedFieldJson"",
+    jsonb_build_object('Id', source_root.""Id"", 'Customer.CustomerName', source_root.""CustomerName"", 'CustomerAddress.AddressLine1', source_customeraddress.""AddressLine1"", 'CustomerAddress.PostalCode', source_customeraddress.""PostalCode"")::text AS ""SourceRecordSnapshotJson"",
+    jsonb_build_object('Id', duplicate_root.""Id"", 'Customer.CustomerName', duplicate_root.""CustomerName"", 'CustomerAddress.AddressLine1', duplicate_customeraddress.""AddressLine1"", 'CustomerAddress.PostalCode', duplicate_customeraddress.""PostalCode"")::text AS ""DuplicateRecordSnapshotJson""
+FROM ""Customers"" source_root
+JOIN ""Customers"" duplicate_root ON source_root.""Id"" < duplicate_root.""Id""
+JOIN ""CustomerAddresses"" source_customeraddress ON source_customeraddress.""CustomerId"" = source_root.""Id""
+JOIN ""CustomerAddresses"" duplicate_customeraddress ON duplicate_customeraddress.""CustomerId"" = duplicate_root.""Id""
+WHERE (similarity(COALESCE(source_root.""CustomerName""::text, ''), COALESCE(duplicate_root.""CustomerName""::text, '')) * 100) >= 85
+  AND (similarity(COALESCE(source_customeraddress.""AddressLine1""::text, ''), COALESCE(duplicate_customeraddress.""AddressLine1""::text, '')) * 100) >= 75
+  AND ((((similarity(COALESCE(source_root.""CustomerName""::text, ''), COALESCE(duplicate_root.""CustomerName""::text, '')) * 100) * 50) + ((similarity(COALESCE(source_customeraddress.""AddressLine1""::text, ''), COALESCE(duplicate_customeraddress.""AddressLine1""::text, '')) * 100) * 30) + ((CASE WHEN COALESCE(source_customeraddress.""PostalCode""::text, '') = COALESCE(duplicate_customeraddress.""PostalCode""::text, '') THEN 100 ELSE 0 END) * 20)) / 100) >= 85
+  AND source_root.""IsActive""::text = 'true'
+  AND duplicate_root.""IsActive""::text = 'true'")
+            .ToListAsync(cancellationToken);
+
+        var result = new DataQualityRuleResult
+        {
+            ResultId = Guid.NewGuid(),
+            RunId = runId,
+            BusinessObjectName = "Customer",
+            RuleCode = "CUSTOMER_DUP_002",
+            RuleName = "Potential Duplicate Customer by Name and Address",
+            EntityName = "Customer",
+            Category = "Duplication",
+            Severity = "Medium",
+            Status = duplicateRows.Any() ? "Failed" : "Passed",
+            AffectedCount = duplicateRows.Count,
+            Score = duplicateRows.Count == 0 ? 100m : 0m,
+            CreatedOn = DateTimeOffset.UtcNow
+        };
+
+        _dbContext.DataQualityRuleResults.Add(result);
+
+        var duplicateDrilldowns = duplicateRows.Select(row => new DataQualityDuplicateDrilldown
+        {
+            DuplicateDrilldownId = Guid.NewGuid(),
+            RunId = runId,
+            ResultId = result.ResultId,
+            BusinessObjectName = "Customer",
+            RuleCode = "CUSTOMER_DUP_002",
+            RuleName = "Potential Duplicate Customer by Name and Address",
+            EntityName = "Customer",
+            SourceRootRecordId = row.SourceRootRecordId,
+            SourceRecordId = row.SourceRecordId,
+            SourceDisplayValue = row.SourceDisplayValue,
+            DuplicateRootRecordId = row.DuplicateRootRecordId,
+            DuplicateRecordId = row.DuplicateRecordId,
+            DuplicateDisplayValue = row.DuplicateDisplayValue,
+            MatchScore = row.MatchScore,
+            MatchStatus = "PotentialDuplicate",
+            Severity = "Medium",
+            Message = $"Potential duplicate Customer found. Match score: {row.MatchScore:0.##}",
+            MatchedFieldJson = row.MatchedFieldJson,
+            SourceRecordSnapshotJson = row.SourceRecordSnapshotJson,
+            DuplicateRecordSnapshotJson = row.DuplicateRecordSnapshotJson,
+            CreatedOn = DateTimeOffset.UtcNow
+        }).ToList();
+
+        _dbContext.DataQualityDuplicateDrilldowns.AddRange(duplicateDrilldowns);
         await _dbContext.SaveChangesAsync(cancellationToken);
     }
 

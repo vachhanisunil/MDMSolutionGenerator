@@ -40,15 +40,19 @@ public sealed class CustomerAnalysisController(IMediator mediator, IServiceScope
     public async Task<ActionResult<IReadOnlyList<CustomerProfilingSummaryDto>>> GetProfilingSummary(Guid runId, CancellationToken cancellationToken)
         => Ok(await mediator.Send(new GetCustomerProfilingSummaryQuery(runId), cancellationToken));
 
-    [HttpGet("runs/{runId:guid}/profiling-drilldown")]
-    public async Task<ActionResult<IReadOnlyList<CustomerProfilingDrilldownDto>>> GetProfilingDrilldown(Guid runId, CancellationToken cancellationToken)
-        => Ok(await mediator.Send(new GetCustomerProfilingDrilldownQuery(runId), cancellationToken));
+    [HttpGet("runs/{runId:guid}/profiling-drilldown/{summaryId:guid}")]
+    public async Task<ActionResult<IReadOnlyList<CustomerProfilingDrilldownDto>>> GetProfilingDrilldown(Guid runId, Guid summaryId, CancellationToken cancellationToken)
+        => Ok(await mediator.Send(new GetCustomerProfilingDrilldownQuery(runId, summaryId), cancellationToken));
 
     [HttpGet("runs/{runId:guid}/rule-summary")]
     public async Task<ActionResult<IReadOnlyList<CustomerRuleSummaryDto>>> GetRuleSummary(Guid runId, CancellationToken cancellationToken)
         => Ok(await mediator.Send(new GetCustomerRuleSummaryQuery(runId), cancellationToken));
 
-    [HttpGet("runs/{runId:guid}/rule-drilldown")]
-    public async Task<ActionResult<IReadOnlyList<CustomerRuleDrilldownDto>>> GetRuleDrilldown(Guid runId, CancellationToken cancellationToken)
-        => Ok(await mediator.Send(new GetCustomerRuleDrilldownQuery(runId), cancellationToken));
+    [HttpGet("runs/{runId:guid}/rule-drilldown/{resultId:guid}")]
+    public async Task<ActionResult<IReadOnlyList<CustomerRuleDrilldownDto>>> GetRuleDrilldown(Guid runId, Guid resultId, CancellationToken cancellationToken)
+        => Ok(await mediator.Send(new GetCustomerRuleDrilldownQuery(runId, resultId), cancellationToken));
+
+    [HttpGet("runs/{runId:guid}/duplicate-drilldown/{resultId:guid}")]
+    public async Task<ActionResult<IReadOnlyList<CustomerDuplicateDrilldownDto>>> GetDuplicateDrilldown(Guid runId, Guid resultId, CancellationToken cancellationToken)
+        => Ok(await mediator.Send(new GetCustomerDuplicateDrilldownQuery(runId, resultId), cancellationToken));
 }

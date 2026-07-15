@@ -9,5 +9,5 @@ public sealed class GetMaterialProfilingDrilldownQueryHandler(IMaterialRunServic
     : IRequestHandler<GetMaterialProfilingDrilldownQuery, IReadOnlyList<MaterialProfilingDrilldownDto>>
 {
     public async Task<IReadOnlyList<MaterialProfilingDrilldownDto>> Handle(GetMaterialProfilingDrilldownQuery request, CancellationToken cancellationToken)
-        => await runService.GetProfilingDrilldownAsync(request.RunId, cancellationToken);
+        => await runService.GetProfilingDrilldownAsync(request.RunId, request.SummaryId, cancellationToken);
 }

@@ -9,5 +9,5 @@ public sealed class GetCustomerRuleDrilldownQueryHandler(ICustomerRunService run
     : IRequestHandler<GetCustomerRuleDrilldownQuery, IReadOnlyList<CustomerRuleDrilldownDto>>
 {
     public async Task<IReadOnlyList<CustomerRuleDrilldownDto>> Handle(GetCustomerRuleDrilldownQuery request, CancellationToken cancellationToken)
-        => await runService.GetRuleDrilldownAsync(request.RunId, cancellationToken);
+        => await runService.GetRuleDrilldownAsync(request.RunId, request.ResultId, cancellationToken);
 }

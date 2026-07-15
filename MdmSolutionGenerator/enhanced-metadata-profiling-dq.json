@@ -4061,6 +4061,54 @@
             "rightField": "CreditLimit",
             "ignoreNull": true
           }
+        },
+        {
+          "ruleId": "CUSTOMER_DUP_002",
+          "ruleCode": "CUSTOMER_DUP_002",
+          "ruleName": "Potential Duplicate Customer by Name and Address",
+          "ruleType": "Duplication",
+          "executionType": "Complex",
+          "businessObject": "Customer",
+          "entity": "Customer",
+          "category": "Duplication",
+          "description": "Identify potential duplicate customers using weighted fuzzy customer name and address matching.",
+          "severity": "Medium",
+          "enabled": true,
+          "filter": {
+            "logicalOperator": "AND",
+            "conditions": [
+              {
+                "propertyPath": "Customer.IsActive",
+                "operator": "Equals",
+                "value": "true"
+              }
+            ]
+          },
+          "matchingCriteria": {
+            "matchType": "WeightedFuzzy",
+            "minimumMatchScore": 85,
+            "properties": [
+              {
+                "propertyPath": "Customer.CustomerName",
+                "comparison": "Fuzzy",
+                "minimumPropertyScore": 85,
+                "weight": 50
+              },
+              {
+                "propertyPath": "CustomerAddress.AddressLine1",
+                "comparison": "Fuzzy",
+                "minimumPropertyScore": 75,
+                "weight": 30
+              },
+              {
+                "propertyPath": "CustomerAddress.PostalCode",
+                "comparison": "Exact",
+                "weight": 20
+              }
+            ]
+          },
+          "message": "Potential duplicate customer found by weighted name and address matching.",
+          "weight": 1
         }
       ],
       "scoring": {
@@ -7373,4 +7421,3 @@
     "description": "Profiling and data quality generation is explicit-only. Entity definitions remain schema-focused; only configured profiling summaries and data quality rules are generated."
   }
 }
-
