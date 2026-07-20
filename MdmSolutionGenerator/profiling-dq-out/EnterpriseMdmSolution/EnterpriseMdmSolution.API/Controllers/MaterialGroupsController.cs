@@ -50,10 +50,6 @@ public sealed class MaterialGroupsController(IMediator mediator) : ControllerBas
     public async Task<ActionResult<BulkMaterialGroupOperationResultDto>> BulkCreate(BulkCreateMaterialGroupDto input, CancellationToken cancellationToken)
         => Ok(await mediator.Send(new BulkCreateMaterialGroupCommand(input), cancellationToken));
 
-    [HttpPut("bulk-update")]
-    public async Task<ActionResult<BulkMaterialGroupOperationResultDto>> BulkUpdate(BulkUpdateMaterialGroupDto input, CancellationToken cancellationToken)
-        => Ok(await mediator.Send(new BulkUpdateMaterialGroupCommand(input), cancellationToken));
-
     [HttpPost("bulk-upsert")]
     public async Task<ActionResult<BulkMaterialGroupOperationResultDto>> BulkUpsert(BulkUpsertMaterialGroupDto input, CancellationToken cancellationToken)
         => Ok(await mediator.Send(new BulkUpsertMaterialGroupCommand(input), cancellationToken));

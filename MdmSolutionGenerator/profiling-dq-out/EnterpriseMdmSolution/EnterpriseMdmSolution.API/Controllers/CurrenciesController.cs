@@ -50,10 +50,6 @@ public sealed class CurrenciesController(IMediator mediator) : ControllerBase
     public async Task<ActionResult<BulkCurrencyOperationResultDto>> BulkCreate(BulkCreateCurrencyDto input, CancellationToken cancellationToken)
         => Ok(await mediator.Send(new BulkCreateCurrencyCommand(input), cancellationToken));
 
-    [HttpPut("bulk-update")]
-    public async Task<ActionResult<BulkCurrencyOperationResultDto>> BulkUpdate(BulkUpdateCurrencyDto input, CancellationToken cancellationToken)
-        => Ok(await mediator.Send(new BulkUpdateCurrencyCommand(input), cancellationToken));
-
     [HttpPost("bulk-upsert")]
     public async Task<ActionResult<BulkCurrencyOperationResultDto>> BulkUpsert(BulkUpsertCurrencyDto input, CancellationToken cancellationToken)
         => Ok(await mediator.Send(new BulkUpsertCurrencyCommand(input), cancellationToken));

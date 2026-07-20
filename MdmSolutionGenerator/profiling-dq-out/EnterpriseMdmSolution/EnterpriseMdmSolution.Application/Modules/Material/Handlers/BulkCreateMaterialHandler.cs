@@ -1,29 +1,80 @@
-using AutoMapper;
+using System.Text.Json;
 using MediatR;
 using EnterpriseMdmSolution.Application.Modules.Material.Commands;
 using EnterpriseMdmSolution.Application.Modules.Material.DTOs;
+using EnterpriseMdmSolution.Core.DataQuality;
 using EnterpriseMdmSolution.Core.Interfaces;
-using Entity = EnterpriseMdmSolution.Core.Entities.Material;
 
 namespace EnterpriseMdmSolution.Application.Modules.Material.Handlers;
 
-public sealed class BulkCreateMaterialHandler(IRepository<Entity> repository, IMapper mapper)
-    : IRequestHandler<BulkCreateMaterialCommand, BulkMaterialOperationResultDto>
+public sealed class BulkCreateMaterialHandler(
+    IRepository<BulkOperationJob> jobRepository,
+    IRepository<BulkOperationItem> itemRepository)
+    : IRequestHandler<BulkCreateMaterialCommand, BulkMaterialJobDto>
 {
-    public async Task<BulkMaterialOperationResultDto> Handle(BulkCreateMaterialCommand request, CancellationToken cancellationToken)
+    public async Task<BulkMaterialJobDto> Handle(BulkCreateMaterialCommand request, CancellationToken cancellationToken)
     {
-        var entities = request.Input.Items.Select(mapper.Map<Entity>).ToList();
-        foreach (var entity in entities)
+        var job = new BulkOperationJob
         {
-            await repository.AddAsync(entity, cancellationToken);
+            JobId = Guid.NewGuid(),
+            BusinessObjectName = "Material",
+            EntityName = "Material",
+            Operation = "BulkCreate",
+            Status = "Queued",
+            RequestedCount = request.Input.Items.Count,
+            QueuedOn = DateTimeOffset.UtcNow,
+            TriggeredBy = string.IsNullOrWhiteSpace(request.Input.TriggeredBy) ? "system" : request.Input.TriggeredBy,
+            InputSnapshotJson = JsonSerializer.Serialize(request.Input)
+        };
+
+        await jobRepository.AddAsync(job, cancellationToken);
+
+        var sequenceNumber = 1;
+        foreach (var inputItem in request.Input.Items)
+        {
+            await itemRepository.AddAsync(new BulkOperationItem
+            {
+                ItemId = Guid.NewGuid(),
+                JobId = job.JobId,
+                SequenceNumber = sequenceNumber++,
+                Status = "Queued",
+                InputSnapshotJson = JsonSerializer.Serialize(inputItem)
+            }, cancellationToken);
         }
 
-        await repository.SaveChangesAsync(cancellationToken);
-        return new BulkMaterialOperationResultDto
-        {
-            RequestedCount = request.Input.Items.Count,
-            CreatedCount = entities.Count,
-            Items = mapper.Map<IReadOnlyList<MaterialDto>>(entities)
-        };
+        await jobRepository.SaveChangesAsync(cancellationToken);
+        var items = (await itemRepository.ListAsync(cancellationToken)).Where(x => x.JobId == job.JobId).OrderBy(x => x.SequenceNumber).ToList();
+        return MapBulkJob(job, items);
     }
+
+    private static BulkMaterialJobDto MapBulkJob(BulkOperationJob job, IReadOnlyList<BulkOperationItem> items)
+        => new()
+        {
+            JobId = job.JobId,
+            BusinessObjectName = job.BusinessObjectName,
+            EntityName = job.EntityName,
+            Operation = job.Operation,
+            Status = job.Status,
+            RequestedCount = job.RequestedCount,
+            CreatedCount = job.CreatedCount,
+            UpdatedCount = job.UpdatedCount,
+            DeletedCount = job.DeletedCount,
+            FailedCount = job.FailedCount,
+            QueuedOn = job.QueuedOn,
+            StartedOn = job.StartedOn,
+            CompletedOn = job.CompletedOn,
+            TriggeredBy = job.TriggeredBy,
+            ErrorMessage = job.ErrorMessage,
+            Items = items.Select(item => new BulkMaterialJobItemDto
+            {
+                ItemId = item.ItemId,
+                JobId = item.JobId,
+                SequenceNumber = item.SequenceNumber,
+                Status = item.Status,
+                RecordId = item.RecordId,
+                ErrorMessage = item.ErrorMessage,
+                InputSnapshotJson = item.InputSnapshotJson,
+                ResultSnapshotJson = item.ResultSnapshotJson
+            }).ToList()
+        };
 }

@@ -50,10 +50,6 @@ public sealed class CountriesController(IMediator mediator) : ControllerBase
     public async Task<ActionResult<BulkCountryOperationResultDto>> BulkCreate(BulkCreateCountryDto input, CancellationToken cancellationToken)
         => Ok(await mediator.Send(new BulkCreateCountryCommand(input), cancellationToken));
 
-    [HttpPut("bulk-update")]
-    public async Task<ActionResult<BulkCountryOperationResultDto>> BulkUpdate(BulkUpdateCountryDto input, CancellationToken cancellationToken)
-        => Ok(await mediator.Send(new BulkUpdateCountryCommand(input), cancellationToken));
-
     [HttpPost("bulk-upsert")]
     public async Task<ActionResult<BulkCountryOperationResultDto>> BulkUpsert(BulkUpsertCountryDto input, CancellationToken cancellationToken)
         => Ok(await mediator.Send(new BulkUpsertCountryCommand(input), cancellationToken));

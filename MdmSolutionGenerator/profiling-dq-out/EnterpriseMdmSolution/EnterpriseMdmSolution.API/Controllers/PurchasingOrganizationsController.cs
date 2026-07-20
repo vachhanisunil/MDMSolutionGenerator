@@ -50,10 +50,6 @@ public sealed class PurchasingOrganizationsController(IMediator mediator) : Cont
     public async Task<ActionResult<BulkPurchasingOrganizationOperationResultDto>> BulkCreate(BulkCreatePurchasingOrganizationDto input, CancellationToken cancellationToken)
         => Ok(await mediator.Send(new BulkCreatePurchasingOrganizationCommand(input), cancellationToken));
 
-    [HttpPut("bulk-update")]
-    public async Task<ActionResult<BulkPurchasingOrganizationOperationResultDto>> BulkUpdate(BulkUpdatePurchasingOrganizationDto input, CancellationToken cancellationToken)
-        => Ok(await mediator.Send(new BulkUpdatePurchasingOrganizationCommand(input), cancellationToken));
-
     [HttpPost("bulk-upsert")]
     public async Task<ActionResult<BulkPurchasingOrganizationOperationResultDto>> BulkUpsert(BulkUpsertPurchasingOrganizationDto input, CancellationToken cancellationToken)
         => Ok(await mediator.Send(new BulkUpsertPurchasingOrganizationCommand(input), cancellationToken));

@@ -53,6 +53,9 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
     public DbSet<DataQualityDrilldown> DataQualityDrilldowns => Set<DataQualityDrilldown>();
     public DbSet<DataQualityDuplicateDrilldown> DataQualityDuplicateDrilldowns => Set<DataQualityDuplicateDrilldown>();
     public DbSet<DuplicateCandidateRow> DuplicateCandidateRows => Set<DuplicateCandidateRow>();
+    public DbSet<BulkOperationJob> BulkOperationJobs => Set<BulkOperationJob>();
+    public DbSet<BulkOperationItem> BulkOperationItems => Set<BulkOperationItem>();
+
 
 
 

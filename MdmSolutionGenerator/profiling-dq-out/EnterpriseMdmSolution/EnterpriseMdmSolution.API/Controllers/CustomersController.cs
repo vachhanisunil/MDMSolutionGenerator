@@ -1,5 +1,6 @@
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.DependencyInjection;
 using EnterpriseMdmSolution.Application.Modules.Customer.Commands;
 using EnterpriseMdmSolution.Application.Modules.Customer.DTOs;
 using EnterpriseMdmSolution.Application.Modules.Customer.Queries;
@@ -8,7 +9,7 @@ namespace EnterpriseMdmSolution.API.Controllers;
 
 [ApiController]
 [Route("api/customers")]
-public sealed class CustomersController(IMediator mediator) : ControllerBase
+public sealed class CustomersController(IMediator mediator, IServiceScopeFactory serviceScopeFactory) : ControllerBase
 {
     [HttpGet("{id}")]
     public async Task<ActionResult<CustomerDto>> GetById(int id, CancellationToken cancellationToken)
@@ -47,18 +48,43 @@ public sealed class CustomersController(IMediator mediator) : ControllerBase
     }
 
     [HttpPost("bulk-create")]
-    public async Task<ActionResult<BulkCustomerOperationResultDto>> BulkCreate(BulkCreateCustomerDto input, CancellationToken cancellationToken)
-        => Ok(await mediator.Send(new BulkCreateCustomerCommand(input), cancellationToken));
-
-    [HttpPut("bulk-update")]
-    public async Task<ActionResult<BulkCustomerOperationResultDto>> BulkUpdate(BulkUpdateCustomerDto input, CancellationToken cancellationToken)
-        => Ok(await mediator.Send(new BulkUpdateCustomerCommand(input), cancellationToken));
+    public async Task<ActionResult<BulkCustomerJobDto>> BulkCreate(BulkCreateCustomerDto input, CancellationToken cancellationToken)
+    {
+        var job = await mediator.Send(new BulkCreateCustomerCommand(input), cancellationToken);
+        QueueBulkJob(job.JobId);
+        return AcceptedAtAction(nameof(GetBulkJob), new { jobId = job.JobId }, job);
+    }
 
     [HttpPost("bulk-upsert")]
-    public async Task<ActionResult<BulkCustomerOperationResultDto>> BulkUpsert(BulkUpsertCustomerDto input, CancellationToken cancellationToken)
-        => Ok(await mediator.Send(new BulkUpsertCustomerCommand(input), cancellationToken));
+    public async Task<ActionResult<BulkCustomerJobDto>> BulkUpsert(BulkUpsertCustomerDto input, CancellationToken cancellationToken)
+    {
+        var job = await mediator.Send(new BulkUpsertCustomerCommand(input), cancellationToken);
+        QueueBulkJob(job.JobId);
+        return AcceptedAtAction(nameof(GetBulkJob), new { jobId = job.JobId }, job);
+    }
 
     [HttpPost("bulk-delete")]
-    public async Task<ActionResult<BulkCustomerOperationResultDto>> BulkDelete(BulkDeleteCustomerDto input, CancellationToken cancellationToken)
-        => Ok(await mediator.Send(new BulkDeleteCustomerCommand(input), cancellationToken));
+    public async Task<ActionResult<BulkCustomerJobDto>> BulkDelete(BulkDeleteCustomerDto input, CancellationToken cancellationToken)
+    {
+        var job = await mediator.Send(new BulkDeleteCustomerCommand(input), cancellationToken);
+        QueueBulkJob(job.JobId);
+        return AcceptedAtAction(nameof(GetBulkJob), new { jobId = job.JobId }, job);
+    }
+
+    [HttpGet("bulk-jobs/{jobId:guid}")]
+    public async Task<ActionResult<BulkCustomerJobDto>> GetBulkJob(Guid jobId, CancellationToken cancellationToken)
+    {
+        var result = await mediator.Send(new GetBulkCustomerJobQuery(jobId), cancellationToken);
+        return result is null ? NotFound() : Ok(result);
+    }
+
+    private void QueueBulkJob(Guid jobId)
+    {
+        _ = Task.Run(async () =>
+        {
+            await using var scope = serviceScopeFactory.CreateAsyncScope();
+            var scopedMediator = scope.ServiceProvider.GetRequiredService<IMediator>();
+            await scopedMediator.Send(new ExecuteBulkCustomerJobCommand(jobId), CancellationToken.None);
+        }, CancellationToken.None);
+    }
 }

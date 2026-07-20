@@ -1,5 +1,6 @@
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.DependencyInjection;
 using EnterpriseMdmSolution.Application.Modules.Material.Commands;
 using EnterpriseMdmSolution.Application.Modules.Material.DTOs;
 using EnterpriseMdmSolution.Application.Modules.Material.Queries;
@@ -8,7 +9,7 @@ namespace EnterpriseMdmSolution.API.Controllers;
 
 [ApiController]
 [Route("api/materials")]
-public sealed class MaterialsController(IMediator mediator) : ControllerBase
+public sealed class MaterialsController(IMediator mediator, IServiceScopeFactory serviceScopeFactory) : ControllerBase
 {
     [HttpGet("{id}")]
     public async Task<ActionResult<MaterialDto>> GetById(int id, CancellationToken cancellationToken)
@@ -47,18 +48,43 @@ public sealed class MaterialsController(IMediator mediator) : ControllerBase
     }
 
     [HttpPost("bulk-create")]
-    public async Task<ActionResult<BulkMaterialOperationResultDto>> BulkCreate(BulkCreateMaterialDto input, CancellationToken cancellationToken)
-        => Ok(await mediator.Send(new BulkCreateMaterialCommand(input), cancellationToken));
-
-    [HttpPut("bulk-update")]
-    public async Task<ActionResult<BulkMaterialOperationResultDto>> BulkUpdate(BulkUpdateMaterialDto input, CancellationToken cancellationToken)
-        => Ok(await mediator.Send(new BulkUpdateMaterialCommand(input), cancellationToken));
+    public async Task<ActionResult<BulkMaterialJobDto>> BulkCreate(BulkCreateMaterialDto input, CancellationToken cancellationToken)
+    {
+        var job = await mediator.Send(new BulkCreateMaterialCommand(input), cancellationToken);
+        QueueBulkJob(job.JobId);
+        return AcceptedAtAction(nameof(GetBulkJob), new { jobId = job.JobId }, job);
+    }
 
     [HttpPost("bulk-upsert")]
-    public async Task<ActionResult<BulkMaterialOperationResultDto>> BulkUpsert(BulkUpsertMaterialDto input, CancellationToken cancellationToken)
-        => Ok(await mediator.Send(new BulkUpsertMaterialCommand(input), cancellationToken));
+    public async Task<ActionResult<BulkMaterialJobDto>> BulkUpsert(BulkUpsertMaterialDto input, CancellationToken cancellationToken)
+    {
+        var job = await mediator.Send(new BulkUpsertMaterialCommand(input), cancellationToken);
+        QueueBulkJob(job.JobId);
+        return AcceptedAtAction(nameof(GetBulkJob), new { jobId = job.JobId }, job);
+    }
 
     [HttpPost("bulk-delete")]
-    public async Task<ActionResult<BulkMaterialOperationResultDto>> BulkDelete(BulkDeleteMaterialDto input, CancellationToken cancellationToken)
-        => Ok(await mediator.Send(new BulkDeleteMaterialCommand(input), cancellationToken));
+    public async Task<ActionResult<BulkMaterialJobDto>> BulkDelete(BulkDeleteMaterialDto input, CancellationToken cancellationToken)
+    {
+        var job = await mediator.Send(new BulkDeleteMaterialCommand(input), cancellationToken);
+        QueueBulkJob(job.JobId);
+        return AcceptedAtAction(nameof(GetBulkJob), new { jobId = job.JobId }, job);
+    }
+
+    [HttpGet("bulk-jobs/{jobId:guid}")]
+    public async Task<ActionResult<BulkMaterialJobDto>> GetBulkJob(Guid jobId, CancellationToken cancellationToken)
+    {
+        var result = await mediator.Send(new GetBulkMaterialJobQuery(jobId), cancellationToken);
+        return result is null ? NotFound() : Ok(result);
+    }
+
+    private void QueueBulkJob(Guid jobId)
+    {
+        _ = Task.Run(async () =>
+        {
+            await using var scope = serviceScopeFactory.CreateAsyncScope();
+            var scopedMediator = scope.ServiceProvider.GetRequiredService<IMediator>();
+            await scopedMediator.Send(new ExecuteBulkMaterialJobCommand(jobId), CancellationToken.None);
+        }, CancellationToken.None);
+    }
 }

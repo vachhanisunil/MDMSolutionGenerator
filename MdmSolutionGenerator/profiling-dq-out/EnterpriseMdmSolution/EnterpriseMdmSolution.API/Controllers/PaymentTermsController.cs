@@ -50,10 +50,6 @@ public sealed class PaymentTermsController(IMediator mediator) : ControllerBase
     public async Task<ActionResult<BulkPaymentTermOperationResultDto>> BulkCreate(BulkCreatePaymentTermDto input, CancellationToken cancellationToken)
         => Ok(await mediator.Send(new BulkCreatePaymentTermCommand(input), cancellationToken));
 
-    [HttpPut("bulk-update")]
-    public async Task<ActionResult<BulkPaymentTermOperationResultDto>> BulkUpdate(BulkUpdatePaymentTermDto input, CancellationToken cancellationToken)
-        => Ok(await mediator.Send(new BulkUpdatePaymentTermCommand(input), cancellationToken));
-
     [HttpPost("bulk-upsert")]
     public async Task<ActionResult<BulkPaymentTermOperationResultDto>> BulkUpsert(BulkUpsertPaymentTermDto input, CancellationToken cancellationToken)
         => Ok(await mediator.Send(new BulkUpsertPaymentTermCommand(input), cancellationToken));

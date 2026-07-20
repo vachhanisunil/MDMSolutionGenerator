@@ -50,10 +50,6 @@ public sealed class UnitOfMeasuresController(IMediator mediator) : ControllerBas
     public async Task<ActionResult<BulkUnitOfMeasureOperationResultDto>> BulkCreate(BulkCreateUnitOfMeasureDto input, CancellationToken cancellationToken)
         => Ok(await mediator.Send(new BulkCreateUnitOfMeasureCommand(input), cancellationToken));
 
-    [HttpPut("bulk-update")]
-    public async Task<ActionResult<BulkUnitOfMeasureOperationResultDto>> BulkUpdate(BulkUpdateUnitOfMeasureDto input, CancellationToken cancellationToken)
-        => Ok(await mediator.Send(new BulkUpdateUnitOfMeasureCommand(input), cancellationToken));
-
     [HttpPost("bulk-upsert")]
     public async Task<ActionResult<BulkUnitOfMeasureOperationResultDto>> BulkUpsert(BulkUpsertUnitOfMeasureDto input, CancellationToken cancellationToken)
         => Ok(await mediator.Send(new BulkUpsertUnitOfMeasureCommand(input), cancellationToken));

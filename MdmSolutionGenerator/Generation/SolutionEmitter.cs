@@ -59,6 +59,8 @@ internal sealed class SolutionEmitter(MetadataDocument metadata, string solution
         yield return File($"{solutionName}.Infrastructure/Persistence/Configurations/DataQualityRuleSummaryConfiguration.cs", EmitAnalysisConfiguration("DataQualityRuleSummary", "RuleSummaryId", "DataQualityRuleSummaries"));
         yield return File($"{solutionName}.Infrastructure/Persistence/Configurations/DataQualityDrilldownConfiguration.cs", EmitAnalysisConfiguration("DataQualityDrilldown", "DrilldownId", "DataQualityDrilldowns"));
         yield return File($"{solutionName}.Infrastructure/Persistence/Configurations/DataQualityDuplicateDrilldownConfiguration.cs", EmitAnalysisConfiguration("DataQualityDuplicateDrilldown", "DuplicateDrilldownId", "DataQualityDuplicateDrilldowns"));
+        yield return File($"{solutionName}.Infrastructure/Persistence/Configurations/BulkOperationJobConfiguration.cs", EmitAnalysisConfiguration("BulkOperationJob", "JobId", "BulkOperationJobs"));
+        yield return File($"{solutionName}.Infrastructure/Persistence/Configurations/BulkOperationItemConfiguration.cs", EmitAnalysisConfiguration("BulkOperationItem", "ItemId", "BulkOperationItems"));
         yield return File($"{solutionName}.Infrastructure/Persistence/Configurations/DuplicateCandidateRowConfiguration.cs", EmitKeylessAnalysisConfiguration("DuplicateCandidateRow"));
         foreach (var entity in metadata.Entities)
         {
@@ -420,6 +422,46 @@ public sealed class DataQualityDuplicateDrilldown : {{_rootNamespace}}.Core.Enti
 }
 """);
 
+        yield return File($"{solutionName}.Core/DataQuality/BulkOperationJob.cs", $$"""
+namespace {{_rootNamespace}}.Core.DataQuality;
+
+public sealed class BulkOperationJob : {{_rootNamespace}}.Core.Entities.BaseEntity
+{
+    public Guid JobId { get; set; }
+    public string BusinessObjectName { get; set; } = string.Empty;
+    public string EntityName { get; set; } = string.Empty;
+    public string Operation { get; set; } = string.Empty;
+    public string Status { get; set; } = string.Empty;
+    public int RequestedCount { get; set; }
+    public int CreatedCount { get; set; }
+    public int UpdatedCount { get; set; }
+    public int DeletedCount { get; set; }
+    public int FailedCount { get; set; }
+    public DateTimeOffset QueuedOn { get; set; }
+    public DateTimeOffset? StartedOn { get; set; }
+    public DateTimeOffset? CompletedOn { get; set; }
+    public string TriggeredBy { get; set; } = string.Empty;
+    public string InputSnapshotJson { get; set; } = string.Empty;
+    public string? ErrorMessage { get; set; }
+}
+""");
+
+        yield return File($"{solutionName}.Core/DataQuality/BulkOperationItem.cs", $$"""
+namespace {{_rootNamespace}}.Core.DataQuality;
+
+public sealed class BulkOperationItem : {{_rootNamespace}}.Core.Entities.BaseEntity
+{
+    public Guid ItemId { get; set; }
+    public Guid JobId { get; set; }
+    public int SequenceNumber { get; set; }
+    public string Status { get; set; } = string.Empty;
+    public string? RecordId { get; set; }
+    public string? ErrorMessage { get; set; }
+    public string InputSnapshotJson { get; set; } = string.Empty;
+    public string ResultSnapshotJson { get; set; } = string.Empty;
+}
+""");
+
         yield return File($"{solutionName}.Core/DataQuality/DuplicateCandidateRow.cs", $$"""
 namespace {{_rootNamespace}}.Core.DataQuality;
 
@@ -608,9 +650,13 @@ public static class DependencyInjection
         if (emitBulk)
         {
             yield return File($"{module}/Commands/BulkCreate{entity.Name}Command.cs", EmitBulkCreateCommand(entity));
-            yield return File($"{module}/Commands/BulkUpdate{entity.Name}Command.cs", EmitBulkUpdateCommand(entity));
             yield return File($"{module}/Commands/BulkUpsert{entity.Name}Command.cs", EmitBulkUpsertCommand(entity));
             yield return File($"{module}/Commands/BulkDelete{entity.Name}Command.cs", EmitBulkDeleteCommand(entity));
+            if (IsBusinessObjectRootEntity(entity))
+            {
+                yield return File($"{module}/Commands/ExecuteBulk{entity.Name}JobCommand.cs", EmitExecuteBulkJobCommand(entity));
+                yield return File($"{module}/Queries/GetBulk{entity.Name}JobQuery.cs", EmitGetBulkJobQuery(entity));
+            }
         }
         yield return File($"{module}/Queries/Get{entity.Name}ByIdQuery.cs", EmitGetByIdQuery(entity));
         yield return File($"{module}/Queries/Search{Naming.Plural(entity.Name)}Query.cs", EmitSearchQuery(entity));
@@ -620,9 +666,13 @@ public static class DependencyInjection
         if (emitBulk)
         {
             yield return File($"{module}/Handlers/BulkCreate{entity.Name}Handler.cs", EmitBulkCreateHandler(entity));
-            yield return File($"{module}/Handlers/BulkUpdate{entity.Name}Handler.cs", EmitBulkUpdateHandler(entity));
             yield return File($"{module}/Handlers/BulkUpsert{entity.Name}Handler.cs", EmitBulkUpsertHandler(entity));
             yield return File($"{module}/Handlers/BulkDelete{entity.Name}Handler.cs", EmitBulkDeleteHandler(entity));
+            if (IsBusinessObjectRootEntity(entity))
+            {
+                yield return File($"{module}/Handlers/ExecuteBulk{entity.Name}JobHandler.cs", EmitExecuteBulkJobHandler(entity));
+                yield return File($"{module}/Handlers/GetBulk{entity.Name}JobHandler.cs", EmitGetBulkJobHandler(entity));
+            }
         }
         yield return File($"{module}/Handlers/Get{entity.Name}ByIdHandler.cs", EmitGetByIdHandler(entity));
         yield return File($"{module}/Handlers/Search{Naming.Plural(entity.Name)}Handler.cs", EmitSearchHandler(entity));
@@ -631,7 +681,6 @@ public static class DependencyInjection
         if (emitBulk)
         {
             yield return File($"{module}/Validators/BulkCreate{entity.Name}CommandValidator.cs", EmitBulkValidator(entity, "BulkCreate", "Create"));
-            yield return File($"{module}/Validators/BulkUpdate{entity.Name}CommandValidator.cs", EmitBulkValidator(entity, "BulkUpdate", "Update"));
             yield return File($"{module}/Validators/BulkUpsert{entity.Name}CommandValidator.cs", EmitBulkValidator(entity, "BulkUpsert", "Update"));
             yield return File($"{module}/Validators/BulkDelete{entity.Name}CommandValidator.cs", EmitBulkDeleteValidator(entity));
         }
@@ -682,21 +731,19 @@ namespace {{_rootNamespace}}.Application.Modules.{{entity.Name}}.DTOs;
 public sealed class BulkCreate{{entity.Name}}Dto
 {
     public List<Create{{entity.Name}}Dto> Items { get; init; } = [];
-}
-
-public sealed class BulkUpdate{{entity.Name}}Dto
-{
-    public List<Update{{entity.Name}}Dto> Items { get; init; } = [];
+    public string TriggeredBy { get; init; } = "system";
 }
 
 public sealed class BulkUpsert{{entity.Name}}Dto
 {
     public List<Update{{entity.Name}}Dto> Items { get; init; } = [];
+    public string TriggeredBy { get; init; } = "system";
 }
 
 public sealed class BulkDelete{{entity.Name}}Dto
 {
     public List<{{KeyType(entity)}}> Ids { get; init; } = [];
+    public string TriggeredBy { get; init; } = "system";
 }
 
 public sealed class Bulk{{entity.Name}}OperationResultDto
@@ -708,6 +755,38 @@ public sealed class Bulk{{entity.Name}}OperationResultDto
     public int NotFoundCount => NotFoundIds.Count;
     public List<{{KeyType(entity)}}> NotFoundIds { get; init; } = [];
     public IReadOnlyList<{{entity.Name}}Dto> Items { get; init; } = [];
+}
+
+public sealed class Bulk{{entity.Name}}JobDto
+{
+    public Guid JobId { get; init; }
+    public string BusinessObjectName { get; init; } = string.Empty;
+    public string EntityName { get; init; } = string.Empty;
+    public string Operation { get; init; } = string.Empty;
+    public string Status { get; init; } = string.Empty;
+    public int RequestedCount { get; init; }
+    public int CreatedCount { get; init; }
+    public int UpdatedCount { get; init; }
+    public int DeletedCount { get; init; }
+    public int FailedCount { get; init; }
+    public DateTimeOffset QueuedOn { get; init; }
+    public DateTimeOffset? StartedOn { get; init; }
+    public DateTimeOffset? CompletedOn { get; init; }
+    public string TriggeredBy { get; init; } = string.Empty;
+    public string? ErrorMessage { get; init; }
+    public IReadOnlyList<Bulk{{entity.Name}}JobItemDto> Items { get; init; } = [];
+}
+
+public sealed class Bulk{{entity.Name}}JobItemDto
+{
+    public Guid ItemId { get; init; }
+    public Guid JobId { get; init; }
+    public int SequenceNumber { get; init; }
+    public string Status { get; init; } = string.Empty;
+    public string? RecordId { get; init; }
+    public string? ErrorMessage { get; init; }
+    public string InputSnapshotJson { get; init; } = string.Empty;
+    public string ResultSnapshotJson { get; init; } = string.Empty;
 }
 """;
 
@@ -1458,16 +1537,7 @@ using {{_rootNamespace}}.Application.Modules.{{entity.Name}}.DTOs;
 
 namespace {{_rootNamespace}}.Application.Modules.{{entity.Name}}.Commands;
 
-public sealed record BulkCreate{{entity.Name}}Command(BulkCreate{{entity.Name}}Dto Input) : IRequest<Bulk{{entity.Name}}OperationResultDto>;
-""";
-
-    private string EmitBulkUpdateCommand(EntityDefinition entity) => $$"""
-using MediatR;
-using {{_rootNamespace}}.Application.Modules.{{entity.Name}}.DTOs;
-
-namespace {{_rootNamespace}}.Application.Modules.{{entity.Name}}.Commands;
-
-public sealed record BulkUpdate{{entity.Name}}Command(BulkUpdate{{entity.Name}}Dto Input) : IRequest<Bulk{{entity.Name}}OperationResultDto>;
+public sealed record BulkCreate{{entity.Name}}Command(BulkCreate{{entity.Name}}Dto Input) : IRequest<{{BulkCommandReturnType(entity)}}>;
 """;
 
     private string EmitBulkUpsertCommand(EntityDefinition entity) => $$"""
@@ -1476,7 +1546,7 @@ using {{_rootNamespace}}.Application.Modules.{{entity.Name}}.DTOs;
 
 namespace {{_rootNamespace}}.Application.Modules.{{entity.Name}}.Commands;
 
-public sealed record BulkUpsert{{entity.Name}}Command(BulkUpsert{{entity.Name}}Dto Input) : IRequest<Bulk{{entity.Name}}OperationResultDto>;
+public sealed record BulkUpsert{{entity.Name}}Command(BulkUpsert{{entity.Name}}Dto Input) : IRequest<{{BulkCommandReturnType(entity)}}>;
 """;
 
     private string EmitBulkDeleteCommand(EntityDefinition entity) => $$"""
@@ -1485,7 +1555,24 @@ using {{_rootNamespace}}.Application.Modules.{{entity.Name}}.DTOs;
 
 namespace {{_rootNamespace}}.Application.Modules.{{entity.Name}}.Commands;
 
-public sealed record BulkDelete{{entity.Name}}Command(BulkDelete{{entity.Name}}Dto Input) : IRequest<Bulk{{entity.Name}}OperationResultDto>;
+public sealed record BulkDelete{{entity.Name}}Command(BulkDelete{{entity.Name}}Dto Input) : IRequest<{{BulkCommandReturnType(entity)}}>;
+""";
+
+    private string EmitExecuteBulkJobCommand(EntityDefinition entity) => $$"""
+using MediatR;
+
+namespace {{_rootNamespace}}.Application.Modules.{{entity.Name}}.Commands;
+
+public sealed record ExecuteBulk{{entity.Name}}JobCommand(Guid JobId) : IRequest;
+""";
+
+    private string EmitGetBulkJobQuery(EntityDefinition entity) => $$"""
+using MediatR;
+using {{_rootNamespace}}.Application.Modules.{{entity.Name}}.DTOs;
+
+namespace {{_rootNamespace}}.Application.Modules.{{entity.Name}}.Queries;
+
+public sealed record GetBulk{{entity.Name}}JobQuery(Guid JobId) : IRequest<Bulk{{entity.Name}}JobDto?>;
 """;
 
     private string EmitGetByIdQuery(EntityDefinition entity) => $$"""
@@ -1586,7 +1673,14 @@ public sealed class Delete{{entity.Name}}Handler(IRepository<Entity> repository)
 }
 """;
 
-    private string EmitBulkCreateHandler(EntityDefinition entity) => $$"""
+    private string EmitBulkCreateHandler(EntityDefinition entity)
+    {
+        if (IsBusinessObjectRootEntity(entity))
+        {
+            return EmitQueueBulkJobHandler(entity, "Create", $"BulkCreate{entity.Name}Dto", "Items", "request.Input.Items");
+        }
+
+        return $$"""
 using AutoMapper;
 using MediatR;
 using {{_rootNamespace}}.Application.Modules.{{entity.Name}}.Commands;
@@ -1617,53 +1711,16 @@ public sealed class BulkCreate{{entity.Name}}Handler(IRepository<Entity> reposit
     }
 }
 """;
+    }
 
-    private string EmitBulkUpdateHandler(EntityDefinition entity) => $$"""
-using AutoMapper;
-using MediatR;
-using {{_rootNamespace}}.Application.Modules.{{entity.Name}}.Commands;
-using {{_rootNamespace}}.Application.Modules.{{entity.Name}}.DTOs;
-using {{_rootNamespace}}.Core.Interfaces;
-using Entity = {{_rootNamespace}}.Core.Entities.{{entity.Name}};
-
-namespace {{_rootNamespace}}.Application.Modules.{{entity.Name}}.Handlers;
-
-public sealed class BulkUpdate{{entity.Name}}Handler(IRepository<Entity> repository, IMapper mapper)
-    : IRequestHandler<BulkUpdate{{entity.Name}}Command, Bulk{{entity.Name}}OperationResultDto>
-{
-    public async Task<Bulk{{entity.Name}}OperationResultDto> Handle(BulkUpdate{{entity.Name}}Command request, CancellationToken cancellationToken)
+    private string EmitBulkUpsertHandler(EntityDefinition entity)
     {
-        var updatedEntities = new List<Entity>();
-        var notFoundIds = new List<{{KeyType(entity)}}>();
-
-        foreach (var requestedItem in request.Input.Items)
+        if (IsBusinessObjectRootEntity(entity))
         {
-            var existingEntity = await repository.GetByIdAsync(requestedItem.{{KeyProperty(entity).Name}}, {{AggregateIncludesExpression(entity)}}, cancellationToken);
-            if (existingEntity is null)
-            {
-                notFoundIds.Add(requestedItem.{{KeyProperty(entity).Name}});
-                continue;
-            }
-
-            mapper.Map(requestedItem, existingEntity);
-{{AggregateSyncCollections(entity, "existingEntity", "requestedItem")}}
-            repository.Update(existingEntity);
-            updatedEntities.Add(existingEntity);
+            return EmitQueueBulkJobHandler(entity, "Upsert", $"BulkUpsert{entity.Name}Dto", "Items", "request.Input.Items");
         }
 
-        await repository.SaveChangesAsync(cancellationToken);
-        return new Bulk{{entity.Name}}OperationResultDto
-        {
-            RequestedCount = request.Input.Items.Count,
-            UpdatedCount = updatedEntities.Count,
-            NotFoundIds = notFoundIds,
-            Items = mapper.Map<IReadOnlyList<{{entity.Name}}Dto>>(updatedEntities)
-        };
-    }
-}
-""";
-
-    private string EmitBulkUpsertHandler(EntityDefinition entity) => $$"""
+        return $$"""
 using AutoMapper;
 using MediatR;
 using {{_rootNamespace}}.Application.Modules.{{entity.Name}}.Commands;
@@ -1718,8 +1775,16 @@ public sealed class BulkUpsert{{entity.Name}}Handler(IRepository<Entity> reposit
     }
 }
 """;
+    }
 
-    private string EmitBulkDeleteHandler(EntityDefinition entity) => $$"""
+    private string EmitBulkDeleteHandler(EntityDefinition entity)
+    {
+        if (IsBusinessObjectRootEntity(entity))
+        {
+            return EmitQueueBulkJobHandler(entity, "Delete", $"BulkDelete{entity.Name}Dto", "Ids", "request.Input.Ids");
+        }
+
+        return $$"""
 using MediatR;
 using {{_rootNamespace}}.Application.Modules.{{entity.Name}}.Commands;
 using {{_rootNamespace}}.Application.Modules.{{entity.Name}}.DTOs;
@@ -1755,6 +1820,329 @@ public sealed class BulkDelete{{entity.Name}}Handler(IRepository<Entity> reposit
             RequestedCount = request.Input.Ids.Count,
             DeletedCount = deletedCount,
             NotFoundIds = notFoundIds
+        };
+    }
+}
+""";
+    }
+
+    private string EmitQueueBulkJobHandler(EntityDefinition entity, string operation, string inputDtoType, string collectionProperty, string itemSourceExpression) => $$"""
+using System.Text.Json;
+using MediatR;
+using {{_rootNamespace}}.Application.Modules.{{entity.Name}}.Commands;
+using {{_rootNamespace}}.Application.Modules.{{entity.Name}}.DTOs;
+using {{_rootNamespace}}.Core.DataQuality;
+using {{_rootNamespace}}.Core.Interfaces;
+
+namespace {{_rootNamespace}}.Application.Modules.{{entity.Name}}.Handlers;
+
+public sealed class Bulk{{operation}}{{entity.Name}}Handler(
+    IRepository<BulkOperationJob> jobRepository,
+    IRepository<BulkOperationItem> itemRepository)
+    : IRequestHandler<Bulk{{operation}}{{entity.Name}}Command, Bulk{{entity.Name}}JobDto>
+{
+    public async Task<Bulk{{entity.Name}}JobDto> Handle(Bulk{{operation}}{{entity.Name}}Command request, CancellationToken cancellationToken)
+    {
+        var job = new BulkOperationJob
+        {
+            JobId = Guid.NewGuid(),
+            BusinessObjectName = "{{entity.Name}}",
+            EntityName = "{{entity.Name}}",
+            Operation = "Bulk{{operation}}",
+            Status = "Queued",
+            RequestedCount = request.Input.{{collectionProperty}}.Count,
+            QueuedOn = DateTimeOffset.UtcNow,
+            TriggeredBy = string.IsNullOrWhiteSpace(request.Input.TriggeredBy) ? "system" : request.Input.TriggeredBy,
+            InputSnapshotJson = JsonSerializer.Serialize(request.Input)
+        };
+
+        await jobRepository.AddAsync(job, cancellationToken);
+
+        var sequenceNumber = 1;
+        foreach (var inputItem in {{itemSourceExpression}})
+        {
+            await itemRepository.AddAsync(new BulkOperationItem
+            {
+                ItemId = Guid.NewGuid(),
+                JobId = job.JobId,
+                SequenceNumber = sequenceNumber++,
+                Status = "Queued",
+                InputSnapshotJson = JsonSerializer.Serialize(inputItem)
+            }, cancellationToken);
+        }
+
+        await jobRepository.SaveChangesAsync(cancellationToken);
+        var items = (await itemRepository.ListAsync(cancellationToken)).Where(x => x.JobId == job.JobId).OrderBy(x => x.SequenceNumber).ToList();
+        return MapBulkJob(job, items);
+    }
+
+    private static Bulk{{entity.Name}}JobDto MapBulkJob(BulkOperationJob job, IReadOnlyList<BulkOperationItem> items)
+        => new()
+        {
+            JobId = job.JobId,
+            BusinessObjectName = job.BusinessObjectName,
+            EntityName = job.EntityName,
+            Operation = job.Operation,
+            Status = job.Status,
+            RequestedCount = job.RequestedCount,
+            CreatedCount = job.CreatedCount,
+            UpdatedCount = job.UpdatedCount,
+            DeletedCount = job.DeletedCount,
+            FailedCount = job.FailedCount,
+            QueuedOn = job.QueuedOn,
+            StartedOn = job.StartedOn,
+            CompletedOn = job.CompletedOn,
+            TriggeredBy = job.TriggeredBy,
+            ErrorMessage = job.ErrorMessage,
+            Items = items.Select(item => new Bulk{{entity.Name}}JobItemDto
+            {
+                ItemId = item.ItemId,
+                JobId = item.JobId,
+                SequenceNumber = item.SequenceNumber,
+                Status = item.Status,
+                RecordId = item.RecordId,
+                ErrorMessage = item.ErrorMessage,
+                InputSnapshotJson = item.InputSnapshotJson,
+                ResultSnapshotJson = item.ResultSnapshotJson
+            }).ToList()
+        };
+}
+""";
+
+    private string EmitExecuteBulkJobHandler(EntityDefinition entity) => $$"""
+using System.Text.Json;
+using AutoMapper;
+using MediatR;
+using {{_rootNamespace}}.Application.Modules.{{entity.Name}}.Commands;
+using {{_rootNamespace}}.Application.Modules.{{entity.Name}}.DTOs;
+using {{_rootNamespace}}.Core.DataQuality;
+using {{_rootNamespace}}.Core.Interfaces;
+using Entity = {{_rootNamespace}}.Core.Entities.{{entity.Name}};
+
+namespace {{_rootNamespace}}.Application.Modules.{{entity.Name}}.Handlers;
+
+public sealed class ExecuteBulk{{entity.Name}}JobHandler(
+    IRepository<BulkOperationJob> jobRepository,
+    IRepository<BulkOperationItem> itemRepository,
+    IRepository<Entity> repository,
+    IMapper mapper)
+    : IRequestHandler<ExecuteBulk{{entity.Name}}JobCommand>
+{
+    public async Task Handle(ExecuteBulk{{entity.Name}}JobCommand request, CancellationToken cancellationToken)
+    {
+        var job = await jobRepository.GetByIdAsync(request.JobId, cancellationToken);
+        if (job is null || job.BusinessObjectName != "{{entity.Name}}")
+        {
+            return;
+        }
+
+        var items = (await itemRepository.ListAsync(cancellationToken))
+            .Where(x => x.JobId == job.JobId)
+            .OrderBy(x => x.SequenceNumber)
+            .ToList();
+
+        try
+        {
+            job.Status = "Running";
+            job.StartedOn = DateTimeOffset.UtcNow;
+            jobRepository.Update(job);
+            await jobRepository.SaveChangesAsync(cancellationToken);
+
+            switch (job.Operation)
+            {
+                case "BulkCreate":
+                    await ExecuteCreateAsync(job, items, cancellationToken);
+                    break;
+                case "BulkUpsert":
+                    await ExecuteUpsertAsync(job, items, cancellationToken);
+                    break;
+                case "BulkDelete":
+                    await ExecuteDeleteAsync(job, items, cancellationToken);
+                    break;
+                default:
+                    throw new InvalidOperationException($"Unsupported bulk operation '{job.Operation}'.");
+            }
+
+            job.Status = job.FailedCount == 0 ? "Completed" : "CompletedWithErrors";
+            job.CompletedOn = DateTimeOffset.UtcNow;
+            jobRepository.Update(job);
+            await jobRepository.SaveChangesAsync(cancellationToken);
+        }
+        catch (Exception exception)
+        {
+            job.Status = "Failed";
+            job.ErrorMessage = exception.Message;
+            job.CompletedOn = DateTimeOffset.UtcNow;
+            jobRepository.Update(job);
+            await jobRepository.SaveChangesAsync(CancellationToken.None);
+        }
+    }
+
+    private async Task ExecuteCreateAsync(BulkOperationJob job, IReadOnlyList<BulkOperationItem> jobItems, CancellationToken cancellationToken)
+    {
+        foreach (var jobItem in jobItems)
+        {
+            try
+            {
+                var input = JsonSerializer.Deserialize<Create{{entity.Name}}Dto>(jobItem.InputSnapshotJson) ?? throw new InvalidOperationException("Bulk item payload is invalid.");
+                var entity = mapper.Map<Entity>(input);
+                await repository.AddAsync(entity, cancellationToken);
+                await repository.SaveChangesAsync(cancellationToken);
+                job.CreatedCount++;
+                MarkSucceeded(jobItem, entity);
+            }
+            catch (Exception exception)
+            {
+                MarkFailed(job, jobItem, exception);
+            }
+        }
+    }
+
+    private async Task ExecuteUpsertAsync(BulkOperationJob job, IReadOnlyList<BulkOperationItem> jobItems, CancellationToken cancellationToken)
+    {
+        foreach (var jobItem in jobItems)
+        {
+            try
+            {
+                var input = JsonSerializer.Deserialize<Update{{entity.Name}}Dto>(jobItem.InputSnapshotJson) ?? throw new InvalidOperationException("Bulk item payload is invalid.");
+                Entity? existingEntity = null;
+                if (!EqualityComparer<{{KeyType(entity)}}>.Default.Equals(input.{{KeyProperty(entity).Name}}, {{DefaultKeyLiteral(KeyProperty(entity))}}))
+                {
+                    existingEntity = await repository.GetByIdAsync(input.{{KeyProperty(entity).Name}}, {{AggregateIncludesExpression(entity)}}, cancellationToken);
+                }
+
+                if (existingEntity is null)
+                {
+                    var newEntity = mapper.Map<Entity>(input);
+{{AddAggregateChildCollections(entity, "newEntity", "input")}}
+                    await repository.AddAsync(newEntity, cancellationToken);
+                    await repository.SaveChangesAsync(cancellationToken);
+                    job.CreatedCount++;
+                    MarkSucceeded(jobItem, newEntity);
+                    continue;
+                }
+
+                mapper.Map(input, existingEntity);
+{{AggregateSyncCollections(entity, "existingEntity", "input")}}
+                repository.Update(existingEntity);
+                await repository.SaveChangesAsync(cancellationToken);
+                job.UpdatedCount++;
+                MarkSucceeded(jobItem, existingEntity);
+            }
+            catch (Exception exception)
+            {
+                MarkFailed(job, jobItem, exception);
+            }
+        }
+    }
+
+    private async Task ExecuteDeleteAsync(BulkOperationJob job, IReadOnlyList<BulkOperationItem> jobItems, CancellationToken cancellationToken)
+    {
+        foreach (var jobItem in jobItems)
+        {
+            try
+            {
+                var id = JsonSerializer.Deserialize<{{KeyType(entity)}}>(jobItem.InputSnapshotJson);
+                var entity = await repository.GetByIdAsync(id!, cancellationToken);
+                if (entity is null)
+                {
+                    MarkNotFound(job, jobItem, id.ToString());
+                    continue;
+                }
+
+                repository.Delete(entity);
+                await repository.SaveChangesAsync(cancellationToken);
+                job.DeletedCount++;
+                jobItem.Status = "Succeeded";
+                jobItem.RecordId = id.ToString();
+            }
+            catch (Exception exception)
+            {
+                MarkFailed(job, jobItem, exception);
+            }
+        }
+    }
+
+    private void MarkSucceeded(BulkOperationItem jobItem, Entity entity)
+    {
+        jobItem.Status = "Succeeded";
+        jobItem.RecordId = entity.{{KeyProperty(entity).Name}}.ToString();
+        jobItem.ResultSnapshotJson = JsonSerializer.Serialize(mapper.Map<{{entity.Name}}Dto>(entity));
+        itemRepository.Update(jobItem);
+    }
+
+    private static void MarkNotFound(BulkOperationJob job, BulkOperationItem jobItem, string? recordId)
+    {
+        job.FailedCount++;
+        jobItem.Status = "NotFound";
+        jobItem.RecordId = recordId;
+        jobItem.ErrorMessage = "Record was not found.";
+    }
+
+    private static void MarkFailed(BulkOperationJob job, BulkOperationItem jobItem, Exception exception)
+    {
+        job.FailedCount++;
+        jobItem.Status = "Failed";
+        jobItem.ErrorMessage = exception.Message;
+    }
+}
+""";
+
+    private string EmitGetBulkJobHandler(EntityDefinition entity) => $$"""
+using MediatR;
+using {{_rootNamespace}}.Application.Modules.{{entity.Name}}.DTOs;
+using {{_rootNamespace}}.Application.Modules.{{entity.Name}}.Queries;
+using {{_rootNamespace}}.Core.DataQuality;
+using {{_rootNamespace}}.Core.Interfaces;
+
+namespace {{_rootNamespace}}.Application.Modules.{{entity.Name}}.Handlers;
+
+public sealed class GetBulk{{entity.Name}}JobHandler(
+    IRepository<BulkOperationJob> jobRepository,
+    IRepository<BulkOperationItem> itemRepository)
+    : IRequestHandler<GetBulk{{entity.Name}}JobQuery, Bulk{{entity.Name}}JobDto?>
+{
+    public async Task<Bulk{{entity.Name}}JobDto?> Handle(GetBulk{{entity.Name}}JobQuery request, CancellationToken cancellationToken)
+    {
+        var job = await jobRepository.GetByIdAsync(request.JobId, cancellationToken);
+        if (job is null || job.BusinessObjectName != "{{entity.Name}}")
+        {
+            return null;
+        }
+
+        var items = (await itemRepository.ListAsync(cancellationToken))
+            .Where(x => x.JobId == job.JobId)
+            .OrderBy(x => x.SequenceNumber)
+            .ToList();
+
+        return new Bulk{{entity.Name}}JobDto
+        {
+            JobId = job.JobId,
+            BusinessObjectName = job.BusinessObjectName,
+            EntityName = job.EntityName,
+            Operation = job.Operation,
+            Status = job.Status,
+            RequestedCount = job.RequestedCount,
+            CreatedCount = job.CreatedCount,
+            UpdatedCount = job.UpdatedCount,
+            DeletedCount = job.DeletedCount,
+            FailedCount = job.FailedCount,
+            QueuedOn = job.QueuedOn,
+            StartedOn = job.StartedOn,
+            CompletedOn = job.CompletedOn,
+            TriggeredBy = job.TriggeredBy,
+            ErrorMessage = job.ErrorMessage,
+            Items = items.Select(item => new Bulk{{entity.Name}}JobItemDto
+            {
+                ItemId = item.ItemId,
+                JobId = item.JobId,
+                SequenceNumber = item.SequenceNumber,
+                Status = item.Status,
+                RecordId = item.RecordId,
+                ErrorMessage = item.ErrorMessage,
+                InputSnapshotJson = item.InputSnapshotJson,
+                ResultSnapshotJson = item.ResultSnapshotJson
+            }).ToList()
         };
     }
 }
@@ -1864,20 +2252,12 @@ public sealed class Search{{Naming.Plural(entity.Name)}}Handler(IRepository<Enti
         builder.AppendLine("            .NotEmpty();");
         builder.AppendLine();
 
-        var hasItemRules = commandPrefix.Equals("BulkUpdate", StringComparison.OrdinalIgnoreCase)
-            || entity.Properties.Any(property => !IsKey(entity, property) && RulesFor(property).Count > 0);
+        var hasItemRules = entity.Properties.Any(property => !IsKey(entity, property) && RulesFor(property).Count > 0);
 
         if (hasItemRules)
         {
             builder.AppendLine("        RuleForEach(x => x.Input.Items).ChildRules(item =>");
             builder.AppendLine("        {");
-            if (commandPrefix.Equals("BulkUpdate", StringComparison.OrdinalIgnoreCase))
-            {
-                builder.AppendLine($"            item.RuleFor(x => x.{KeyProperty(entity).Name})");
-                builder.AppendLine($"                .NotEqual({DefaultKeyLiteral(KeyProperty(entity))});");
-                builder.AppendLine();
-            }
-
             foreach (var property in entity.Properties.Where(p => !IsKey(entity, p)))
             {
                 var rules = RulesFor(property);
@@ -1935,6 +2315,8 @@ public sealed class BulkDelete{{entity.Name}}CommandValidator : AbstractValidato
             "    public DbSet<DataQualityRuleSummary> DataQualityRuleSummaries => Set<DataQualityRuleSummary>();",
             "    public DbSet<DataQualityDrilldown> DataQualityDrilldowns => Set<DataQualityDrilldown>();",
             "    public DbSet<DataQualityDuplicateDrilldown> DataQualityDuplicateDrilldowns => Set<DataQualityDuplicateDrilldown>();",
+            "    public DbSet<BulkOperationJob> BulkOperationJobs => Set<BulkOperationJob>();",
+            "    public DbSet<BulkOperationItem> BulkOperationItems => Set<BulkOperationItem>();",
             "    public DbSet<DuplicateCandidateRow> DuplicateCandidateRows => Set<DuplicateCandidateRow>();"
         };
         var sets = string.Join(Environment.NewLine, entitySets.Concat(analysisSets));
@@ -2348,16 +2730,60 @@ public sealed class ExceptionHandlingMiddleware(RequestDelegate next, ILogger<Ex
     private string EmitController(EntityDefinition entity)
     {
         var plural = Naming.Plural(entity.Name).ToLowerInvariant();
-        var bulkActions = IsBulkApiEntity(entity)
-            ? $$"""
+        var isBusinessObjectRoot = IsBusinessObjectRootEntity(entity);
+        var controllerServices = isBusinessObjectRoot ? "IMediator mediator, IServiceScopeFactory serviceScopeFactory" : "IMediator mediator";
+        var serviceScopeUsing = isBusinessObjectRoot ? "using Microsoft.Extensions.DependencyInjection;" + Environment.NewLine : "";
+        var bulkActions = !IsBulkApiEntity(entity)
+            ? ""
+            : isBusinessObjectRoot
+                ? $$"""
+
+    [HttpPost("bulk-create")]
+    public async Task<ActionResult<Bulk{{entity.Name}}JobDto>> BulkCreate(BulkCreate{{entity.Name}}Dto input, CancellationToken cancellationToken)
+    {
+        var job = await mediator.Send(new BulkCreate{{entity.Name}}Command(input), cancellationToken);
+        QueueBulkJob(job.JobId);
+        return AcceptedAtAction(nameof(GetBulkJob), new { jobId = job.JobId }, job);
+    }
+
+    [HttpPost("bulk-upsert")]
+    public async Task<ActionResult<Bulk{{entity.Name}}JobDto>> BulkUpsert(BulkUpsert{{entity.Name}}Dto input, CancellationToken cancellationToken)
+    {
+        var job = await mediator.Send(new BulkUpsert{{entity.Name}}Command(input), cancellationToken);
+        QueueBulkJob(job.JobId);
+        return AcceptedAtAction(nameof(GetBulkJob), new { jobId = job.JobId }, job);
+    }
+
+    [HttpPost("bulk-delete")]
+    public async Task<ActionResult<Bulk{{entity.Name}}JobDto>> BulkDelete(BulkDelete{{entity.Name}}Dto input, CancellationToken cancellationToken)
+    {
+        var job = await mediator.Send(new BulkDelete{{entity.Name}}Command(input), cancellationToken);
+        QueueBulkJob(job.JobId);
+        return AcceptedAtAction(nameof(GetBulkJob), new { jobId = job.JobId }, job);
+    }
+
+    [HttpGet("bulk-jobs/{jobId:guid}")]
+    public async Task<ActionResult<Bulk{{entity.Name}}JobDto>> GetBulkJob(Guid jobId, CancellationToken cancellationToken)
+    {
+        var result = await mediator.Send(new GetBulk{{entity.Name}}JobQuery(jobId), cancellationToken);
+        return result is null ? NotFound() : Ok(result);
+    }
+
+    private void QueueBulkJob(Guid jobId)
+    {
+        _ = Task.Run(async () =>
+        {
+            await using var scope = serviceScopeFactory.CreateAsyncScope();
+            var scopedMediator = scope.ServiceProvider.GetRequiredService<IMediator>();
+            await scopedMediator.Send(new ExecuteBulk{{entity.Name}}JobCommand(jobId), CancellationToken.None);
+        }, CancellationToken.None);
+    }
+"""
+                : $$"""
 
     [HttpPost("bulk-create")]
     public async Task<ActionResult<Bulk{{entity.Name}}OperationResultDto>> BulkCreate(BulkCreate{{entity.Name}}Dto input, CancellationToken cancellationToken)
         => Ok(await mediator.Send(new BulkCreate{{entity.Name}}Command(input), cancellationToken));
-
-    [HttpPut("bulk-update")]
-    public async Task<ActionResult<Bulk{{entity.Name}}OperationResultDto>> BulkUpdate(BulkUpdate{{entity.Name}}Dto input, CancellationToken cancellationToken)
-        => Ok(await mediator.Send(new BulkUpdate{{entity.Name}}Command(input), cancellationToken));
 
     [HttpPost("bulk-upsert")]
     public async Task<ActionResult<Bulk{{entity.Name}}OperationResultDto>> BulkUpsert(BulkUpsert{{entity.Name}}Dto input, CancellationToken cancellationToken)
@@ -2366,12 +2792,11 @@ public sealed class ExceptionHandlingMiddleware(RequestDelegate next, ILogger<Ex
     [HttpPost("bulk-delete")]
     public async Task<ActionResult<Bulk{{entity.Name}}OperationResultDto>> BulkDelete(BulkDelete{{entity.Name}}Dto input, CancellationToken cancellationToken)
         => Ok(await mediator.Send(new BulkDelete{{entity.Name}}Command(input), cancellationToken));
-"""
-            : "";
+""";
         return $$"""
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using {{_rootNamespace}}.Application.Modules.{{entity.Name}}.Commands;
+{{serviceScopeUsing}}using {{_rootNamespace}}.Application.Modules.{{entity.Name}}.Commands;
 using {{_rootNamespace}}.Application.Modules.{{entity.Name}}.DTOs;
 using {{_rootNamespace}}.Application.Modules.{{entity.Name}}.Queries;
 
@@ -2379,7 +2804,7 @@ namespace {{_rootNamespace}}.API.Controllers;
 
 [ApiController]
 [Route("api/{{plural}}")]
-public sealed class {{Naming.Plural(entity.Name)}}Controller(IMediator mediator) : ControllerBase
+public sealed class {{Naming.Plural(entity.Name)}}Controller({{controllerServices}}) : ControllerBase
 {
     [HttpGet("{id}")]
     public async Task<ActionResult<{{entity.Name}}Dto>> GetById({{KeyType(entity)}} id, CancellationToken cancellationToken)
@@ -2560,6 +2985,14 @@ public sealed class {{businessObject.Name}}AnalysisController(IMediator mediator
     private BusinessObjectDefinition? BusinessObjectForRoot(EntityDefinition entity)
         => metadata.BusinessObjects.FirstOrDefault(b => Matches(b.RootEntity ?? b.Entity ?? b.Name, entity.Name));
 
+    private bool IsBusinessObjectRootEntity(EntityDefinition entity)
+        => metadata.BusinessObjects.Any(b => Matches(b.RootEntity ?? b.Entity ?? b.Name, entity.Name));
+
+    private string BulkCommandReturnType(EntityDefinition entity)
+        => IsBusinessObjectRootEntity(entity)
+            ? $"Bulk{entity.Name}JobDto"
+            : $"Bulk{entity.Name}OperationResultDto";
+
     private bool IsBulkApiEntity(EntityDefinition entity)
     {
         if (metadata.BusinessObjects.Count == 0)
@@ -2567,9 +3000,7 @@ public sealed class {{businessObject.Name}}AnalysisController(IMediator mediator
             return true;
         }
 
-        var isBusinessObjectRoot = metadata.BusinessObjects
-            .Any(b => Matches(b.RootEntity ?? b.Entity ?? b.Name, entity.Name));
-        if (isBusinessObjectRoot)
+        if (IsBusinessObjectRootEntity(entity))
         {
             return true;
         }

@@ -1,38 +1,80 @@
+using System.Text.Json;
 using MediatR;
 using EnterpriseMdmSolution.Application.Modules.Vendor.Commands;
 using EnterpriseMdmSolution.Application.Modules.Vendor.DTOs;
+using EnterpriseMdmSolution.Core.DataQuality;
 using EnterpriseMdmSolution.Core.Interfaces;
-using Entity = EnterpriseMdmSolution.Core.Entities.Vendor;
 
 namespace EnterpriseMdmSolution.Application.Modules.Vendor.Handlers;
 
-public sealed class BulkDeleteVendorHandler(IRepository<Entity> repository)
-    : IRequestHandler<BulkDeleteVendorCommand, BulkVendorOperationResultDto>
+public sealed class BulkDeleteVendorHandler(
+    IRepository<BulkOperationJob> jobRepository,
+    IRepository<BulkOperationItem> itemRepository)
+    : IRequestHandler<BulkDeleteVendorCommand, BulkVendorJobDto>
 {
-    public async Task<BulkVendorOperationResultDto> Handle(BulkDeleteVendorCommand request, CancellationToken cancellationToken)
+    public async Task<BulkVendorJobDto> Handle(BulkDeleteVendorCommand request, CancellationToken cancellationToken)
     {
-        var deletedCount = 0;
-        var notFoundIds = new List<int>();
-
-        foreach (var id in request.Input.Ids)
+        var job = new BulkOperationJob
         {
-            var entity = await repository.GetByIdAsync(id, cancellationToken);
-            if (entity is null)
-            {
-                notFoundIds.Add(id);
-                continue;
-            }
+            JobId = Guid.NewGuid(),
+            BusinessObjectName = "Vendor",
+            EntityName = "Vendor",
+            Operation = "BulkDelete",
+            Status = "Queued",
+            RequestedCount = request.Input.Ids.Count,
+            QueuedOn = DateTimeOffset.UtcNow,
+            TriggeredBy = string.IsNullOrWhiteSpace(request.Input.TriggeredBy) ? "system" : request.Input.TriggeredBy,
+            InputSnapshotJson = JsonSerializer.Serialize(request.Input)
+        };
 
-            repository.Delete(entity);
-            deletedCount++;
+        await jobRepository.AddAsync(job, cancellationToken);
+
+        var sequenceNumber = 1;
+        foreach (var inputItem in request.Input.Ids)
+        {
+            await itemRepository.AddAsync(new BulkOperationItem
+            {
+                ItemId = Guid.NewGuid(),
+                JobId = job.JobId,
+                SequenceNumber = sequenceNumber++,
+                Status = "Queued",
+                InputSnapshotJson = JsonSerializer.Serialize(inputItem)
+            }, cancellationToken);
         }
 
-        await repository.SaveChangesAsync(cancellationToken);
-        return new BulkVendorOperationResultDto
-        {
-            RequestedCount = request.Input.Ids.Count,
-            DeletedCount = deletedCount,
-            NotFoundIds = notFoundIds
-        };
+        await jobRepository.SaveChangesAsync(cancellationToken);
+        var items = (await itemRepository.ListAsync(cancellationToken)).Where(x => x.JobId == job.JobId).OrderBy(x => x.SequenceNumber).ToList();
+        return MapBulkJob(job, items);
     }
+
+    private static BulkVendorJobDto MapBulkJob(BulkOperationJob job, IReadOnlyList<BulkOperationItem> items)
+        => new()
+        {
+            JobId = job.JobId,
+            BusinessObjectName = job.BusinessObjectName,
+            EntityName = job.EntityName,
+            Operation = job.Operation,
+            Status = job.Status,
+            RequestedCount = job.RequestedCount,
+            CreatedCount = job.CreatedCount,
+            UpdatedCount = job.UpdatedCount,
+            DeletedCount = job.DeletedCount,
+            FailedCount = job.FailedCount,
+            QueuedOn = job.QueuedOn,
+            StartedOn = job.StartedOn,
+            CompletedOn = job.CompletedOn,
+            TriggeredBy = job.TriggeredBy,
+            ErrorMessage = job.ErrorMessage,
+            Items = items.Select(item => new BulkVendorJobItemDto
+            {
+                ItemId = item.ItemId,
+                JobId = item.JobId,
+                SequenceNumber = item.SequenceNumber,
+                Status = item.Status,
+                RecordId = item.RecordId,
+                ErrorMessage = item.ErrorMessage,
+                InputSnapshotJson = item.InputSnapshotJson,
+                ResultSnapshotJson = item.ResultSnapshotJson
+            }).ToList()
+        };
 }

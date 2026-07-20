@@ -3,4 +3,4 @@ using EnterpriseMdmSolution.Application.Modules.Material.DTOs;
 
 namespace EnterpriseMdmSolution.Application.Modules.Material.Commands;
 
-public sealed record BulkUpsertMaterialCommand(BulkUpsertMaterialDto Input) : IRequest<BulkMaterialOperationResultDto>;
+public sealed record BulkUpsertMaterialCommand(BulkUpsertMaterialDto Input) : IRequest<BulkMaterialJobDto>;

@@ -38,6 +38,8 @@ public sealed class MdmSolutionGeneratorService(GeneratorOptions options) : IMdm
             files.Add(path);
         }
 
+        DeleteStaleBulkUpdateArtifacts(solutionRoot);
+
         return new GenerationResult(
             solutionName,
             solutionRoot,
@@ -48,6 +50,25 @@ public sealed class MdmSolutionGeneratorService(GeneratorOptions options) : IMdm
                 $"{solutionName}.Infrastructure"
             ],
             files);
+    }
+
+    private static void DeleteStaleBulkUpdateArtifacts(string solutionRoot)
+    {
+        if (!Directory.Exists(solutionRoot))
+        {
+            return;
+        }
+
+        foreach (var file in Directory.EnumerateFiles(solutionRoot, "BulkUpdate*.cs", SearchOption.AllDirectories))
+        {
+            var normalizedPath = file.Replace('\\', '/');
+            if (!normalizedPath.Contains(".Application/Modules/", StringComparison.OrdinalIgnoreCase))
+            {
+                continue;
+            }
+
+            File.Delete(file);
+        }
     }
 
     private static async Task WriteGeneratedFileAsync(string path, string relativePath, string content, CancellationToken cancellationToken)
@@ -189,6 +210,8 @@ public sealed class MdmSolutionGeneratorService(GeneratorOptions options) : IMdm
 
         var fileName = Path.GetFileName(normalizedPath);
         return fileName.StartsWith("Bulk", StringComparison.OrdinalIgnoreCase)
+            || fileName.StartsWith("ExecuteBulk", StringComparison.OrdinalIgnoreCase)
+            || fileName.StartsWith("GetBulk", StringComparison.OrdinalIgnoreCase)
             || fileName.Contains("/DTOs/Bulk", StringComparison.OrdinalIgnoreCase);
     }
 
