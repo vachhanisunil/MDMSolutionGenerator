@@ -7,3 +7,4 @@ MdmSolutionGenerator/enterpriseMDM/
 MdmSolutionGenerator/aggregate-test-out/
 MdmSolutionGenerator/aggregate-test-metadata.json
 MdmSolutionGenerator/pg-test-out/
+/MdmSolutionGenerator/outputs/customer-metadata-details
