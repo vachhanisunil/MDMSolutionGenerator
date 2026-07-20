@@ -45,4 +45,5 @@ public sealed class VendorCertificatesController(IMediator mediator) : Controlle
         var deleted = await mediator.Send(new DeleteVendorCertificateCommand(id), cancellationToken);
         return deleted ? NoContent() : NotFound();
     }
+
 }

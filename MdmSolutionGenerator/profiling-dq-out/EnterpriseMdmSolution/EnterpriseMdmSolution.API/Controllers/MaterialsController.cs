@@ -45,4 +45,20 @@ public sealed class MaterialsController(IMediator mediator) : ControllerBase
         var deleted = await mediator.Send(new DeleteMaterialCommand(id), cancellationToken);
         return deleted ? NoContent() : NotFound();
     }
+
+    [HttpPost("bulk-create")]
+    public async Task<ActionResult<BulkMaterialOperationResultDto>> BulkCreate(BulkCreateMaterialDto input, CancellationToken cancellationToken)
+        => Ok(await mediator.Send(new BulkCreateMaterialCommand(input), cancellationToken));
+
+    [HttpPut("bulk-update")]
+    public async Task<ActionResult<BulkMaterialOperationResultDto>> BulkUpdate(BulkUpdateMaterialDto input, CancellationToken cancellationToken)
+        => Ok(await mediator.Send(new BulkUpdateMaterialCommand(input), cancellationToken));
+
+    [HttpPost("bulk-upsert")]
+    public async Task<ActionResult<BulkMaterialOperationResultDto>> BulkUpsert(BulkUpsertMaterialDto input, CancellationToken cancellationToken)
+        => Ok(await mediator.Send(new BulkUpsertMaterialCommand(input), cancellationToken));
+
+    [HttpPost("bulk-delete")]
+    public async Task<ActionResult<BulkMaterialOperationResultDto>> BulkDelete(BulkDeleteMaterialDto input, CancellationToken cancellationToken)
+        => Ok(await mediator.Send(new BulkDeleteMaterialCommand(input), cancellationToken));
 }

@@ -45,4 +45,5 @@ public sealed class MaterialForecastsController(IMediator mediator) : Controller
         var deleted = await mediator.Send(new DeleteMaterialForecastCommand(id), cancellationToken);
         return deleted ? NoContent() : NotFound();
     }
+
 }

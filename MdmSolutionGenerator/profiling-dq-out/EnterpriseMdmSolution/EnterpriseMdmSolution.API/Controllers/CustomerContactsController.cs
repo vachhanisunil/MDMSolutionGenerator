@@ -45,4 +45,5 @@ public sealed class CustomerContactsController(IMediator mediator) : ControllerB
         var deleted = await mediator.Send(new DeleteCustomerContactCommand(id), cancellationToken);
         return deleted ? NoContent() : NotFound();
     }
+
 }

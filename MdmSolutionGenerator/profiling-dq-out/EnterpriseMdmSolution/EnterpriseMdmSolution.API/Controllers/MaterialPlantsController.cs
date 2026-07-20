@@ -45,4 +45,5 @@ public sealed class MaterialPlantsController(IMediator mediator) : ControllerBas
         var deleted = await mediator.Send(new DeleteMaterialPlantCommand(id), cancellationToken);
         return deleted ? NoContent() : NotFound();
     }
+
 }

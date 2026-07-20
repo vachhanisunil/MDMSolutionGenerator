@@ -45,4 +45,5 @@ public sealed class CustomerSalesAreasController(IMediator mediator) : Controlle
         var deleted = await mediator.Send(new DeleteCustomerSalesAreaCommand(id), cancellationToken);
         return deleted ? NoContent() : NotFound();
     }
+
 }

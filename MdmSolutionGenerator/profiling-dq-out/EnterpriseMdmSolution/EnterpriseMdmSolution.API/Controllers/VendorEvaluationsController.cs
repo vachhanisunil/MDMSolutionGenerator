@@ -45,4 +45,5 @@ public sealed class VendorEvaluationsController(IMediator mediator) : Controller
         var deleted = await mediator.Send(new DeleteVendorEvaluationCommand(id), cancellationToken);
         return deleted ? NoContent() : NotFound();
     }
+
 }

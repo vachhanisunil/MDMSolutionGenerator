@@ -45,4 +45,5 @@ public sealed class VendorContactsController(IMediator mediator) : ControllerBas
         var deleted = await mediator.Send(new DeleteVendorContactCommand(id), cancellationToken);
         return deleted ? NoContent() : NotFound();
     }
+
 }

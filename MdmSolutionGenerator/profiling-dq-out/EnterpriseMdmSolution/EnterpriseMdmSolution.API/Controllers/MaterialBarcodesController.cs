@@ -45,4 +45,5 @@ public sealed class MaterialBarcodesController(IMediator mediator) : ControllerB
         var deleted = await mediator.Send(new DeleteMaterialBarcodeCommand(id), cancellationToken);
         return deleted ? NoContent() : NotFound();
     }
+
 }

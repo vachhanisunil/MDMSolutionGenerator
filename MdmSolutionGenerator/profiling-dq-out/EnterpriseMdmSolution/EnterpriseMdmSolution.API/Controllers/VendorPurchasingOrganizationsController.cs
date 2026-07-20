@@ -45,4 +45,5 @@ public sealed class VendorPurchasingOrganizationsController(IMediator mediator) 
         var deleted = await mediator.Send(new DeleteVendorPurchasingOrganizationCommand(id), cancellationToken);
         return deleted ? NoContent() : NotFound();
     }
+
 }

@@ -45,4 +45,20 @@ public sealed class PaymentTermsController(IMediator mediator) : ControllerBase
         var deleted = await mediator.Send(new DeletePaymentTermCommand(id), cancellationToken);
         return deleted ? NoContent() : NotFound();
     }
+
+    [HttpPost("bulk-create")]
+    public async Task<ActionResult<BulkPaymentTermOperationResultDto>> BulkCreate(BulkCreatePaymentTermDto input, CancellationToken cancellationToken)
+        => Ok(await mediator.Send(new BulkCreatePaymentTermCommand(input), cancellationToken));
+
+    [HttpPut("bulk-update")]
+    public async Task<ActionResult<BulkPaymentTermOperationResultDto>> BulkUpdate(BulkUpdatePaymentTermDto input, CancellationToken cancellationToken)
+        => Ok(await mediator.Send(new BulkUpdatePaymentTermCommand(input), cancellationToken));
+
+    [HttpPost("bulk-upsert")]
+    public async Task<ActionResult<BulkPaymentTermOperationResultDto>> BulkUpsert(BulkUpsertPaymentTermDto input, CancellationToken cancellationToken)
+        => Ok(await mediator.Send(new BulkUpsertPaymentTermCommand(input), cancellationToken));
+
+    [HttpPost("bulk-delete")]
+    public async Task<ActionResult<BulkPaymentTermOperationResultDto>> BulkDelete(BulkDeletePaymentTermDto input, CancellationToken cancellationToken)
+        => Ok(await mediator.Send(new BulkDeletePaymentTermCommand(input), cancellationToken));
 }

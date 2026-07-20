@@ -45,4 +45,5 @@ public sealed class VendorTaxsController(IMediator mediator) : ControllerBase
         var deleted = await mediator.Send(new DeleteVendorTaxCommand(id), cancellationToken);
         return deleted ? NoContent() : NotFound();
     }
+
 }

@@ -45,4 +45,5 @@ public sealed class CustomerCreditProfilesController(IMediator mediator) : Contr
         var deleted = await mediator.Send(new DeleteCustomerCreditProfileCommand(id), cancellationToken);
         return deleted ? NoContent() : NotFound();
     }
+
 }

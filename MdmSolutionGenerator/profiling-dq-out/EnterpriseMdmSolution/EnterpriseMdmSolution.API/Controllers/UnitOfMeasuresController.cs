@@ -45,4 +45,20 @@ public sealed class UnitOfMeasuresController(IMediator mediator) : ControllerBas
         var deleted = await mediator.Send(new DeleteUnitOfMeasureCommand(id), cancellationToken);
         return deleted ? NoContent() : NotFound();
     }
+
+    [HttpPost("bulk-create")]
+    public async Task<ActionResult<BulkUnitOfMeasureOperationResultDto>> BulkCreate(BulkCreateUnitOfMeasureDto input, CancellationToken cancellationToken)
+        => Ok(await mediator.Send(new BulkCreateUnitOfMeasureCommand(input), cancellationToken));
+
+    [HttpPut("bulk-update")]
+    public async Task<ActionResult<BulkUnitOfMeasureOperationResultDto>> BulkUpdate(BulkUpdateUnitOfMeasureDto input, CancellationToken cancellationToken)
+        => Ok(await mediator.Send(new BulkUpdateUnitOfMeasureCommand(input), cancellationToken));
+
+    [HttpPost("bulk-upsert")]
+    public async Task<ActionResult<BulkUnitOfMeasureOperationResultDto>> BulkUpsert(BulkUpsertUnitOfMeasureDto input, CancellationToken cancellationToken)
+        => Ok(await mediator.Send(new BulkUpsertUnitOfMeasureCommand(input), cancellationToken));
+
+    [HttpPost("bulk-delete")]
+    public async Task<ActionResult<BulkUnitOfMeasureOperationResultDto>> BulkDelete(BulkDeleteUnitOfMeasureDto input, CancellationToken cancellationToken)
+        => Ok(await mediator.Send(new BulkDeleteUnitOfMeasureCommand(input), cancellationToken));
 }

@@ -45,4 +45,5 @@ public sealed class MaterialUOMsController(IMediator mediator) : ControllerBase
         var deleted = await mediator.Send(new DeleteMaterialUOMCommand(id), cancellationToken);
         return deleted ? NoContent() : NotFound();
     }
+
 }

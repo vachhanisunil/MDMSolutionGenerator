@@ -45,4 +45,5 @@ public sealed class CustomerClassificationsController(IMediator mediator) : Cont
         var deleted = await mediator.Send(new DeleteCustomerClassificationCommand(id), cancellationToken);
         return deleted ? NoContent() : NotFound();
     }
+
 }

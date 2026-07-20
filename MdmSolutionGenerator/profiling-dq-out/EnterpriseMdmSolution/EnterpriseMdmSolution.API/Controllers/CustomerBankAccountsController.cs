@@ -45,4 +45,5 @@ public sealed class CustomerBankAccountsController(IMediator mediator) : Control
         var deleted = await mediator.Send(new DeleteCustomerBankAccountCommand(id), cancellationToken);
         return deleted ? NoContent() : NotFound();
     }
+
 }

@@ -95,6 +95,17 @@ public sealed class MdmSolutionGeneratorService(GeneratorOptions options) : IMdm
             return generatedContent;
         }
 
+        if (normalizedPath.Contains(".API/Controllers/", StringComparison.OrdinalIgnoreCase)
+            && normalizedPath.EndsWith("Controller.cs", StringComparison.OrdinalIgnoreCase))
+        {
+            return generatedContent;
+        }
+
+        if (IsBulkGeneratedFile(normalizedPath))
+        {
+            return generatedContent;
+        }
+
         if (normalizedPath.Contains(".Application/Modules/", StringComparison.OrdinalIgnoreCase)
             && normalizedPath.Contains("/DataQuality/Services/", StringComparison.OrdinalIgnoreCase))
         {
@@ -167,6 +178,18 @@ public sealed class MdmSolutionGeneratorService(GeneratorOptions options) : IMdm
             || fileName.Contains("RuleSummary", StringComparison.OrdinalIgnoreCase)
             || fileName.Contains("RuleDrilldown", StringComparison.OrdinalIgnoreCase)
             || fileName.Contains("DuplicateDrilldown", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static bool IsBulkGeneratedFile(string normalizedPath)
+    {
+        if (!normalizedPath.Contains(".Application/Modules/", StringComparison.OrdinalIgnoreCase))
+        {
+            return false;
+        }
+
+        var fileName = Path.GetFileName(normalizedPath);
+        return fileName.StartsWith("Bulk", StringComparison.OrdinalIgnoreCase)
+            || fileName.Contains("/DTOs/Bulk", StringComparison.OrdinalIgnoreCase);
     }
 
     private static string MergeClassProperties(string existingContent, string generatedContent)

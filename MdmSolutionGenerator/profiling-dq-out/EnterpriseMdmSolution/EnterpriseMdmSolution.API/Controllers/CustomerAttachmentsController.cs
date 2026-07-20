@@ -45,4 +45,5 @@ public sealed class CustomerAttachmentsController(IMediator mediator) : Controll
         var deleted = await mediator.Send(new DeleteCustomerAttachmentCommand(id), cancellationToken);
         return deleted ? NoContent() : NotFound();
     }
+
 }

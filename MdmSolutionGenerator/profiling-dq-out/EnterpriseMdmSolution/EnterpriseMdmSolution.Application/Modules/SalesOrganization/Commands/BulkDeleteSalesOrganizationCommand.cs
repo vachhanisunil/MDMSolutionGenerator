@@ -1,0 +1,6 @@
+using MediatR;
+using EnterpriseMdmSolution.Application.Modules.SalesOrganization.DTOs;
+
+namespace EnterpriseMdmSolution.Application.Modules.SalesOrganization.Commands;
+
+public sealed record BulkDeleteSalesOrganizationCommand(BulkDeleteSalesOrganizationDto Input) : IRequest<BulkSalesOrganizationOperationResultDto>;

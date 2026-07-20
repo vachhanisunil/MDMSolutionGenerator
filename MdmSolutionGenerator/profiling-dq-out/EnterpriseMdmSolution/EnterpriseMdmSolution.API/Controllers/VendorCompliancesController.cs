@@ -45,4 +45,5 @@ public sealed class VendorCompliancesController(IMediator mediator) : Controller
         var deleted = await mediator.Send(new DeleteVendorComplianceCommand(id), cancellationToken);
         return deleted ? NoContent() : NotFound();
     }
+
 }

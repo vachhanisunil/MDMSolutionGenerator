@@ -592,23 +592,49 @@ public static class DependencyInjection
     private IEnumerable<GeneratedFile> EmitApplicationModule(EntityDefinition entity)
     {
         var module = $"{solutionName}.Application/Modules/{entity.Name}";
+        var emitBulk = IsBulkApiEntity(entity);
         yield return File($"{module}/DTOs/{entity.Name}Dto.cs", EmitDto(entity));
         yield return File($"{module}/DTOs/Create{entity.Name}Dto.cs", EmitMutateDto(entity, "Create"));
         yield return File($"{module}/DTOs/Update{entity.Name}Dto.cs", EmitMutateDto(entity, "Update"));
         yield return File($"{module}/DTOs/Search{entity.Name}Dto.cs", EmitSearchDto(entity));
+        if (emitBulk)
+        {
+            yield return File($"{module}/DTOs/Bulk{entity.Name}Dtos.cs", EmitBulkDtos(entity));
+        }
         yield return File($"{module}/Mappings/{entity.Name}Profile.cs", EmitProfile(entity));
         yield return File($"{module}/Commands/Create{entity.Name}Command.cs", EmitCreateCommand(entity));
         yield return File($"{module}/Commands/Update{entity.Name}Command.cs", EmitUpdateCommand(entity));
         yield return File($"{module}/Commands/Delete{entity.Name}Command.cs", EmitDeleteCommand(entity));
+        if (emitBulk)
+        {
+            yield return File($"{module}/Commands/BulkCreate{entity.Name}Command.cs", EmitBulkCreateCommand(entity));
+            yield return File($"{module}/Commands/BulkUpdate{entity.Name}Command.cs", EmitBulkUpdateCommand(entity));
+            yield return File($"{module}/Commands/BulkUpsert{entity.Name}Command.cs", EmitBulkUpsertCommand(entity));
+            yield return File($"{module}/Commands/BulkDelete{entity.Name}Command.cs", EmitBulkDeleteCommand(entity));
+        }
         yield return File($"{module}/Queries/Get{entity.Name}ByIdQuery.cs", EmitGetByIdQuery(entity));
         yield return File($"{module}/Queries/Search{Naming.Plural(entity.Name)}Query.cs", EmitSearchQuery(entity));
         yield return File($"{module}/Handlers/Create{entity.Name}Handler.cs", EmitCreateHandler(entity));
         yield return File($"{module}/Handlers/Update{entity.Name}Handler.cs", EmitUpdateHandler(entity));
         yield return File($"{module}/Handlers/Delete{entity.Name}Handler.cs", EmitDeleteHandler(entity));
+        if (emitBulk)
+        {
+            yield return File($"{module}/Handlers/BulkCreate{entity.Name}Handler.cs", EmitBulkCreateHandler(entity));
+            yield return File($"{module}/Handlers/BulkUpdate{entity.Name}Handler.cs", EmitBulkUpdateHandler(entity));
+            yield return File($"{module}/Handlers/BulkUpsert{entity.Name}Handler.cs", EmitBulkUpsertHandler(entity));
+            yield return File($"{module}/Handlers/BulkDelete{entity.Name}Handler.cs", EmitBulkDeleteHandler(entity));
+        }
         yield return File($"{module}/Handlers/Get{entity.Name}ByIdHandler.cs", EmitGetByIdHandler(entity));
         yield return File($"{module}/Handlers/Search{Naming.Plural(entity.Name)}Handler.cs", EmitSearchHandler(entity));
         yield return File($"{module}/Validators/Create{entity.Name}CommandValidator.cs", EmitValidator(entity, "Create"));
         yield return File($"{module}/Validators/Update{entity.Name}CommandValidator.cs", EmitValidator(entity, "Update"));
+        if (emitBulk)
+        {
+            yield return File($"{module}/Validators/BulkCreate{entity.Name}CommandValidator.cs", EmitBulkValidator(entity, "BulkCreate", "Create"));
+            yield return File($"{module}/Validators/BulkUpdate{entity.Name}CommandValidator.cs", EmitBulkValidator(entity, "BulkUpdate", "Update"));
+            yield return File($"{module}/Validators/BulkUpsert{entity.Name}CommandValidator.cs", EmitBulkValidator(entity, "BulkUpsert", "Update"));
+            yield return File($"{module}/Validators/BulkDelete{entity.Name}CommandValidator.cs", EmitBulkDeleteValidator(entity));
+        }
     }
 
     private IEnumerable<GeneratedFile> EmitBusinessObjectAnalysisModule(BusinessObjectDefinition businessObject)
@@ -649,6 +675,41 @@ public static class DependencyInjection
 
     private string EmitDto(EntityDefinition entity) => EmitDtoClass(entity, $"{entity.Name}Dto", includeKey: true);
     private string EmitMutateDto(EntityDefinition entity, string prefix) => EmitDtoClass(entity, $"{prefix}{entity.Name}Dto", includeKey: prefix.Equals("Update", StringComparison.OrdinalIgnoreCase));
+
+    private string EmitBulkDtos(EntityDefinition entity) => $$"""
+namespace {{_rootNamespace}}.Application.Modules.{{entity.Name}}.DTOs;
+
+public sealed class BulkCreate{{entity.Name}}Dto
+{
+    public List<Create{{entity.Name}}Dto> Items { get; init; } = [];
+}
+
+public sealed class BulkUpdate{{entity.Name}}Dto
+{
+    public List<Update{{entity.Name}}Dto> Items { get; init; } = [];
+}
+
+public sealed class BulkUpsert{{entity.Name}}Dto
+{
+    public List<Update{{entity.Name}}Dto> Items { get; init; } = [];
+}
+
+public sealed class BulkDelete{{entity.Name}}Dto
+{
+    public List<{{KeyType(entity)}}> Ids { get; init; } = [];
+}
+
+public sealed class Bulk{{entity.Name}}OperationResultDto
+{
+    public int RequestedCount { get; init; }
+    public int CreatedCount { get; init; }
+    public int UpdatedCount { get; init; }
+    public int DeletedCount { get; init; }
+    public int NotFoundCount => NotFoundIds.Count;
+    public List<{{KeyType(entity)}}> NotFoundIds { get; init; } = [];
+    public IReadOnlyList<{{entity.Name}}Dto> Items { get; init; } = [];
+}
+""";
 
     private string EmitAnalysisDtos(BusinessObjectDefinition businessObject, EntityDefinition root) => $$"""
 namespace {{_rootNamespace}}.Application.Modules.{{businessObject.Name}}.DTOs;
@@ -1391,6 +1452,42 @@ namespace {{_rootNamespace}}.Application.Modules.{{entity.Name}}.Commands;
 public sealed record Delete{{entity.Name}}Command({{KeyType(entity)}} Id) : IRequest<bool>;
 """;
 
+    private string EmitBulkCreateCommand(EntityDefinition entity) => $$"""
+using MediatR;
+using {{_rootNamespace}}.Application.Modules.{{entity.Name}}.DTOs;
+
+namespace {{_rootNamespace}}.Application.Modules.{{entity.Name}}.Commands;
+
+public sealed record BulkCreate{{entity.Name}}Command(BulkCreate{{entity.Name}}Dto Input) : IRequest<Bulk{{entity.Name}}OperationResultDto>;
+""";
+
+    private string EmitBulkUpdateCommand(EntityDefinition entity) => $$"""
+using MediatR;
+using {{_rootNamespace}}.Application.Modules.{{entity.Name}}.DTOs;
+
+namespace {{_rootNamespace}}.Application.Modules.{{entity.Name}}.Commands;
+
+public sealed record BulkUpdate{{entity.Name}}Command(BulkUpdate{{entity.Name}}Dto Input) : IRequest<Bulk{{entity.Name}}OperationResultDto>;
+""";
+
+    private string EmitBulkUpsertCommand(EntityDefinition entity) => $$"""
+using MediatR;
+using {{_rootNamespace}}.Application.Modules.{{entity.Name}}.DTOs;
+
+namespace {{_rootNamespace}}.Application.Modules.{{entity.Name}}.Commands;
+
+public sealed record BulkUpsert{{entity.Name}}Command(BulkUpsert{{entity.Name}}Dto Input) : IRequest<Bulk{{entity.Name}}OperationResultDto>;
+""";
+
+    private string EmitBulkDeleteCommand(EntityDefinition entity) => $$"""
+using MediatR;
+using {{_rootNamespace}}.Application.Modules.{{entity.Name}}.DTOs;
+
+namespace {{_rootNamespace}}.Application.Modules.{{entity.Name}}.Commands;
+
+public sealed record BulkDelete{{entity.Name}}Command(BulkDelete{{entity.Name}}Dto Input) : IRequest<Bulk{{entity.Name}}OperationResultDto>;
+""";
+
     private string EmitGetByIdQuery(EntityDefinition entity) => $$"""
 using MediatR;
 using {{_rootNamespace}}.Application.Modules.{{entity.Name}}.DTOs;
@@ -1489,6 +1586,180 @@ public sealed class Delete{{entity.Name}}Handler(IRepository<Entity> repository)
 }
 """;
 
+    private string EmitBulkCreateHandler(EntityDefinition entity) => $$"""
+using AutoMapper;
+using MediatR;
+using {{_rootNamespace}}.Application.Modules.{{entity.Name}}.Commands;
+using {{_rootNamespace}}.Application.Modules.{{entity.Name}}.DTOs;
+using {{_rootNamespace}}.Core.Interfaces;
+using Entity = {{_rootNamespace}}.Core.Entities.{{entity.Name}};
+
+namespace {{_rootNamespace}}.Application.Modules.{{entity.Name}}.Handlers;
+
+public sealed class BulkCreate{{entity.Name}}Handler(IRepository<Entity> repository, IMapper mapper)
+    : IRequestHandler<BulkCreate{{entity.Name}}Command, Bulk{{entity.Name}}OperationResultDto>
+{
+    public async Task<Bulk{{entity.Name}}OperationResultDto> Handle(BulkCreate{{entity.Name}}Command request, CancellationToken cancellationToken)
+    {
+        var entities = request.Input.Items.Select(mapper.Map<Entity>).ToList();
+        foreach (var entity in entities)
+        {
+            await repository.AddAsync(entity, cancellationToken);
+        }
+
+        await repository.SaveChangesAsync(cancellationToken);
+        return new Bulk{{entity.Name}}OperationResultDto
+        {
+            RequestedCount = request.Input.Items.Count,
+            CreatedCount = entities.Count,
+            Items = mapper.Map<IReadOnlyList<{{entity.Name}}Dto>>(entities)
+        };
+    }
+}
+""";
+
+    private string EmitBulkUpdateHandler(EntityDefinition entity) => $$"""
+using AutoMapper;
+using MediatR;
+using {{_rootNamespace}}.Application.Modules.{{entity.Name}}.Commands;
+using {{_rootNamespace}}.Application.Modules.{{entity.Name}}.DTOs;
+using {{_rootNamespace}}.Core.Interfaces;
+using Entity = {{_rootNamespace}}.Core.Entities.{{entity.Name}};
+
+namespace {{_rootNamespace}}.Application.Modules.{{entity.Name}}.Handlers;
+
+public sealed class BulkUpdate{{entity.Name}}Handler(IRepository<Entity> repository, IMapper mapper)
+    : IRequestHandler<BulkUpdate{{entity.Name}}Command, Bulk{{entity.Name}}OperationResultDto>
+{
+    public async Task<Bulk{{entity.Name}}OperationResultDto> Handle(BulkUpdate{{entity.Name}}Command request, CancellationToken cancellationToken)
+    {
+        var updatedEntities = new List<Entity>();
+        var notFoundIds = new List<{{KeyType(entity)}}>();
+
+        foreach (var requestedItem in request.Input.Items)
+        {
+            var existingEntity = await repository.GetByIdAsync(requestedItem.{{KeyProperty(entity).Name}}, {{AggregateIncludesExpression(entity)}}, cancellationToken);
+            if (existingEntity is null)
+            {
+                notFoundIds.Add(requestedItem.{{KeyProperty(entity).Name}});
+                continue;
+            }
+
+            mapper.Map(requestedItem, existingEntity);
+{{AggregateSyncCollections(entity, "existingEntity", "requestedItem")}}
+            repository.Update(existingEntity);
+            updatedEntities.Add(existingEntity);
+        }
+
+        await repository.SaveChangesAsync(cancellationToken);
+        return new Bulk{{entity.Name}}OperationResultDto
+        {
+            RequestedCount = request.Input.Items.Count,
+            UpdatedCount = updatedEntities.Count,
+            NotFoundIds = notFoundIds,
+            Items = mapper.Map<IReadOnlyList<{{entity.Name}}Dto>>(updatedEntities)
+        };
+    }
+}
+""";
+
+    private string EmitBulkUpsertHandler(EntityDefinition entity) => $$"""
+using AutoMapper;
+using MediatR;
+using {{_rootNamespace}}.Application.Modules.{{entity.Name}}.Commands;
+using {{_rootNamespace}}.Application.Modules.{{entity.Name}}.DTOs;
+using {{_rootNamespace}}.Core.Interfaces;
+using Entity = {{_rootNamespace}}.Core.Entities.{{entity.Name}};
+
+namespace {{_rootNamespace}}.Application.Modules.{{entity.Name}}.Handlers;
+
+public sealed class BulkUpsert{{entity.Name}}Handler(IRepository<Entity> repository, IMapper mapper)
+    : IRequestHandler<BulkUpsert{{entity.Name}}Command, Bulk{{entity.Name}}OperationResultDto>
+{
+    public async Task<Bulk{{entity.Name}}OperationResultDto> Handle(BulkUpsert{{entity.Name}}Command request, CancellationToken cancellationToken)
+    {
+        var changedEntities = new List<Entity>();
+        var createdCount = 0;
+        var updatedCount = 0;
+
+        foreach (var requestedItem in request.Input.Items)
+        {
+            Entity? existingEntity = null;
+            if (!EqualityComparer<{{KeyType(entity)}}>.Default.Equals(requestedItem.{{KeyProperty(entity).Name}}, {{DefaultKeyLiteral(KeyProperty(entity))}}))
+            {
+                existingEntity = await repository.GetByIdAsync(requestedItem.{{KeyProperty(entity).Name}}, {{AggregateIncludesExpression(entity)}}, cancellationToken);
+            }
+
+            if (existingEntity is null)
+            {
+                var newEntity = mapper.Map<Entity>(requestedItem);
+{{AddAggregateChildCollections(entity, "newEntity", "requestedItem")}}
+                await repository.AddAsync(newEntity, cancellationToken);
+                changedEntities.Add(newEntity);
+                createdCount++;
+                continue;
+            }
+
+            mapper.Map(requestedItem, existingEntity);
+{{AggregateSyncCollections(entity, "existingEntity", "requestedItem")}}
+            repository.Update(existingEntity);
+            changedEntities.Add(existingEntity);
+            updatedCount++;
+        }
+
+        await repository.SaveChangesAsync(cancellationToken);
+        return new Bulk{{entity.Name}}OperationResultDto
+        {
+            RequestedCount = request.Input.Items.Count,
+            CreatedCount = createdCount,
+            UpdatedCount = updatedCount,
+            Items = mapper.Map<IReadOnlyList<{{entity.Name}}Dto>>(changedEntities)
+        };
+    }
+}
+""";
+
+    private string EmitBulkDeleteHandler(EntityDefinition entity) => $$"""
+using MediatR;
+using {{_rootNamespace}}.Application.Modules.{{entity.Name}}.Commands;
+using {{_rootNamespace}}.Application.Modules.{{entity.Name}}.DTOs;
+using {{_rootNamespace}}.Core.Interfaces;
+using Entity = {{_rootNamespace}}.Core.Entities.{{entity.Name}};
+
+namespace {{_rootNamespace}}.Application.Modules.{{entity.Name}}.Handlers;
+
+public sealed class BulkDelete{{entity.Name}}Handler(IRepository<Entity> repository)
+    : IRequestHandler<BulkDelete{{entity.Name}}Command, Bulk{{entity.Name}}OperationResultDto>
+{
+    public async Task<Bulk{{entity.Name}}OperationResultDto> Handle(BulkDelete{{entity.Name}}Command request, CancellationToken cancellationToken)
+    {
+        var deletedCount = 0;
+        var notFoundIds = new List<{{KeyType(entity)}}>();
+
+        foreach (var id in request.Input.Ids)
+        {
+            var entity = await repository.GetByIdAsync(id, cancellationToken);
+            if (entity is null)
+            {
+                notFoundIds.Add(id);
+                continue;
+            }
+
+            repository.Delete(entity);
+            deletedCount++;
+        }
+
+        await repository.SaveChangesAsync(cancellationToken);
+        return new Bulk{{entity.Name}}OperationResultDto
+        {
+            RequestedCount = request.Input.Ids.Count,
+            DeletedCount = deletedCount,
+            NotFoundIds = notFoundIds
+        };
+    }
+}
+""";
+
     private string EmitGetByIdHandler(EntityDefinition entity) => $$"""
 using AutoMapper;
 using MediatR;
@@ -1572,9 +1843,85 @@ public sealed class Search{{Naming.Plural(entity.Name)}}Handler(IRepository<Enti
         }
 
         builder.AppendLine("    }");
+        builder.AppendLine("}"); 
+        return builder.ToString();
+    }
+
+    private string EmitBulkValidator(EntityDefinition entity, string commandPrefix, string dtoPrefix)
+    {
+        var commandType = $"{commandPrefix}{entity.Name}Command";
+        var builder = new StringBuilder();
+        builder.AppendLine("using FluentValidation;");
+        builder.AppendLine($"using {_rootNamespace}.Application.Modules.{entity.Name}.Commands;");
+        builder.AppendLine();
+        builder.AppendLine($"namespace {_rootNamespace}.Application.Modules.{entity.Name}.Validators;");
+        builder.AppendLine();
+        builder.AppendLine($"public sealed class {commandType}Validator : AbstractValidator<{commandType}>");
+        builder.AppendLine("{");
+        builder.AppendLine($"    public {commandType}Validator()");
+        builder.AppendLine("    {");
+        builder.AppendLine("        RuleFor(x => x.Input.Items)");
+        builder.AppendLine("            .NotEmpty();");
+        builder.AppendLine();
+
+        var hasItemRules = commandPrefix.Equals("BulkUpdate", StringComparison.OrdinalIgnoreCase)
+            || entity.Properties.Any(property => !IsKey(entity, property) && RulesFor(property).Count > 0);
+
+        if (hasItemRules)
+        {
+            builder.AppendLine("        RuleForEach(x => x.Input.Items).ChildRules(item =>");
+            builder.AppendLine("        {");
+            if (commandPrefix.Equals("BulkUpdate", StringComparison.OrdinalIgnoreCase))
+            {
+                builder.AppendLine($"            item.RuleFor(x => x.{KeyProperty(entity).Name})");
+                builder.AppendLine($"                .NotEqual({DefaultKeyLiteral(KeyProperty(entity))});");
+                builder.AppendLine();
+            }
+
+            foreach (var property in entity.Properties.Where(p => !IsKey(entity, p)))
+            {
+                var rules = RulesFor(property);
+                if (rules.Count == 0)
+                {
+                    continue;
+                }
+
+                builder.Append($"            item.RuleFor(x => x.{property.Name})");
+                foreach (var rule in rules)
+                {
+                    builder.AppendLine();
+                    builder.Append($"                .{rule}");
+                }
+                builder.AppendLine(";");
+                builder.AppendLine();
+            }
+
+            builder.AppendLine("        });");
+        }
+
+        builder.AppendLine("    }");
         builder.AppendLine("}");
         return builder.ToString();
     }
+
+    private string EmitBulkDeleteValidator(EntityDefinition entity) => $$"""
+using FluentValidation;
+using {{_rootNamespace}}.Application.Modules.{{entity.Name}}.Commands;
+
+namespace {{_rootNamespace}}.Application.Modules.{{entity.Name}}.Validators;
+
+public sealed class BulkDelete{{entity.Name}}CommandValidator : AbstractValidator<BulkDelete{{entity.Name}}Command>
+{
+    public BulkDelete{{entity.Name}}CommandValidator()
+    {
+        RuleFor(x => x.Input.Ids)
+            .NotEmpty();
+
+        RuleForEach(x => x.Input.Ids)
+            .NotEqual({{DefaultKeyLiteral(KeyProperty(entity))}});
+    }
+}
+""";
 
     private string EmitDbContext()
     {
@@ -2001,6 +2348,26 @@ public sealed class ExceptionHandlingMiddleware(RequestDelegate next, ILogger<Ex
     private string EmitController(EntityDefinition entity)
     {
         var plural = Naming.Plural(entity.Name).ToLowerInvariant();
+        var bulkActions = IsBulkApiEntity(entity)
+            ? $$"""
+
+    [HttpPost("bulk-create")]
+    public async Task<ActionResult<Bulk{{entity.Name}}OperationResultDto>> BulkCreate(BulkCreate{{entity.Name}}Dto input, CancellationToken cancellationToken)
+        => Ok(await mediator.Send(new BulkCreate{{entity.Name}}Command(input), cancellationToken));
+
+    [HttpPut("bulk-update")]
+    public async Task<ActionResult<Bulk{{entity.Name}}OperationResultDto>> BulkUpdate(BulkUpdate{{entity.Name}}Dto input, CancellationToken cancellationToken)
+        => Ok(await mediator.Send(new BulkUpdate{{entity.Name}}Command(input), cancellationToken));
+
+    [HttpPost("bulk-upsert")]
+    public async Task<ActionResult<Bulk{{entity.Name}}OperationResultDto>> BulkUpsert(BulkUpsert{{entity.Name}}Dto input, CancellationToken cancellationToken)
+        => Ok(await mediator.Send(new BulkUpsert{{entity.Name}}Command(input), cancellationToken));
+
+    [HttpPost("bulk-delete")]
+    public async Task<ActionResult<Bulk{{entity.Name}}OperationResultDto>> BulkDelete(BulkDelete{{entity.Name}}Dto input, CancellationToken cancellationToken)
+        => Ok(await mediator.Send(new BulkDelete{{entity.Name}}Command(input), cancellationToken));
+"""
+            : "";
         return $$"""
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -2049,6 +2416,7 @@ public sealed class {{Naming.Plural(entity.Name)}}Controller(IMediator mediator)
         var deleted = await mediator.Send(new Delete{{entity.Name}}Command(id), cancellationToken);
         return deleted ? NoContent() : NotFound();
     }
+{{bulkActions}}
 }
 """;
     }
@@ -2192,6 +2560,29 @@ public sealed class {{businessObject.Name}}AnalysisController(IMediator mediator
     private BusinessObjectDefinition? BusinessObjectForRoot(EntityDefinition entity)
         => metadata.BusinessObjects.FirstOrDefault(b => Matches(b.RootEntity ?? b.Entity ?? b.Name, entity.Name));
 
+    private bool IsBulkApiEntity(EntityDefinition entity)
+    {
+        if (metadata.BusinessObjects.Count == 0)
+        {
+            return true;
+        }
+
+        var isBusinessObjectRoot = metadata.BusinessObjects
+            .Any(b => Matches(b.RootEntity ?? b.Entity ?? b.Name, entity.Name));
+        if (isBusinessObjectRoot)
+        {
+            return true;
+        }
+
+        var businessObjectEntityNames = metadata.BusinessObjects
+            .SelectMany(b => b.Entities.Count == 0
+                ? [Naming.Pascal(b.RootEntity ?? b.Entity ?? b.Name)]
+                : b.Entities.Select(Naming.Pascal))
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+        return !businessObjectEntityNames.Contains(entity.Name);
+    }
+
     private IReadOnlyList<EntityDefinition> AggregateChildren(EntityDefinition entity)
     {
         var businessObject = BusinessObjectForRoot(entity);
@@ -2278,6 +2669,9 @@ public sealed class {{businessObject.Name}}AnalysisController(IMediator mediator
     }
 
     private string AggregateSyncCollections(EntityDefinition entity)
+        => AggregateSyncCollections(entity, "entity", "request.Input");
+
+    private string AggregateSyncCollections(EntityDefinition entity, string entityVariableName, string inputVariableName)
     {
         var builder = new StringBuilder();
         foreach (var child in AggregateChildren(entity))
@@ -2285,7 +2679,7 @@ public sealed class {{businessObject.Name}}AnalysisController(IMediator mediator
             var collection = Naming.Plural(child.Name);
             var childKey = KeyProperty(child);
             var childKeyDefault = DefaultKeyLiteral(childKey);
-            builder.AppendLine($"        Sync{collection}(entity.{collection}, request.Input.{collection});");
+            builder.AppendLine($"        Sync{collection}({entityVariableName}.{collection}, {inputVariableName}.{collection});");
             builder.AppendLine();
             builder.AppendLine($"        void Sync{collection}(ICollection<{_rootNamespace}.Core.Entities.{child.Name}> existingItems, IEnumerable<{_rootNamespace}.Application.Modules.{child.Name}.DTOs.Update{child.Name}Dto> requestedItems)");
             builder.AppendLine("        {");
@@ -2315,6 +2709,21 @@ public sealed class {{businessObject.Name}}AnalysisController(IMediator mediator
             builder.AppendLine("                mapper.Map(requestedItem, existingItem);");
             builder.AppendLine("            }");
             builder.AppendLine("        }");
+        }
+
+        return builder.ToString().TrimEnd();
+    }
+
+    private string AddAggregateChildCollections(EntityDefinition entity, string entityVariableName, string inputVariableName)
+    {
+        var builder = new StringBuilder();
+        foreach (var child in AggregateChildren(entity))
+        {
+            var collection = Naming.Plural(child.Name);
+            builder.AppendLine($"                foreach (var childItem in {inputVariableName}.{collection})");
+            builder.AppendLine("                {");
+            builder.AppendLine($"                    {entityVariableName}.{collection}.Add(mapper.Map<{_rootNamespace}.Core.Entities.{child.Name}>(childItem));");
+            builder.AppendLine("                }");
         }
 
         return builder.ToString().TrimEnd();

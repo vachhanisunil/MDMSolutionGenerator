@@ -45,4 +45,5 @@ public sealed class MaterialVendorsController(IMediator mediator) : ControllerBa
         var deleted = await mediator.Send(new DeleteMaterialVendorCommand(id), cancellationToken);
         return deleted ? NoContent() : NotFound();
     }
+
 }

@@ -45,4 +45,5 @@ public sealed class MaterialStoragesController(IMediator mediator) : ControllerB
         var deleted = await mediator.Send(new DeleteMaterialStorageCommand(id), cancellationToken);
         return deleted ? NoContent() : NotFound();
     }
+
 }

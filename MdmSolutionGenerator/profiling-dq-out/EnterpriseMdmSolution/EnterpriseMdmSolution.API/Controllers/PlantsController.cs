@@ -45,4 +45,20 @@ public sealed class PlantsController(IMediator mediator) : ControllerBase
         var deleted = await mediator.Send(new DeletePlantCommand(id), cancellationToken);
         return deleted ? NoContent() : NotFound();
     }
+
+    [HttpPost("bulk-create")]
+    public async Task<ActionResult<BulkPlantOperationResultDto>> BulkCreate(BulkCreatePlantDto input, CancellationToken cancellationToken)
+        => Ok(await mediator.Send(new BulkCreatePlantCommand(input), cancellationToken));
+
+    [HttpPut("bulk-update")]
+    public async Task<ActionResult<BulkPlantOperationResultDto>> BulkUpdate(BulkUpdatePlantDto input, CancellationToken cancellationToken)
+        => Ok(await mediator.Send(new BulkUpdatePlantCommand(input), cancellationToken));
+
+    [HttpPost("bulk-upsert")]
+    public async Task<ActionResult<BulkPlantOperationResultDto>> BulkUpsert(BulkUpsertPlantDto input, CancellationToken cancellationToken)
+        => Ok(await mediator.Send(new BulkUpsertPlantCommand(input), cancellationToken));
+
+    [HttpPost("bulk-delete")]
+    public async Task<ActionResult<BulkPlantOperationResultDto>> BulkDelete(BulkDeletePlantDto input, CancellationToken cancellationToken)
+        => Ok(await mediator.Send(new BulkDeletePlantCommand(input), cancellationToken));
 }

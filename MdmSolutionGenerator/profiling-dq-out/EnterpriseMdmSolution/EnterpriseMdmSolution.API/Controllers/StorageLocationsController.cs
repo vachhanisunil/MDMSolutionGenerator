@@ -45,4 +45,20 @@ public sealed class StorageLocationsController(IMediator mediator) : ControllerB
         var deleted = await mediator.Send(new DeleteStorageLocationCommand(id), cancellationToken);
         return deleted ? NoContent() : NotFound();
     }
+
+    [HttpPost("bulk-create")]
+    public async Task<ActionResult<BulkStorageLocationOperationResultDto>> BulkCreate(BulkCreateStorageLocationDto input, CancellationToken cancellationToken)
+        => Ok(await mediator.Send(new BulkCreateStorageLocationCommand(input), cancellationToken));
+
+    [HttpPut("bulk-update")]
+    public async Task<ActionResult<BulkStorageLocationOperationResultDto>> BulkUpdate(BulkUpdateStorageLocationDto input, CancellationToken cancellationToken)
+        => Ok(await mediator.Send(new BulkUpdateStorageLocationCommand(input), cancellationToken));
+
+    [HttpPost("bulk-upsert")]
+    public async Task<ActionResult<BulkStorageLocationOperationResultDto>> BulkUpsert(BulkUpsertStorageLocationDto input, CancellationToken cancellationToken)
+        => Ok(await mediator.Send(new BulkUpsertStorageLocationCommand(input), cancellationToken));
+
+    [HttpPost("bulk-delete")]
+    public async Task<ActionResult<BulkStorageLocationOperationResultDto>> BulkDelete(BulkDeleteStorageLocationDto input, CancellationToken cancellationToken)
+        => Ok(await mediator.Send(new BulkDeleteStorageLocationCommand(input), cancellationToken));
 }

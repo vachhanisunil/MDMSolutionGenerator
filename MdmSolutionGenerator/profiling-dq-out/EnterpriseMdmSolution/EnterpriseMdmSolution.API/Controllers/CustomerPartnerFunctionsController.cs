@@ -45,4 +45,5 @@ public sealed class CustomerPartnerFunctionsController(IMediator mediator) : Con
         var deleted = await mediator.Send(new DeleteCustomerPartnerFunctionCommand(id), cancellationToken);
         return deleted ? NoContent() : NotFound();
     }
+
 }

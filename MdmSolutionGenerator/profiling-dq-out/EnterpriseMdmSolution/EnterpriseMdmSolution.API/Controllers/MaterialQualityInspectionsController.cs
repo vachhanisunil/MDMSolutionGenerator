@@ -45,4 +45,5 @@ public sealed class MaterialQualityInspectionsController(IMediator mediator) : C
         var deleted = await mediator.Send(new DeleteMaterialQualityInspectionCommand(id), cancellationToken);
         return deleted ? NoContent() : NotFound();
     }
+
 }

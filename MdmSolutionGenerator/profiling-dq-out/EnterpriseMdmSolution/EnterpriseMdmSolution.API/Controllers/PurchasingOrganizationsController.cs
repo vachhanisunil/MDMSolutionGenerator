@@ -45,4 +45,20 @@ public sealed class PurchasingOrganizationsController(IMediator mediator) : Cont
         var deleted = await mediator.Send(new DeletePurchasingOrganizationCommand(id), cancellationToken);
         return deleted ? NoContent() : NotFound();
     }
+
+    [HttpPost("bulk-create")]
+    public async Task<ActionResult<BulkPurchasingOrganizationOperationResultDto>> BulkCreate(BulkCreatePurchasingOrganizationDto input, CancellationToken cancellationToken)
+        => Ok(await mediator.Send(new BulkCreatePurchasingOrganizationCommand(input), cancellationToken));
+
+    [HttpPut("bulk-update")]
+    public async Task<ActionResult<BulkPurchasingOrganizationOperationResultDto>> BulkUpdate(BulkUpdatePurchasingOrganizationDto input, CancellationToken cancellationToken)
+        => Ok(await mediator.Send(new BulkUpdatePurchasingOrganizationCommand(input), cancellationToken));
+
+    [HttpPost("bulk-upsert")]
+    public async Task<ActionResult<BulkPurchasingOrganizationOperationResultDto>> BulkUpsert(BulkUpsertPurchasingOrganizationDto input, CancellationToken cancellationToken)
+        => Ok(await mediator.Send(new BulkUpsertPurchasingOrganizationCommand(input), cancellationToken));
+
+    [HttpPost("bulk-delete")]
+    public async Task<ActionResult<BulkPurchasingOrganizationOperationResultDto>> BulkDelete(BulkDeletePurchasingOrganizationDto input, CancellationToken cancellationToken)
+        => Ok(await mediator.Send(new BulkDeletePurchasingOrganizationCommand(input), cancellationToken));
 }
