@@ -1,6 +1,6 @@
 using System.Text;
 
-namespace MdmSolutionGenerator.Generation.DataQuality;
+namespace SolutionGeneratorService.Generation.DataQuality;
 
 internal sealed class DataQualityRuleCodeTemplateBuilder(string rootNamespace)
 {

@@ -1,4 +1,5 @@
-using MdmSolutionGenerator.Generation;
+using SolutionGeneratorService.Generation;
+using GeneratorService = SolutionGeneratorService.Generation.SolutionGeneratorService;
 
 var metadataPath = ReadArgument(args, "--metadata");
 if (string.IsNullOrWhiteSpace(metadataPath))
@@ -10,7 +11,7 @@ if (string.IsNullOrWhiteSpace(metadataPath))
 var outputFolder = ReadArgument(args, "--output");
 await using var stream = File.OpenRead(metadataPath);
 
-var generator = new MdmSolutionGeneratorService(new GeneratorOptions());
+var generator = new GeneratorService(new GeneratorOptions());
 var result = await generator.GenerateAsync(stream, outputFolder, CancellationToken.None);
 
 Console.WriteLine($"Generated {result.SolutionName}");
@@ -26,7 +27,7 @@ static string? ReadArgument(string[] args, string name)
 
 static void WriteUsage()
 {
-    Console.WriteLine("MDM Solution Generator");
+    Console.WriteLine("SolutionGeneratorService");
     Console.WriteLine();
     Console.WriteLine("Usage:");
     Console.WriteLine("  dotnet run -- --metadata <metadata-json-path> [--output <output-folder>]");

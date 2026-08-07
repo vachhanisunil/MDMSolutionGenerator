@@ -1,4 +1,4 @@
-namespace MdmSolutionGenerator.Generation;
+namespace SolutionGeneratorService.Generation;
 
 public sealed class GeneratorOptions
 {

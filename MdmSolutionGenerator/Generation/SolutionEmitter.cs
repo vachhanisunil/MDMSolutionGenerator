@@ -1,7 +1,7 @@
 using System.Text;
-using MdmSolutionGenerator.Generation.DataQuality;
+using SolutionGeneratorService.Generation.DataQuality;
 
-namespace MdmSolutionGenerator.Generation;
+namespace SolutionGeneratorService.Generation;
 
 internal sealed record GeneratedFile(string RelativePath, string Content);
 
@@ -84,11 +84,6 @@ internal sealed class SolutionEmitter(MetadataDocument metadata, string solution
 
     private IEnumerable<EntityDefinition> BusinessEntities()
     {
-        if (metadata.BusinessObjects.Count == 0)
-        {
-            return metadata.Entities;
-        }
-
         var names = metadata.BusinessObjects
             .Select(b => Naming.Pascal(b.Entity ?? b.Name))
             .ToHashSet(StringComparer.OrdinalIgnoreCase);
@@ -97,9 +92,7 @@ internal sealed class SolutionEmitter(MetadataDocument metadata, string solution
     }
 
     private IEnumerable<BusinessObjectDefinition> BusinessObjects()
-        => metadata.BusinessObjects.Count == 0
-            ? metadata.Entities.Select(e => new BusinessObjectDefinition { Name = e.Name, Entity = e.Name, RootEntity = e.Name, Entities = [e.Name] })
-            : metadata.BusinessObjects;
+        => metadata.BusinessObjects;
 
     private string EmitSolutionFile()
     {

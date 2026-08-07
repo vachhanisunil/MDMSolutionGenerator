@@ -1,7 +1,7 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace MdmSolutionGenerator.Generation;
+namespace SolutionGeneratorService.Generation;
 
 public sealed class MetadataDocument
 {

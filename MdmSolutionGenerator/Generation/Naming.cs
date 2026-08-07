@@ -1,6 +1,6 @@
 using System.Text;
 
-namespace MdmSolutionGenerator.Generation;
+namespace SolutionGeneratorService.Generation;
 
 internal static class Naming
 {

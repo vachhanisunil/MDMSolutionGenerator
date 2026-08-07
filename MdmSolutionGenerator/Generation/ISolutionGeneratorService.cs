@@ -1,6 +1,6 @@
-namespace MdmSolutionGenerator.Generation;
+namespace SolutionGeneratorService.Generation;
 
-public interface IMdmSolutionGenerator
+public interface ISolutionGeneratorService
 {
     Task<GenerationResult> GenerateAsync(Stream metadataStream, string? outputFolder, CancellationToken cancellationToken);
 }

@@ -1,4 +1,4 @@
-namespace MdmSolutionGenerator.Generation.DataQuality;
+namespace SolutionGeneratorService.Generation.DataQuality;
 
 internal sealed class BusinessObjectDataQualityArtifactGenerator(MetadataDocument metadata, string solutionName, string rootNamespace)
 {

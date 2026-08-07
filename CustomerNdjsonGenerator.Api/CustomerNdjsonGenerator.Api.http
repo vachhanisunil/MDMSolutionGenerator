@@ -1,0 +1,38 @@
+@CustomerNdjsonGenerator.Api_HostAddress = http://localhost:5221
+
+POST {{CustomerNdjsonGenerator.Api_HostAddress}}/api/customers/ndjson
+Content-Type: application/json
+Accept: application/json
+
+{
+  "recordCount": 1000000,
+  "startCustomerSequence": 10001,
+  "fileName": "customers-1m.ndjson",
+  "countryId": 1,
+  "currencyId": 1,
+  "salesOrganizationId": 1,
+  "paymentTermId": 1
+}
+
+###
+
+POST {{CustomerNdjsonGenerator.Api_HostAddress}}/api/customers/ndjson/jobs
+Content-Type: application/json
+Accept: application/json
+
+{
+  "recordCount": 1000000,
+  "startCustomerSequence": 10001,
+  "fileName": "customers-1m.ndjson",
+  "countryId": 1,
+  "currencyId": 1,
+  "salesOrganizationId": 1,
+  "paymentTermId": 1
+}
+
+###
+
+GET {{CustomerNdjsonGenerator.Api_HostAddress}}/api/customers/ndjson/jobs
+Accept: application/json
+
+###
