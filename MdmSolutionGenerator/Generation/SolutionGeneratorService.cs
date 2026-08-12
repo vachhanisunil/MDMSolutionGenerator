@@ -35,15 +35,10 @@ public sealed class SolutionGeneratorService(GeneratorOptions options) : ISoluti
         var solutionName = Naming.NamespacePart(metadata.Application.Name);
         var solutionRoot = Path.Combine(targetRoot, solutionName);
         Directory.CreateDirectory(solutionRoot);
-        if (options.GenerateSingleProjectSolution)
-        {
-            DeleteStaleMultiProjectArtifacts(solutionRoot, solutionName);
-        }
+        DeleteStaleMultiProjectArtifacts(solutionRoot, solutionName);
 
         var files = new List<string>();
-        var generatedFiles = options.GenerateSingleProjectSolution
-            ? new CompactSolutionEmitter(metadata, solutionName).Emit()
-            : new SolutionEmitter(metadata, solutionName).Emit();
+        var generatedFiles = new CompactSolutionEmitter(metadata, solutionName).Emit();
 
         foreach (var file in generatedFiles)
         {
@@ -61,14 +56,7 @@ public sealed class SolutionGeneratorService(GeneratorOptions options) : ISoluti
         return new GenerationResult(
             solutionName,
             solutionRoot,
-            options.GenerateSingleProjectSolution
-                ? [solutionName]
-                : [
-                    $"{solutionName}.API",
-                    $"{solutionName}.Application",
-                    $"{solutionName}.Core",
-                    $"{solutionName}.Infrastructure"
-                ],
+            [solutionName],
             files);
     }
 

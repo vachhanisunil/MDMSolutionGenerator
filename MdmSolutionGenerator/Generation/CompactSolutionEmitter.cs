@@ -2,6 +2,8 @@ using System.Text;
 
 namespace SolutionGeneratorService.Generation;
 
+internal sealed record GeneratedFile(string RelativePath, string Content);
+
 internal sealed class CompactSolutionEmitter(MetadataDocument metadata, string solutionName)
 {
     private readonly string _rootNamespace = Naming.NamespacePart(metadata.Application.Namespace ?? solutionName);
