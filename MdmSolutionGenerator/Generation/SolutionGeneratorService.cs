@@ -35,10 +35,17 @@ public sealed class SolutionGeneratorService(GeneratorOptions options) : ISoluti
         var solutionName = Naming.NamespacePart(metadata.Application.Name);
         var solutionRoot = Path.Combine(targetRoot, solutionName);
         Directory.CreateDirectory(solutionRoot);
+        if (options.GenerateSingleProjectSolution)
+        {
+            DeleteStaleMultiProjectArtifacts(solutionRoot, solutionName);
+        }
 
         var files = new List<string>();
-        var emitter = new SolutionEmitter(metadata, solutionName);
-        foreach (var file in emitter.Emit())
+        var generatedFiles = options.GenerateSingleProjectSolution
+            ? new CompactSolutionEmitter(metadata, solutionName).Emit()
+            : new SolutionEmitter(metadata, solutionName).Emit();
+
+        foreach (var file in generatedFiles)
         {
             cancellationToken.ThrowIfCancellationRequested();
             var path = Path.Combine(solutionRoot, file.RelativePath);
@@ -54,12 +61,14 @@ public sealed class SolutionGeneratorService(GeneratorOptions options) : ISoluti
         return new GenerationResult(
             solutionName,
             solutionRoot,
-            [
-                $"{solutionName}.API",
-                $"{solutionName}.Application",
-                $"{solutionName}.Core",
-                $"{solutionName}.Infrastructure"
-            ],
+            options.GenerateSingleProjectSolution
+                ? [solutionName]
+                : [
+                    $"{solutionName}.API",
+                    $"{solutionName}.Application",
+                    $"{solutionName}.Core",
+                    $"{solutionName}.Infrastructure"
+                ],
             files);
     }
 
@@ -364,6 +373,18 @@ public sealed class SolutionGeneratorService(GeneratorOptions options) : ISoluti
         }
     }
 
+    private static void DeleteStaleMultiProjectArtifacts(string solutionRoot, string solutionName)
+    {
+        foreach (var projectSuffix in new[] { "API", "Application", "Core", "Infrastructure" })
+        {
+            var projectDirectory = Path.Combine(solutionRoot, $"{solutionName}.{projectSuffix}");
+            if (Directory.Exists(projectDirectory))
+            {
+                Directory.Delete(projectDirectory, recursive: true);
+            }
+        }
+    }
+
     private static async Task WriteGeneratedFileAsync(string path, string relativePath, string content, CancellationToken cancellationToken)
     {
         if (!File.Exists(path))
@@ -388,6 +409,11 @@ public sealed class SolutionGeneratorService(GeneratorOptions options) : ISoluti
     private static string TryMergeIncrementalChanges(string relativePath, string existingContent, string generatedContent)
     {
         var normalizedPath = relativePath.Replace('\\', '/');
+
+        if (IsCompactGeneratedFile(normalizedPath))
+        {
+            return generatedContent;
+        }
 
         if (normalizedPath.EndsWith("/appsettings.json", StringComparison.OrdinalIgnoreCase)
             || normalizedPath.Contains("/Migrations/", StringComparison.OrdinalIgnoreCase))
@@ -726,6 +752,12 @@ public sealed class SolutionGeneratorService(GeneratorOptions options) : ISoluti
             || normalizedPath.EndsWith("/ExceptionHandlingMiddleware.cs", StringComparison.OrdinalIgnoreCase)
             || normalizedPath.EndsWith("/SearchRequest.cs", StringComparison.OrdinalIgnoreCase)
             || normalizedPath.EndsWith("/PagedResult.cs", StringComparison.OrdinalIgnoreCase);
+
+    private static bool IsCompactGeneratedFile(string normalizedPath)
+        => !normalizedPath.Contains(".API/", StringComparison.OrdinalIgnoreCase)
+            && !normalizedPath.Contains(".Application/", StringComparison.OrdinalIgnoreCase)
+            && !normalizedPath.Contains(".Core/", StringComparison.OrdinalIgnoreCase)
+            && !normalizedPath.Contains(".Infrastructure/", StringComparison.OrdinalIgnoreCase);
 
     private static MetadataDocument Normalize(MetadataDocument metadata)
     {

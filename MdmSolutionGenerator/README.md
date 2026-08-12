@@ -1,6 +1,8 @@
 # SolutionGeneratorService
 
-Console generator that accepts MDM metadata JSON and emits a buildable .NET 9 Clean Architecture solution with API, Application, Core, and Infrastructure projects.
+Console generator that accepts MDM metadata JSON and emits a compact, buildable .NET 9 ASP.NET Core solution.
+
+The default generated solution is intentionally a single project. It avoids CQRS and the four-project Clean Architecture layout so generated artifacts stay small and easier to navigate.
 
 ## Run
 
@@ -47,9 +49,12 @@ dotnet build .\generated-out\GeneratedSolution\GeneratedSolution.sln --no-restor
 
 The generated solution includes:
 
-- Clean Architecture projects: API, Application, Core, Infrastructure
-- CQRS commands, queries, handlers, DTOs, validators, and AutoMapper profiles
-- EF Core `AppDbContext`, entity configurations, repository implementation, and starter migration
-- MediatR validation pipeline behavior
-- ASP.NET Core controllers, Swagger registration, DI extensions, and exception middleware
+- One ASP.NET Core Web API project
+- Entity classes
+- DTO classes
+- Per-entity controllers
+- A shared generic CRUD service
+- EF Core `AppDbContext` with inline model configuration
+- Swagger registration
 - Search request support with filtering, sorting, and pagination
+- A compact analysis controller/service for business object runs, profiling summaries, and rule results
