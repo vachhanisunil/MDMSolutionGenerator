@@ -1,0 +1,33 @@
+{
+  "application": {
+    "name": "CustomerOnboarding"
+  },
+  "analysisGenerationMode": "Create",
+  "businessObjects": [
+    {
+      "name": "Customer",
+      "category": "Reference",
+      "description": "Business object for customer information.",
+      "entity": "Customer",
+      "rootEntity": "Customer",
+      "entities": [
+        "Customer"
+      ],
+      "operations": [
+        {
+          "name": "Create",
+          "type": "Create"
+        },
+        {
+          "name": "Search",
+          "type": "Search"
+        }
+      ],
+      "profiling": {
+        "enabled": true,
+        "summaries": []
+      },
+      "dataQualityRules": []
+    }
+  ]
+}

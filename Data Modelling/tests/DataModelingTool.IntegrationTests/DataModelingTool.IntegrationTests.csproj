@@ -1,0 +1,17 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\DataModelingTool.Application\DataModelingTool.Application.csproj" />
+    <ProjectReference Include="..\..\src\DataModelingTool.Infrastructure\DataModelingTool.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\src\DataModelingTool.AI\DataModelingTool.AI.csproj" />
+    <ProjectReference Include="..\..\src\DataModelingTool.Domain\DataModelingTool.Domain.csproj" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+</Project>

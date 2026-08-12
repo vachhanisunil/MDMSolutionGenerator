@@ -1,0 +1,18 @@
+{
+  "applicationName": "CustomerOnboarding",
+  "sourceFile": "customer.md",
+  "generationMode": 0,
+  "generatedOn": "2026-08-11T12:32:14.2528864+00:00",
+  "counts": {
+    "businessObjects": 9,
+    "entities": 9,
+    "relationships": 8,
+    "dataQualityRules": 9,
+    "ambiguities": 1
+  },
+  "outputFiles": {
+    "entityMetadata": "customer-onboarding.entity-metadata.json",
+    "businessObjectMetadata": "customer-onboarding.business-object-metadata.json",
+    "generationSummary": "customer-onboarding.generation-summary.json"
+  }
+}

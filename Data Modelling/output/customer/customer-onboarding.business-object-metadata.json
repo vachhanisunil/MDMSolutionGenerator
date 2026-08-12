@@ -1,0 +1,399 @@
+{
+  "application": {
+    "name": "CustomerOnboarding"
+  },
+  "audit": {
+    "generatedOn": "2026-08-11T12:32:14.2520887+00:00",
+    "generatedBy": "DataModelingTool"
+  },
+  "analysisGenerationMode": "Create",
+  "businessObjects": [
+    {
+      "name": "CustomerOnboarding\n\nCustomer",
+      "category": "Transaction",
+      "description": "Business object for customer onboarding\n\ncustomer.",
+      "entity": "CustomerOnboarding\n\nCustomer",
+      "rootEntity": "CustomerOnboarding\n\nCustomer",
+      "entities": [
+        "CustomerOnboarding\n\nCustomer"
+      ],
+      "operations": [
+        {
+          "name": "Create",
+          "type": 0
+        },
+        {
+          "name": "Update",
+          "type": 2
+        },
+        {
+          "name": "Search",
+          "type": 7
+        }
+      ],
+      "profiling": {
+        "enabled": true,
+        "summaries": [
+          {
+            "code": "PROFILE_CUSTOMER_ONBOARDING_CUSTOMER_NAME",
+            "entity": "CustomerOnboarding\n\nCustomer",
+            "field": "Name",
+            "description": "Summarize name completeness for CustomerOnboarding\n\nCustomer."
+          }
+        ]
+      },
+      "dataQualityRules": [
+        {
+          "code": "DQ_CUSTOMER_ONBOARDING_CUSTOMER_CODE_REQUIRED",
+          "entity": "CustomerOnboarding\n\nCustomer",
+          "field": "CustomerOnboarding\n\nCustomerCode",
+          "description": "CustomerOnboarding\n\nCustomer code is required."
+        }
+      ]
+    },
+    {
+      "name": "Onboarding",
+      "category": "Reference",
+      "description": "Business object for onboarding.",
+      "entity": "Onboarding",
+      "rootEntity": "Onboarding",
+      "entities": [
+        "Onboarding"
+      ],
+      "operations": [
+        {
+          "name": "Create",
+          "type": 0
+        },
+        {
+          "name": "Update",
+          "type": 2
+        },
+        {
+          "name": "Search",
+          "type": 7
+        }
+      ],
+      "profiling": {
+        "enabled": true,
+        "summaries": [
+          {
+            "code": "PROFILE_ONBOARDING_NAME",
+            "entity": "Onboarding",
+            "field": "Name",
+            "description": "Summarize name completeness for Onboarding."
+          }
+        ]
+      },
+      "dataQualityRules": [
+        {
+          "code": "DQ_ONBOARDING_CODE_REQUIRED",
+          "entity": "Onboarding",
+          "field": "OnboardingCode",
+          "description": "Onboarding code is required."
+        }
+      ]
+    },
+    {
+      "name": "Customer",
+      "category": "Reference",
+      "description": "Business object for customer.",
+      "entity": "Customer",
+      "rootEntity": "Customer",
+      "entities": [
+        "Customer"
+      ],
+      "operations": [
+        {
+          "name": "Create",
+          "type": 0
+        },
+        {
+          "name": "Update",
+          "type": 2
+        },
+        {
+          "name": "Search",
+          "type": 7
+        }
+      ],
+      "profiling": {
+        "enabled": true,
+        "summaries": [
+          {
+            "code": "PROFILE_CUSTOMER_NAME",
+            "entity": "Customer",
+            "field": "Name",
+            "description": "Summarize name completeness for Customer."
+          }
+        ]
+      },
+      "dataQualityRules": [
+        {
+          "code": "DQ_CUSTOMER_CODE_REQUIRED",
+          "entity": "Customer",
+          "field": "CustomerCode",
+          "description": "Customer code is required."
+        }
+      ]
+    },
+    {
+      "name": "Account",
+      "category": "Reference",
+      "description": "Business object for account.",
+      "entity": "Account",
+      "rootEntity": "Account",
+      "entities": [
+        "Account"
+      ],
+      "operations": [
+        {
+          "name": "Create",
+          "type": 0
+        },
+        {
+          "name": "Update",
+          "type": 2
+        },
+        {
+          "name": "Search",
+          "type": 7
+        }
+      ],
+      "profiling": {
+        "enabled": true,
+        "summaries": [
+          {
+            "code": "PROFILE_ACCOUNT_NAME",
+            "entity": "Account",
+            "field": "Name",
+            "description": "Summarize name completeness for Account."
+          }
+        ]
+      },
+      "dataQualityRules": [
+        {
+          "code": "DQ_ACCOUNT_CODE_REQUIRED",
+          "entity": "Account",
+          "field": "AccountCode",
+          "description": "Account code is required."
+        }
+      ]
+    },
+    {
+      "name": "Address",
+      "category": "Reference",
+      "description": "Business object for address.",
+      "entity": "Address",
+      "rootEntity": "Address",
+      "entities": [
+        "Address"
+      ],
+      "operations": [
+        {
+          "name": "Create",
+          "type": 0
+        },
+        {
+          "name": "Update",
+          "type": 2
+        },
+        {
+          "name": "Search",
+          "type": 7
+        }
+      ],
+      "profiling": {
+        "enabled": true,
+        "summaries": [
+          {
+            "code": "PROFILE_ADDRESS_NAME",
+            "entity": "Address",
+            "field": "Name",
+            "description": "Summarize name completeness for Address."
+          }
+        ]
+      },
+      "dataQualityRules": [
+        {
+          "code": "DQ_ADDRESS_CODE_REQUIRED",
+          "entity": "Address",
+          "field": "AddressCode",
+          "description": "Address code is required."
+        }
+      ]
+    },
+    {
+      "name": "Contact",
+      "category": "Reference",
+      "description": "Business object for contact.",
+      "entity": "Contact",
+      "rootEntity": "Contact",
+      "entities": [
+        "Contact"
+      ],
+      "operations": [
+        {
+          "name": "Create",
+          "type": 0
+        },
+        {
+          "name": "Update",
+          "type": 2
+        },
+        {
+          "name": "Search",
+          "type": 7
+        }
+      ],
+      "profiling": {
+        "enabled": true,
+        "summaries": [
+          {
+            "code": "PROFILE_CONTACT_NAME",
+            "entity": "Contact",
+            "field": "Name",
+            "description": "Summarize name completeness for Contact."
+          }
+        ]
+      },
+      "dataQualityRules": [
+        {
+          "code": "DQ_CONTACT_CODE_REQUIRED",
+          "entity": "Contact",
+          "field": "ContactCode",
+          "description": "Contact code is required."
+        }
+      ]
+    },
+    {
+      "name": "Create",
+      "category": "Reference",
+      "description": "Business object for create.",
+      "entity": "Create",
+      "rootEntity": "Create",
+      "entities": [
+        "Create"
+      ],
+      "operations": [
+        {
+          "name": "Create",
+          "type": 0
+        },
+        {
+          "name": "Update",
+          "type": 2
+        },
+        {
+          "name": "Search",
+          "type": 7
+        }
+      ],
+      "profiling": {
+        "enabled": true,
+        "summaries": [
+          {
+            "code": "PROFILE_CREATE_NAME",
+            "entity": "Create",
+            "field": "Name",
+            "description": "Summarize name completeness for Create."
+          }
+        ]
+      },
+      "dataQualityRules": [
+        {
+          "code": "DQ_CREATE_CODE_REQUIRED",
+          "entity": "Create",
+          "field": "CreateCode",
+          "description": "Create code is required."
+        }
+      ]
+    },
+    {
+      "name": "Update",
+      "category": "Reference",
+      "description": "Business object for update.",
+      "entity": "Update",
+      "rootEntity": "Update",
+      "entities": [
+        "Update"
+      ],
+      "operations": [
+        {
+          "name": "Create",
+          "type": 0
+        },
+        {
+          "name": "Update",
+          "type": 2
+        },
+        {
+          "name": "Search",
+          "type": 7
+        }
+      ],
+      "profiling": {
+        "enabled": true,
+        "summaries": [
+          {
+            "code": "PROFILE_UPDATE_NAME",
+            "entity": "Update",
+            "field": "Name",
+            "description": "Summarize name completeness for Update."
+          }
+        ]
+      },
+      "dataQualityRules": [
+        {
+          "code": "DQ_UPDATE_CODE_REQUIRED",
+          "entity": "Update",
+          "field": "UpdateCode",
+          "description": "Update code is required."
+        }
+      ]
+    },
+    {
+      "name": "Search",
+      "category": "Reference",
+      "description": "Business object for search.",
+      "entity": "Search",
+      "rootEntity": "Search",
+      "entities": [
+        "Search"
+      ],
+      "operations": [
+        {
+          "name": "Create",
+          "type": 0
+        },
+        {
+          "name": "Update",
+          "type": 2
+        },
+        {
+          "name": "Search",
+          "type": 7
+        }
+      ],
+      "profiling": {
+        "enabled": true,
+        "summaries": [
+          {
+            "code": "PROFILE_SEARCH_NAME",
+            "entity": "Search",
+            "field": "Name",
+            "description": "Summarize name completeness for Search."
+          }
+        ]
+      },
+      "dataQualityRules": [
+        {
+          "code": "DQ_SEARCH_CODE_REQUIRED",
+          "entity": "Search",
+          "field": "SearchCode",
+          "description": "Search code is required."
+        }
+      ]
+    }
+  ]
+}

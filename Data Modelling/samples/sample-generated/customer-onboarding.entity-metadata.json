@@ -1,0 +1,26 @@
+{
+  "application": {
+    "name": "CustomerOnboarding"
+  },
+  "entities": [
+    {
+      "name": "Customer",
+      "description": "Represents customer information.",
+      "properties": [
+        {
+          "name": "Id",
+          "type": "int",
+          "isKey": true,
+          "identity": true,
+          "required": true
+        },
+        {
+          "name": "CustomerCode",
+          "type": "string",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "relationships": []
+}

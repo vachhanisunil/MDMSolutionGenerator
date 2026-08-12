@@ -1,0 +1,368 @@
+{
+  "application": {
+    "name": "CustomerOnboarding"
+  },
+  "audit": {
+    "generatedOn": "2026-08-11T12:32:14.2465192+00:00",
+    "generatedBy": "DataModelingTool"
+  },
+  "entities": [
+    {
+      "name": "CustomerOnboarding\n\nCustomer",
+      "description": "Represents customer onboarding\n\ncustomer information described by the business specification.",
+      "properties": [
+        {
+          "name": "Id",
+          "type": "int",
+          "isKey": true,
+          "identity": true,
+          "required": true
+        },
+        {
+          "name": "CustomerOnboarding\n\nCustomerCode",
+          "type": "string",
+          "isKey": false,
+          "identity": false,
+          "required": true
+        },
+        {
+          "name": "Name",
+          "type": "string",
+          "isKey": false,
+          "identity": false,
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "Onboarding",
+      "description": "Represents onboarding information described by the business specification.",
+      "properties": [
+        {
+          "name": "Id",
+          "type": "int",
+          "isKey": true,
+          "identity": true,
+          "required": true
+        },
+        {
+          "name": "OnboardingCode",
+          "type": "string",
+          "isKey": false,
+          "identity": false,
+          "required": true
+        },
+        {
+          "name": "Name",
+          "type": "string",
+          "isKey": false,
+          "identity": false,
+          "required": false
+        },
+        {
+          "name": "CustomerOnboarding\n\nCustomerId",
+          "type": "int",
+          "isKey": false,
+          "identity": false,
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "Customer",
+      "description": "Represents customer information described by the business specification.",
+      "properties": [
+        {
+          "name": "Id",
+          "type": "int",
+          "isKey": true,
+          "identity": true,
+          "required": true
+        },
+        {
+          "name": "CustomerCode",
+          "type": "string",
+          "isKey": false,
+          "identity": false,
+          "required": true
+        },
+        {
+          "name": "Name",
+          "type": "string",
+          "isKey": false,
+          "identity": false,
+          "required": false
+        },
+        {
+          "name": "CustomerOnboarding\n\nCustomerId",
+          "type": "int",
+          "isKey": false,
+          "identity": false,
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "Account",
+      "description": "Represents account information described by the business specification.",
+      "properties": [
+        {
+          "name": "Id",
+          "type": "int",
+          "isKey": true,
+          "identity": true,
+          "required": true
+        },
+        {
+          "name": "AccountCode",
+          "type": "string",
+          "isKey": false,
+          "identity": false,
+          "required": true
+        },
+        {
+          "name": "Name",
+          "type": "string",
+          "isKey": false,
+          "identity": false,
+          "required": false
+        },
+        {
+          "name": "CustomerOnboarding\n\nCustomerId",
+          "type": "int",
+          "isKey": false,
+          "identity": false,
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "Address",
+      "description": "Represents address information described by the business specification.",
+      "properties": [
+        {
+          "name": "Id",
+          "type": "int",
+          "isKey": true,
+          "identity": true,
+          "required": true
+        },
+        {
+          "name": "AddressCode",
+          "type": "string",
+          "isKey": false,
+          "identity": false,
+          "required": true
+        },
+        {
+          "name": "Name",
+          "type": "string",
+          "isKey": false,
+          "identity": false,
+          "required": false
+        },
+        {
+          "name": "CustomerOnboarding\n\nCustomerId",
+          "type": "int",
+          "isKey": false,
+          "identity": false,
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "Contact",
+      "description": "Represents contact information described by the business specification.",
+      "properties": [
+        {
+          "name": "Id",
+          "type": "int",
+          "isKey": true,
+          "identity": true,
+          "required": true
+        },
+        {
+          "name": "ContactCode",
+          "type": "string",
+          "isKey": false,
+          "identity": false,
+          "required": true
+        },
+        {
+          "name": "Name",
+          "type": "string",
+          "isKey": false,
+          "identity": false,
+          "required": false
+        },
+        {
+          "name": "CustomerOnboarding\n\nCustomerId",
+          "type": "int",
+          "isKey": false,
+          "identity": false,
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "Create",
+      "description": "Represents create information described by the business specification.",
+      "properties": [
+        {
+          "name": "Id",
+          "type": "int",
+          "isKey": true,
+          "identity": true,
+          "required": true
+        },
+        {
+          "name": "CreateCode",
+          "type": "string",
+          "isKey": false,
+          "identity": false,
+          "required": true
+        },
+        {
+          "name": "Name",
+          "type": "string",
+          "isKey": false,
+          "identity": false,
+          "required": false
+        },
+        {
+          "name": "CustomerOnboarding\n\nCustomerId",
+          "type": "int",
+          "isKey": false,
+          "identity": false,
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "Update",
+      "description": "Represents update information described by the business specification.",
+      "properties": [
+        {
+          "name": "Id",
+          "type": "int",
+          "isKey": true,
+          "identity": true,
+          "required": true
+        },
+        {
+          "name": "UpdateCode",
+          "type": "string",
+          "isKey": false,
+          "identity": false,
+          "required": true
+        },
+        {
+          "name": "Name",
+          "type": "string",
+          "isKey": false,
+          "identity": false,
+          "required": false
+        },
+        {
+          "name": "CustomerOnboarding\n\nCustomerId",
+          "type": "int",
+          "isKey": false,
+          "identity": false,
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "Search",
+      "description": "Represents search information described by the business specification.",
+      "properties": [
+        {
+          "name": "Id",
+          "type": "int",
+          "isKey": true,
+          "identity": true,
+          "required": true
+        },
+        {
+          "name": "SearchCode",
+          "type": "string",
+          "isKey": false,
+          "identity": false,
+          "required": true
+        },
+        {
+          "name": "Name",
+          "type": "string",
+          "isKey": false,
+          "identity": false,
+          "required": false
+        },
+        {
+          "name": "CustomerOnboarding\n\nCustomerId",
+          "type": "int",
+          "isKey": false,
+          "identity": false,
+          "required": true
+        }
+      ]
+    }
+  ],
+  "relationships": [
+    {
+      "name": "CustomerOnboarding\n\nCustomer_Onboarding",
+      "type": 1,
+      "from": "Onboarding",
+      "to": "CustomerOnboarding\n\nCustomer",
+      "foreignKey": "CustomerOnboarding\n\nCustomerId"
+    },
+    {
+      "name": "CustomerOnboarding\n\nCustomer_Customer",
+      "type": 1,
+      "from": "Customer",
+      "to": "CustomerOnboarding\n\nCustomer",
+      "foreignKey": "CustomerOnboarding\n\nCustomerId"
+    },
+    {
+      "name": "CustomerOnboarding\n\nCustomer_Account",
+      "type": 1,
+      "from": "Account",
+      "to": "CustomerOnboarding\n\nCustomer",
+      "foreignKey": "CustomerOnboarding\n\nCustomerId"
+    },
+    {
+      "name": "CustomerOnboarding\n\nCustomer_Address",
+      "type": 1,
+      "from": "Address",
+      "to": "CustomerOnboarding\n\nCustomer",
+      "foreignKey": "CustomerOnboarding\n\nCustomerId"
+    },
+    {
+      "name": "CustomerOnboarding\n\nCustomer_Contact",
+      "type": 1,
+      "from": "Contact",
+      "to": "CustomerOnboarding\n\nCustomer",
+      "foreignKey": "CustomerOnboarding\n\nCustomerId"
+    },
+    {
+      "name": "CustomerOnboarding\n\nCustomer_Create",
+      "type": 1,
+      "from": "Create",
+      "to": "CustomerOnboarding\n\nCustomer",
+      "foreignKey": "CustomerOnboarding\n\nCustomerId"
+    },
+    {
+      "name": "CustomerOnboarding\n\nCustomer_Update",
+      "type": 1,
+      "from": "Update",
+      "to": "CustomerOnboarding\n\nCustomer",
+      "foreignKey": "CustomerOnboarding\n\nCustomerId"
+    },
+    {
+      "name": "CustomerOnboarding\n\nCustomer_Search",
+      "type": 1,
+      "from": "Search",
+      "to": "CustomerOnboarding\n\nCustomer",
+      "foreignKey": "CustomerOnboarding\n\nCustomerId"
+    }
+  ]
+}
